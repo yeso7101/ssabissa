@@ -6,8 +6,11 @@ from collections import Counter
 import requests
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
+from fastapi import FastAPI, Response
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
 @app.get("/sitemap.xml")
 def get_sitemap():
     xml_content = """<?xml version="1.0" encoding="UTF-8"?>
