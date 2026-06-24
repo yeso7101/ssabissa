@@ -9,7 +9,77 @@ from fastapi.responses import PlainTextResponse
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
+import json
+import os
 
+
+
+DATA_FILE = "ranking_data.json"
+# [파일 저장용 유틸 함수]
+def save_ranking_to_file():
+    # 현재 메모리에 있는 카운트 데이터를 통합해서 JSON 파일로 저장합니다.
+    payload = {
+        "KR": dict(SEARCH_COUNT_KR),
+        "US": dict(SEARCH_COUNT_US)
+    }
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=4)
+
+@app.get("/")  # 혹은 @app.post("/") 주송이님 라우터 양식에 맞게 유지하세요!
+def home(request: Request, ticker: str = Form(None), q: str = None):
+    search_target = ticker or q
+    result = None
+    
+    if search_target:
+        # 1. 공백 없애고 소문자로 만들어서 검색 정확도 올리기
+        clean_target = search_target.strip().lower().replace(" ", "")
+        
+        # 2. 방금 만든 400대장 사전에 있으면 진짜 티커로 변환, 없으면 입력값 그대로 사용
+        if clean_target in STOCK_MAP:
+            resolved_ticker = STOCK_MAP[clean_target]
+        else:
+            resolved_ticker = resolve_ticker_by_name(search_target) # 기존 백업 로직
+            
+        try:
+            info = yf.Ticker(resolved_ticker).info
+            cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
+            if not cur: raise Exception()
+            
+            score, color, reasons, brief = calculate_ssabissa_score(info, resolved_ticker)
+            name = info.get("longName") or info.get("shortName") or resolved_ticker
+            currency = info.get("currency", "$")
+            fmt = "{:,.0f}" if currency in ["KRW", "₩"] else "{:,.2f}"
+            
+            result = {
+                "name": name, "ticker": resolved_ticker,
+                "current_price": fmt.format(cur) + f" {currency}",
+                "score": score, "color": color, "brief": brief, "reasons": reasons
+            }
+            
+            TICKER_CACHE[resolved_ticker] = {"name": name, "score": score, "color": color}
+            
+            # 3. 랭킹 카운트 올리기
+            if ".KS" in resolved_ticker or ".KQ" in resolved_ticker: 
+                SEARCH_COUNT_KR[resolved_ticker] += 1
+            else: 
+                SEARCH_COUNT_US[resolved_ticker] += 1
+                
+            # 4. [핵심] 검색될 때마다 랭킹 데이터를 하드디스크(파일)에 실시간 박제!
+            save_ranking_to_file()
+            
+        except Exception: 
+            result = {"error": "올바른 종목명이나 티커코드를 다시 한번 확인해 주세요."}
+            
+    return templates.TemplateResponse(
+        request=request, 
+        name="index.html", 
+        context={
+            "request": request, 
+            "result": result, 
+            "ticker": search_target, 
+            "metrics_guide": SYSTEM_METRICS_GUIDE
+        }
+    )
 app = FastAPI()
 
 STOCK_MAP = {
@@ -440,6 +510,15 @@ templates.env.cache = None
 # 실시간 랭킹 캐시 디렉토리
 SEARCH_COUNT_KR = Counter({"005930.KS": 15, "000660.KS": 12, "035420.KS": 8, "035720.KS": 7, "005380.KS": 6})
 SEARCH_COUNT_US = Counter({"AAPL": 20, "TSLA": 18, "NVDA": 15, "MSFT": 12, "AMZN": 10})
+if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        try:
+            past_data = json.load(f)
+            # 옛날 기록이 있으면 불러와서 복구합니다.
+            for k, v in past_data.get("KR", {}).items(): SEARCH_COUNT_KR[k] = v
+            for k, v in past_data.get("US", {}).items(): SEARCH_COUNT_US[k] = v
+        except Exception:
+            pass
 TICKER_CACHE = {
     "005930.KS": {"name": "삼성전자", "score": 62, "color": "hsl(55, 85%, 45%)"},
     "000660.KS": {"name": "SK하이닉스", "score": 65, "color": "hsl(60, 85%, 45%)"},
@@ -566,74 +645,6 @@ def calculate_ssabissa_score(info, ticker):
 
 @app.get("/", response_class=HTMLResponse)
 @app.post("/", response_class=HTMLResponse)
-DATA_FILE = "ranking_data.json"
-
-# [파일 저장용 유틸 함수]
-def save_ranking_to_file():
-    # 현재 메모리에 있는 카운트 데이터를 통합해서 JSON 파일로 저장합니다.
-    payload = {
-        "KR": dict(SEARCH_COUNT_KR),
-        "US": dict(SEARCH_COUNT_US)
-    }
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=4)
-
-@app.get("/")  # 혹은 @app.post("/") 주송이님 라우터 양식에 맞게 유지하세요!
-def home(request: Request, ticker: str = Form(None), q: str = None):
-    search_target = ticker or q
-    result = None
-    
-    if search_target:
-        # 1. 공백 없애고 소문자로 만들어서 검색 정확도 올리기
-        clean_target = search_target.strip().lower().replace(" ", "")
-        
-        # 2. 방금 만든 400대장 사전에 있으면 진짜 티커로 변환, 없으면 입력값 그대로 사용
-        if clean_target in STOCK_MAP:
-            resolved_ticker = STOCK_MAP[clean_target]
-        else:
-            resolved_ticker = resolve_ticker_by_name(search_target) # 기존 백업 로직
-            
-        try:
-            info = yf.Ticker(resolved_ticker).info
-            cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
-            if not cur: raise Exception()
-            
-            score, color, reasons, brief = calculate_ssabissa_score(info, resolved_ticker)
-            name = info.get("longName") or info.get("shortName") or resolved_ticker
-            currency = info.get("currency", "$")
-            fmt = "{:,.0f}" if currency in ["KRW", "₩"] else "{:,.2f}"
-            
-            result = {
-                "name": name, "ticker": resolved_ticker,
-                "current_price": fmt.format(cur) + f" {currency}",
-                "score": score, "color": color, "brief": brief, "reasons": reasons
-            }
-            
-            TICKER_CACHE[resolved_ticker] = {"name": name, "score": score, "color": color}
-            
-            # 3. 랭킹 카운트 올리기
-            if ".KS" in resolved_ticker or ".KQ" in resolved_ticker: 
-                SEARCH_COUNT_KR[resolved_ticker] += 1
-            else: 
-                SEARCH_COUNT_US[resolved_ticker] += 1
-                
-            # 4. [핵심] 검색될 때마다 랭킹 데이터를 하드디스크(파일)에 실시간 박제!
-            save_ranking_to_file()
-            
-        except Exception: 
-            result = {"error": "올바른 종목명이나 티커코드를 다시 한번 확인해 주세요."}
-            
-    return templates.TemplateResponse(
-        request=request, 
-        name="index.html", 
-        context={
-            "request": request, 
-            "result": result, 
-            "ticker": search_target, 
-            "metrics_guide": SYSTEM_METRICS_GUIDE
-        }
-    )
-
 @app.get("/ranking", response_class=HTMLResponse)
 def ranking(request: Request):
     kr_ranks = [{"rank": i+1, "ticker": t, "name": TICKER_CACHE[t]["name"], "score": TICKER_CACHE[t]["score"], "color": TICKER_CACHE[t]["color"]} for i, (t, _) in enumerate(SEARCH_COUNT_KR.most_common(10)) if t in TICKER_CACHE]
