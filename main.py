@@ -26,20 +26,19 @@ def save_ranking_to_file():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=4)
 
-@app.post("/")  # 혹은 @app.post("/") 주송이님 라우터 양식에 맞게 유지하세요!
+@app.get("/")
+@app.post("/")
 def home(request: Request, ticker: str = Form(None), q: str = None):
     search_target = ticker or q
     result = None
     
     if search_target:
-        # 1. 공백 없애고 소문자로 만들어서 검색 정확도 올리기
+        # 400대장 딕셔너리 매핑 및 공백 제거
         clean_target = search_target.strip().lower().replace(" ", "")
-        
-        # 2. 방금 만든 400대장 사전에 있으면 진짜 티커로 변환, 없으면 입력값 그대로 사용
         if clean_target in STOCK_MAP:
             resolved_ticker = STOCK_MAP[clean_target]
         else:
-            resolved_ticker = resolve_ticker_by_name(search_target) # 기존 백업 로직
+            resolved_ticker = resolve_ticker_by_name(search_target)
             
         try:
             info = yf.Ticker(resolved_ticker).info
@@ -59,18 +58,18 @@ def home(request: Request, ticker: str = Form(None), q: str = None):
             
             TICKER_CACHE[resolved_ticker] = {"name": name, "score": score, "color": color}
             
-            # 3. 랭킹 카운트 올리기
             if ".KS" in resolved_ticker or ".KQ" in resolved_ticker: 
                 SEARCH_COUNT_KR[resolved_ticker] += 1
             else: 
                 SEARCH_COUNT_US[resolved_ticker] += 1
                 
-            # 4. [핵심] 검색될 때마다 랭킹 데이터를 하드디스크(파일)에 실시간 박제!
+            # 검색할 때마다 실시간으로 파일 보존
             save_ranking_to_file()
             
         except Exception: 
             result = {"error": "올바른 종목명이나 티커코드를 다시 한번 확인해 주세요."}
             
+    # 첫 메인 주소("/")로 들어오면 무조건 index.html을 보여줍니다!
     return templates.TemplateResponse(
         request=request, 
         name="index.html", 
@@ -647,9 +646,20 @@ def calculate_ssabissa_score(info, ticker):
 @app.post("/", response_class=HTMLResponse)
 @app.get("/ranking", response_class=HTMLResponse)
 def ranking(request: Request):
+    # 주송이님이 깎아두신 1등~10등 추출 알고리즘 원본 그대로 가동!
     kr_ranks = [{"rank": i+1, "ticker": t, "name": TICKER_CACHE[t]["name"], "score": TICKER_CACHE[t]["score"], "color": TICKER_CACHE[t]["color"]} for i, (t, _) in enumerate(SEARCH_COUNT_KR.most_common(10)) if t in TICKER_CACHE]
     us_ranks = [{"rank": i+1, "ticker": t, "name": TICKER_CACHE[t]["name"], "score": TICKER_CACHE[t]["score"], "color": TICKER_CACHE[t]["color"]} for i, (t, _) in enumerate(SEARCH_COUNT_US.most_common(10)) if t in TICKER_CACHE]
-    return templates.TemplateResponse(request=request, name="ranking.html", context={"request": request, "kr_rankings": kr_ranks, "us_rankings": us_ranks})
+    
+    # /ranking 주소로 들어오면 무조건 ranking.html을 보여줍니다!
+    return templates.TemplateResponse(
+        request=request, 
+        name="ranking.html", 
+        context={
+            "request": request, 
+            "kr_rankings": kr_ranks, 
+            "us_rankings": us_ranks
+        }
+    )
 
 @app.get("/api/autocomplete")
 def api_autocomplete(q: str = ""):
