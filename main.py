@@ -8,6 +8,29 @@ from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
 app = FastAPI()
+@app.get("/sitemap.xml")
+def get_sitemap():
+    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://www.ssabissa.com/</loc>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://www.ssabissa.com/ranking</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.ssabissa.com/strategy</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.ssabissa.com/about</loc>
+        <priority>0.5</priority>
+    </url>
+</urlset>
+""".strip()
+    return Response(content=xml_content, media_type="application/xml")
 templates = Jinja2Templates(directory="templates")
 templates.env.cache = None
 
