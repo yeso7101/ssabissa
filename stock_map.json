@@ -671,7 +671,7 @@
         "베이커휴즈": "BKR",
         "필립스66": "PSX",
         "마라톤페트롤리엄": "MPC",
-        "발레로": "VLO"
+        "발레로": "VLO",
         "s&p500etf": "SPY", "spy": "SPY", "스파이": "SPY",
         "나스닥etf": "QQQ", "qqq": "QQQ", "큐큐큐": "QQQ",
         "다우etf": "DIA", "dia": "DIA",
@@ -740,7 +740,7 @@
         "퓨어스토리지": "PSTG",
         "넷앱": "NTAP",
         "슈퍼마이크로컴퓨터": "SMCI", "smci": "SMCI", "슈마컴": "SMCI",
-        "델테크놀로지스": "DELL", "dell": "DELL",
+        "델": "DELL", "dell": "DELL",
         "휴렛팩커드엔터프라이즈": "HPE", "hpe": "HPE",
         "레노버": "LNVGY",
         "시스코시스템즈": "CSCO",
