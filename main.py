@@ -26,7 +26,7 @@ def save_ranking_to_file():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=4)
 
-@app.get("/")  # 혹은 @app.post("/") 주송이님 라우터 양식에 맞게 유지하세요!
+@app.post("/")  # 혹은 @app.post("/") 주송이님 라우터 양식에 맞게 유지하세요!
 def home(request: Request, ticker: str = Form(None), q: str = None):
     search_target = ticker or q
     result = None
