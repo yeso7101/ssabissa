@@ -15,6 +15,7 @@ import os
 
 
 DATA_FILE = "ranking_data.json"
+app = FastAPI()
 # [파일 저장용 유틸 함수]
 def save_ranking_to_file():
     # 현재 메모리에 있는 카운트 데이터를 통합해서 JSON 파일로 저장합니다.
@@ -80,7 +81,6 @@ def home(request: Request, ticker: str = Form(None), q: str = None):
             "metrics_guide": SYSTEM_METRICS_GUIDE
         }
     )
-app = FastAPI()
 
 STOCK_MAP = {
     # ================================================================
