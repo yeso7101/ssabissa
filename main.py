@@ -185,3 +185,15 @@ def strategy_page(request: Request): return templates.TemplateResponse(request=r
 def about_page(request: Request): return templates.TemplateResponse(request=request, name="about.html", context={"request": request})
 @app.get("/privacy", response_class=HTMLResponse)
 def privacy_page(request: Request): return templates.TemplateResponse(request=request, name="privacy.html", context={"request": request})
+from fastapi.responses import PlainTextResponse
+
+# 로봇이 www.ssabissa.com/robots.txt 로 들어오면 이 함수가 실행됩니다.
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def get_robots_txt():
+    return """User-agent: *
+Allow: /
+Allow: /ranking
+Allow: /strategy
+Allow: /about
+Sitemap: https://www.ssabissa.com/sitemap.xml
+"""
