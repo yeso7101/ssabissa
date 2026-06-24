@@ -3,3 +3,4 @@ uvicorn
 yfinance
 requests
 jinja2
+python-multipart
