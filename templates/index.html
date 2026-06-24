@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>싸비싸 주가분석기 - 실시간 기업 가치 스크리닝 계량 도구</title>
+    <meta name="description" content="복잡한 재무 지표 소음을 걷어내고, 유상증자 리스크 및 코리아 디스카운트 보정 알고리즘을 거쳐 도출된 정량적 가치 점수를 100점 만점으로 확인해 보세요.">
+    <meta name="keywords" content="주가분석기, 기업가치, 적정주가, 선행PER, 저PBR, 유상증자감점, 싸비싸, 주식계량분석">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="싸비싸 주가분석기">
+    <meta property="og:description" content="유상증자 리스크 및 보정이 완료된 100점 만점 직관적 계량 리포트">
+    <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; }
+        body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+        
+        /* 📱 반응형 플로팅 상단 메뉴 */
+        .top-nav { position: absolute; top: 24px; right: 28px; display: flex; gap: 20px; z-index: 100;}
+        .top-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; text-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+
+        .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
+        
+        /* 🎨 요청사항 적용: 80% 크기 축소, 흰색 문자 복구, 짙은 백드롭 플로팅 섀도우 극대화 */
+        .title-text { display: inline-block; font-size: 2.8rem; font-weight: 900; color: #ffffff; margin: 0 0 25px 0; letter-spacing: -1px; text-shadow: 0 8px 20px rgba(59, 130, 246, 0.65), 0 15px 40px rgba(59, 130, 246, 0.45); }
+        
+        .search-box { position: relative; width: 100%; margin: 0 auto; }
+        .search-input { width: 100%; box-sizing: border-box; padding: 18px 56px 18px 26px; font-size: 0.95rem; border: none; border-radius: 40px; outline: none; background: #ffffff; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); font-family: inherit; font-weight: 600; color: var(--text-main); }
+        .search-input::placeholder { color: #cbd5e1; font-weight: 500; }
+        
+        /* 돋보기 아이콘 채도 조절 */
+        .search-icon { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; color: #abc4e8; transition: color 0.2s; }
+        .search-icon:hover { color: var(--blue); }
+        
+        .sub-text { font-size: 0.75rem; color: #abc4e8; margin-top: 14px; font-weight: 600; }
+
+        /* 0.08 알파값의 명확한 플로팅 그림자 통일 레이어 */
+        .floating-card { background: var(--card-bg); border-radius: 24px; padding: 32px; margin-top: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: none; text-align: left; word-break: keep-all; }
+        
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; cursor: pointer; font-size: 1rem; font-weight: 800; color: var(--blue); background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); margin-top: 20px; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: var(--card-bg); border-radius: 0 0 20px 20px; }
+        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; margin-bottom: 20px; }
+        
+        .guide-item { margin-bottom: 16px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 12px; }
+        .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
+        .guide-title { font-size: 0.95rem; font-weight: 800; display: flex; justify-content: space-between; margin-bottom: 6px;}
+        .guide-desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
+
+        .autocomplete-list { position: absolute; top: 65px; left: 0; right: 0; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); z-index: 99; overflow: hidden; display: none; text-align: left; border: none; }
+        .auto-item { padding: 16px 24px; cursor: pointer; font-size: 0.9rem; font-weight: 700; border-bottom: 1px dashed #e2e8f0;}
+        .auto-item:hover { background-color: var(--bg); color: var(--blue); }
+        
+        /* 🔗 공유 픽토그램 단추 */
+        .share-pill { display: inline-flex; align-items: center; gap: 6px; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer; }
+        .share-pill:hover { background: #e2e8f0; color: var(--blue); }
+
+        footer { text-align: center; font-size: 0.72rem; color: #94a3b8; margin-top: 50px; line-height: 1.6; font-weight: 600; width: 100%; max-width: 500px; padding: 0 20px; box-sizing: border-box; word-break: keep-all; }
+
+        /* 📱 모바일 디바이스 최적화 미디어 쿼리 패치 */
+        @media (max-width: 540px) {
+            .top-nav { position: fixed; top: auto; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 14px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); justify-content: space-around; border-radius: 20px 20px 0 0; }
+            .main-wrapper { margin-bottom: 60px; padding: 12px; }
+            .title-text { font-size: 2.3rem; margin-top: 30px; }
+            .floating-card { padding: 22px; border-radius: 20px; }
+            .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a href="/ranking">랭킹</a>
+        <a href="/strategy">전략</a>
+        <a href="/about">소개</a>
+        <a href="/privacy">약관</a>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="title-text">SSABISSA</div>
+        
+        <form action="/" method="POST" id="searchForm" class="search-box">
+            <input type="text" id="ticker" name="ticker" class="search-input" placeholder="종목코드 또는 티커 예 : 005930.ks 또는 aapl" autocomplete="off" required>
+            <button type="submit" class="search-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            <div id="autocompleteBox" class="autocomplete-list"></div>
+        </form>
+        <div class="sub-text">당신의 주식가치를 스캔하세요</div>
+
+        <div id="loadingBox" style="display: none; margin-top: 20px; color: var(--blue); font-size: 0.85rem; font-weight: 700;">기업 가치 연산 중...</div>
+
+        {% if result %}
+            {% if result.error %}
+                <div class="floating-card" style="text-align: center; color: #ef4444; font-weight: 800;">{{ result.error }}</div>
+            {% else %}
+                <div class="floating-card">
+                    <button class="share-pill" onclick="copyUrl()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        공유
+                    </button>
+                    <h2 style="margin:0 0 5px 0; font-size:1.35rem; font-weight:900; color:var(--text-main);">{{ result.name }} ({{ result.ticker }})</h2>
+                    <div style="font-size:0.9rem; color:#64748b; margin-bottom:30px; font-weight: 600;">현재 거래가: {{ result.current_price }}</div>
+                    
+                    <div style="display: flex; justify-content: center; margin-bottom: 35px;">
+                        <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient({{ result.color }} {{ result.score }}%, #e2e8f0 0deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.05);">
+                            <div style="width: 130px; height: 130px; border-radius: 50%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);">
+                                <span style="font-size: 3rem; font-weight: 900; color: {{ result.color }}; line-height: 1;">{{ result.score }}</span>
+                                <span style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; margin-top: 4px;">가치 점수</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background:#f8fafc; padding:20px; border-radius:16px; margin-bottom:20px; font-size:0.95rem; line-height:1.6;">
+                        <b style="color:var(--blue);">요약 진단:</b> <span style="font-weight: 600; color: var(--text-main);">{{ result.brief }}</span>
+                    </div>
+
+                    <div style="font-size:0.9rem;">
+                        {% for reason in result.reasons %}
+                            <div style="padding:12px 0; border-bottom:1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items: center;">
+                                <span style="font-weight: 600; color: #334155;">{{ reason }}</span>
+                                {% if '+' in reason %}<span style="color:#3b82f6; font-weight:800; font-size:1.1rem;">+</span>
+                                {% else %}<span style="color:#ef4444; font-weight:800; font-size:1.1rem;">-</span>{% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="accordion-header" onclick="toggleAccordion()">
+                    <span>💡 평가 기준 가이드 열어보기</span>
+                    <span id="accArrow">▼</span>
+                </div>
+                <div class="accordion-content" id="accContent">
+                    {% for guide in metrics_guide %}
+                        {% set matched = false %}
+                        {% for r in result.reasons %}{% if guide.keyword in r %}{% set matched = true %}{% endif %}{% endfor %}
+                        <div class="guide-item">
+                            <div class="guide-title">
+                                <span style="color:{% if guide.type == 'plus' %}#3b82f6{% else %}#ef4444{% endif %};">
+                                    {{ guide.title }}
+                                </span>
+                                {% if matched %}<span style="color:var(--blue); font-size:0.8rem; background:#eff6ff; padding:2px 8px; border-radius:10px;">해당됨</span>{% endif %}
+                            </div>
+                            <div class="guide-desc">{{ guide.desc }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>© 2026 싸비싸(SsaBiSsa). ALL RIGHTS RESERVED.</p>
+        <p style="margin-top: 6px; font-size: 0.68rem; color: #94a3b8; font-weight: 600;"><b>⚠️ 책임면책고지:</b> 본 엔진이 제공하는 가치 점수는 계량 지표 연산 결과물일 뿐 매수·매도 추천이 아니며, 모든 금융 투자 판단에 따른 최종 손실 책임은 전적으로 투자자 본인에게 있습니다.</p>
+    </footer>
+
+    <script>
+        function toggleAccordion() {
+            const content = document.getElementById("accContent");
+            content.classList.toggle("open");
+            document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
+        }
+        document.getElementById("searchForm").addEventListener("submit", () => { document.getElementById("loadingBox").style.display = "block"; });
+        const tickerInput = document.getElementById("ticker"), autoBox = document.getElementById("autocompleteBox");
+        let timeout = null;
+        tickerInput.addEventListener("input", function(e) {
+            clearTimeout(timeout);
+            const query = e.target.value.trim();
+            if (query.length < 2) { autoBox.style.display = "none"; return; }
+            timeout = setTimeout(() => {
+                fetch(`/api/autocomplete?q=${encodeURIComponent(query)}`).then(r => r.json()).then(data => {
+                    if (!data.length) { autoBox.style.display = "none"; return; }
+                    autoBox.innerHTML = "";
+                    data.forEach(item => {
+                        const row = document.createElement("div"); row.className = "auto-item";
+                        row.innerHTML = `<span style="color:var(--blue); font-size:0.85rem; margin-right:6px;">${item.ticker}</span> <span>${item.name}</span>`;
+                        row.onclick = () => { tickerInput.value = item.ticker; autoBox.style.display = "none"; document.getElementById("searchForm").submit(); };
+                        autoBox.appendChild(row);
+                    });
+                    autoBox.style.display = "block";
+                });
+            }, 250);
+        });
+        document.addEventListener("click", e => { if(e.target !== tickerInput) autoBox.style.display = "none"; });
+        function copyUrl() { navigator.clipboard.writeText(window.location.origin + "/?ticker=" + encodeURIComponent(tickerInput.value)).then(() => alert("진단 링크가 복사되었습니다.")); }
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "short_name": "SsaBiSsa",
+  "name": "싸비싸 주가분석기 (SsaBiSsa)",
+  "icons": [
+    {
+      "src": "https://fastly.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/192x192/1f4c8.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f0f4f8",
+  "theme_color": "#212529",
+  "display": "standalone",
+  "orientation": "portrait"
+}

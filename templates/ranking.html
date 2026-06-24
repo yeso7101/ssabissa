@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 인기 종목 증시 랭킹 - 싸비싸</title>
+    <meta name="description" content="글로벌 주식 시장에서 투자자들이 실시간으로 가장 많이 조회하고 가치를 스캔한 상위 10개 인기 종목의 중복 제거 가치 랭킹 보드입니다.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="실시간 인기 종목 증시 랭킹 - 싸비싸">
+    <meta property="og:description" content="글로벌 주식 시장 실시간 펀더멘탈 가치 분석 스크리너 랭킹 순위">
+    <meta property="og:url" content="https://ssabissa.com/ranking">
+    <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; }
+        body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        
+        .mobile-top-bar { display: none; text-align: center; padding: 16px 0; background: var(--bg); position: sticky; top: 0; z-index: 101; }
+        .mobile-logo { font-size: 1.6rem; font-weight: 900; color: var(--blue); text-decoration: none; text-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+
+        .floating-header { position: sticky; top: 0; z-index: 100; max-width: 900px; margin: 0 auto; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--bg); }
+        .sub-logo { font-size: 1.5rem; font-weight: 900; color: var(--blue); text-decoration: none; text-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        
+        /* 🔍 검색창 내부 픽토그램 정렬 구조화 */
+        .mini-search { position: relative; width: 260px; display: flex; align-items: center; }
+        .mini-search input { width: 100%; padding: 12px 45px 12px 20px; border-radius: 30px; border: none; outline: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.08); }
+        .mini-search button { position: absolute; right: 16px; background: none; border: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 1rem; }
+        
+        .sub-nav { display: flex; gap: 16px; }
+        .sub-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+
+        .container { max-width: 900px; margin: 0 auto 60px auto; padding: 0 20px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .floating-card { background: var(--card-bg); border-radius: 24px; padding: 32px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: none; }
+        .card-title { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-top: 0; margin-bottom: 20px; text-align: center; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px 8px; color: #94a3b8; font-size: 0.85rem; font-weight: 700; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 16px 8px; border-bottom: 1px dashed #e2e8f0; font-size: 0.95rem; font-weight: 600; }
+        .rank-no { color: var(--blue); font-weight: 900; font-size: 1.1rem; }
+        .score-pill { color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: inline-block;}
+        
+        .rank-link { color: var(--text-main); text-decoration: none; cursor: pointer; }
+        .rank-link:hover { color: var(--blue); text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .mobile-top-bar { display: block; }
+            .floating-header { display: none; }
+            .grid-layout { grid-template-columns: 1fr; gap: 20px; }
+            .sub-nav { position: fixed; top: auto; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 16px 20px; box-shadow: 0 -4px 25px rgba(0,0,0,0.06); justify-content: space-around; border-radius: 24px 24px 0 0; width: 100%; box-sizing: border-box; display: flex !important; z-index: 1000; }
+            .container { margin-top: 20px; margin-bottom: 100px; padding: 0 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-top-bar">
+        <a href="/" class="mobile-logo">SSABISSA</a>
+    </div>
+
+    <div style="padding: 0 20px;">
+        <div class="floating-header">
+            <a href="/" class="sub-logo">SSABISSA</a>
+            <form action="/" method="POST" class="mini-search">
+                <input type="text" name="ticker" placeholder="종목코드 검색..." required autocomplete="off">
+                <button type="submit">🔍</button>
+            </form>
+            <div class="sub-nav"><a href="/ranking">랭킹</a><a href="/strategy">전략</a><a href="/about">소개</a><a href="/privacy">약관</a></div>
+        </div>
+    </div>
+
+    <form id="hiddenForm" action="/" method="POST" style="display:none;">
+        <input type="hidden" id="hiddenTicker" name="ticker">
+    </form>
+
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="color: var(--blue); font-weight: 900; font-size: 1.8rem; margin: 0 0 8px 0; text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">🔥 실시간 검색 랭킹</h1>
+            <p style="color: #718096; font-size: 0.95rem; font-weight: 600; margin: 0;">방금 전 가장 많이 스캔된 인기 종목들입니다.</p>
+        </div>
+        
+        <div class="grid-layout">
+            <div class="floating-card">
+                <h2 class="card-title">🇰🇷 국내 증시 TOP 10</h2>
+                <table>
+                    <tr><th width="15%">순위</th><th>종목명</th><th width="30%">점수</th></tr>
+                    {% for item in kr_rankings %}
+                    <tr>
+                        <td class="rank-no">{{ item.rank }}</td>
+                        <td><span class="rank-link" onclick="searchTicker('{{ item.ticker }}')">{{ item.name }}</span></td>
+                        <td><span class="score-pill" style="background: {{ item.color }};">{{ item.score }}점</span></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="floating-card">
+                <h2 class="card-title">🇺🇸 미국 증시 TOP 10</h2>
+                <table>
+                    <tr><th width="15%">순위</th><th>티커명</th><th width="30%">점수</th></tr>
+                    {% for item in us_rankings %}
+                    <tr>
+                        <td class="rank-no">{{ item.rank }}</td>
+                        <td><span class="rank-link" onclick="searchTicker('{{ item.ticker }}')">{{ item.name }}</span></td>
+                        <td><span class="score-pill" style="background: {{ item.color }};">{{ item.score }}점</span></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="sub-nav"><a href="/ranking">랭킹</a><a href="/strategy">전략</a><a href="/about">소개</a><a href="/privacy">약관</a></div>
+
+    <script>
+        function searchTicker(ticker) {
+            document.getElementById("hiddenTicker").value = ticker;
+            document.getElementById("hiddenForm").submit();
+        }
+    </script>
+</body>
+</html>
