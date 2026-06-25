@@ -16,6 +16,35 @@ import os
 
 DATA_FILE = "ranking_data.json"
 app = FastAPI()
+# ================================================================
+# [랭킹 초기화 엔진] 1,200대장 종목을 조회수 1로 기본 세팅하기
+# ================================================================
+# 데이터 파일(ranking_data.json)이 없는 최초 실행 시에만 1로 초기화합니다.
+if not os.path.exists(DATA_FILE):
+    for name, ticker in STOCK_MAP.items():
+        # 캐시(TICKER_CACHE)에 종목 이름과 기본 스코어 정보를 미리 연동해 둡니다.
+        if ticker not in TICKER_CACHE:
+            TICKER_CACHE[ticker] = {
+                "name": name, 
+                "score": 50,       # 초기 기본 가치 점수 (유저가 검색하면 실시간 갱신됨)
+                "color": "#64748b" # 초기 기본 색상 (회색)
+            }
+        
+        # 한국 주식과 미국 주식을 티커 형태로 구분하여 초기 조회수 1 주입
+        if ".KS" in ticker or ".KQ" in ticker:
+            if SEARCH_COUNT_KR[ticker] == 0:
+                SEARCH_COUNT_KR[ticker] = 1
+        else:
+            if "000000" not in ticker:  # 미상장 임시 데이터 제외
+                if SEARCH_COUNT_US[ticker] == 0:
+                    SEARCH_COUNT_US[ticker] = 1
+                    
+    # 초기 세팅된 조회수 1짜리 더미 데이터를 json 파일로 즉시 저장합니다.
+    try:
+        save_ranking_to_file()
+        print("🚀 [가치 스캐너] 1,200대장 종목 랭킹 초기화 완료! (기본 조회수 1 세팅)")
+    except Exception as e:
+        print(f"⚠️ 랭킹 초기화 파일 저장 중 오류 발생: {e}")
 # [파일 저장용 유틸 함수]
 def save_ranking_to_file():
     # 현재 메모리에 있는 카운트 데이터를 통합해서 JSON 파일로 저장합니다.
