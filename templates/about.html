@@ -38,12 +38,36 @@
         .contact-box { background: #f8fafc; padding: 20px; border-radius: 16px; margin-top: 40px; text-align: center; font-size: 0.9rem; font-weight: 700; color: #64748b; }
 
         @media (max-width: 768px) {
-            .mobile-top-bar { display: block; }
-            .floating-header { display: none; }
-            .sub-nav { position: fixed; top: auto; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 16px 20px; box-shadow: 0 -4px 25px rgba(0,0,0,0.06); justify-content: space-around; border-radius: 24px 24px 0 0; width: 100%; box-sizing: border-box; display: flex !important; z-index: 1000; }
-            .container { margin-top: 20px; margin-bottom: 100px; padding: 0 12px; }
-            .floating-card { padding: 24px; border-radius: 20px; }
-        }
+    .mobile-top-bar { display: block; }
+    .floating-header { display: none; }
+    
+    /* 1. 소개 페이지 내비바도 모바일 상단(top: 0) 고정 및 모서리 교정 */
+    .sub-nav { 
+        position: fixed; 
+        top: 0; 
+        bottom: auto; 
+        left: 0; 
+        right: 0; 
+        background: #ffffff; 
+        padding: 16px 20px; 
+        box-shadow: 0 4px 25px rgba(0,0,0,0.06); 
+        justify-content: space-around; 
+        border-radius: 0 0 24px 24px; 
+        width: 100%; 
+        box-sizing: border-box; 
+        display: flex !important; 
+        z-index: 1000; 
+    }
+    
+    /* 2. 상단 바 높이만큼 위쪽 여백을 주고, 하단 책임면책고지 가림 방지 여백 조절 */
+    .container { 
+        margin-top: 80px; 
+        margin-bottom: 40px; 
+        padding: 0 12px; 
+    }
+    
+    .floating-card { padding: 24px; border-radius: 20px; }
+}
     </style>
 </head>
 <body>

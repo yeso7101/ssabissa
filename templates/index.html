@@ -59,12 +59,31 @@
 
         /* 📱 모바일 디바이스 최적화 미디어 쿼리 패치 */
         @media (max-width: 540px) {
-            .top-nav { position: fixed; top: auto; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 14px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); justify-content: space-around; border-radius: 20px 20px 0 0; }
-            .main-wrapper { margin-bottom: 60px; padding: 12px; }
-            .title-text { font-size: 2.3rem; margin-top: 30px; }
-            .floating-card { padding: 22px; border-radius: 20px; }
-            .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
-        }
+    /* 모바일에서도 바닥으로 내려가지 않고 상단에 딱 붙어있도록 수정 */
+    .top-nav { 
+        position: fixed; 
+        top: 0; 
+        bottom: auto; 
+        left: 0; 
+        right: 0; 
+        background: #ffffff; 
+        padding: 14px 20px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+        justify-content: space-around; 
+        border-radius: 0 0 20px 20px; /* 위쪽 대신 아래쪽 모서리를 둥글게 */
+    }
+    
+    /* 바닥 여백 대신 상단 바 높이만큼 본문을 아래로 밀어주기 */
+    .main-wrapper { 
+        margin-top: 70px; 
+        margin-bottom: 20px; 
+        padding: 12px; 
+    }
+    
+    .title-text { font-size: 2.3rem; margin-top: 30px; }
+    .floating-card { padding: 22px; border-radius: 20px; }
+    .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
+}
     </style>
 </head>
 <body>
