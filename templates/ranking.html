@@ -44,12 +44,11 @@
         .rank-link { color: var(--text-main); text-decoration: none; cursor: pointer; }
         .rank-link:hover { color: var(--blue); text-decoration: underline; }
 
-       @media (max-width: 768px) {
+      @media (max-width: 768px) {
     .mobile-top-bar { display: block; }
     .floating-header { display: none; }
-    .grid-layout { grid-template-columns: 1fr; gap: 20px; }
     
-    /* 1. 내비바를 모바일에서도 상단(top: 0)에 고정하고 아래 모서리를 둥글게 */
+    /* 양옆 정렬(space-between)과 패딩 정돈 */
     .sub-nav { 
         position: fixed; 
         top: 0; 
@@ -57,22 +56,24 @@
         left: 0; 
         right: 0; 
         background: #ffffff; 
-        padding: 16px 20px; 
+        padding: 0 20px; /* 좌우 여백 */
+        height: 60px;    /* 상단바 높이 고정 */
         box-shadow: 0 4px 25px rgba(0,0,0,0.06); 
-        justify-content: space-around; 
-        border-radius: 0 0 24px 24px; 
+        justify-content: space-between; /* 👈 요게 타이틀과 메뉴를 양옆으로 찢어줍니다 */
+        align-items: center; /* 세로 가운데 정렬 */
         width: 100%; 
         box-sizing: border-box; 
         display: flex !important; 
         z-index: 1000; 
     }
     
-    /* 2. 상단 바에 가려지지 않게 위쪽 여백을 주고, 하단 고지 가림 방지용 아래쪽 여백 조절 */
     .container { 
         margin-top: 80px; 
         margin-bottom: 40px; 
         padding: 0 12px; 
     }
+    
+    .floating-card { padding: 24px; border-radius: 20px; }
 }
     </style>
 </head>
@@ -132,8 +133,16 @@
         </div>
     </div>
 
-    <div class="sub-nav"><a href="/ranking">랭킹</a><a href="/strategy">전략</a><a href="/about">소개</a><a href="/privacy">약관</a></div>
-
+    <div class="sub-nav">
+    <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 800; font-size: 18px; letter-spacing: -0.5px;">
+        🔍 가치 스캐너
+    </a>
+    
+    <div style="display: flex; gap: 16px;">
+        <a href="/ranking" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📊 랭킹</a>
+        <a href="/guide" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📖 가이드</a>
+    </div>
+</div>
     <script>
         function searchTicker(ticker) {
             document.getElementById("hiddenTicker").value = ticker;
