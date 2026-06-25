@@ -38,21 +38,19 @@
             padding: 0 24px; box-sizing: border-box; z-index: 1000;
         }
         .sub-nav { display: flex; gap: 16px; align-items: center; }
-        .sub-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; }
+        .sub-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; transition: all 0.3s ease-in-out; }
         
         /* 🎨 [데스크탑 active] 사각형 캡슐을 완전히 부수고 글자 뒤로 몽환적으로 번지는 수채화 후광 효과 */
-        .sub-nav a.active {
+        .sub-nav a.active, .sub-nav a:hover {
             color: #1e293b !important;          
             background: transparent !important;   
             padding: 6px 12px;
             font-weight: 900;
             font-size: 0.95rem;
             border-bottom: none !important;      
-            
             text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 
                          0 0 30px rgba(59, 130, 246, 0.25), 
                          0 0 45px rgba(59, 130, 246, 0.15);
-            transition: all 0.3s ease-in-out;
         }
         
         /* 🔍 검색창 내부 정렬 구조화 */
@@ -71,7 +69,7 @@
         /* 💡 아코디언 컴포넌트 전용 UI */
         .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 35px; border: 1px solid #edf2f7; text-align: left; }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; text-align: left; }
-        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
+        .accordion-content.open { max-height: 2000px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
         .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
         .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
         .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
@@ -81,7 +79,7 @@
             .sub-navbar { display: none !important; }
             body { padding-top: 20px; margin-bottom: 75px; }
             
-            /* 🚨 Bug Fix: 반투명 크리스탈 하단 가둠막 시스템 가동 */
+            /* 🚨 반투명 크리스탈 하단 가둠막 시스템 가동 */
             .mobile-sub-nav { 
                 position: fixed; 
                 top: auto !important;
@@ -111,7 +109,8 @@
                 background: transparent !important;
             }
             
-            .mobile-sub-nav a.active {
+            /* 📱 [모바일 active] 수채화 물감 번짐효과 정렬 */
+            .mobile-sub-nav a.active, .mobile-sub-nav a:hover {
                 color: #1a73e8 !important;
                 background: transparent !important;
                 font-weight: 900;
@@ -173,30 +172,34 @@
                 <b style="color:var(--blue); font-size: 1rem;">📬 개발자 이메일:</b> yeso7101@gmail.com
             </div>
 
-            <!-- 💡 [3번 실현] 소개 페이지 하단에도 공용 가이드 서랍 최종 장착 -->
+            <!-- 💡 평가 기준 아코디언 서랍 (11가지 마스터 잣대 동기화) -->
             <div class="accordion-header" onclick="toggleAccordion()">
-                <span>💡 평가 기준 가이드 열어보기</span>
+                <span>💡 11대 핵심 종합 평가 기준표 열어보기</span>
                 <span id="accArrow">▼</span>
             </div>
             <div class="accordion-content" id="accContent">
-                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 미래 성장성 대비 저렴한 상태입니다.</div></div>
-                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 자산 가치 저평가 국면입니다.</div></div>
-                <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">주주가치 희석 유상증자 이력</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석시키는 대규모 유상증자는 가치 연산 점수에서 감점 처리됩니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">1. 선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 성장성 대비 저렴한 상태입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">2. PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 저평가 구간입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">3. 역사적 배당수익률 밴드 상단</span></div><div class="guide-desc">과거 평균 배당률 대비 현재 배당수익률이 극대화되어 강한 하방 경직성을 확보했습니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">4. 최근 3개년 순현금 흐름(FCF) 흑자</span></div><div class="guide-desc">영업활동을 통해 실제로 벌어들인 현금이 유출보다 많아 펀더멘탈이 견고합니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">5. ROE(자기자본이익률) 10% 이상 유지</span></div><div class="guide-desc">주주가 맡긴 자본을 활용하여 매년 안정적으로 이익을 창출해 내는 효율적 기업입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">6. 영업이익률(OPM) 동종업계 상위 20%</span></div><div class="guide-desc">경쟁사 대비 높은 마진율을 통해 가격 결정권과 독점적 시장 지위를 구축했습니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">7. 주주가치 희석 유상증자 이력 (-감점)</span></div><div class="guide-desc">기존 주주의 지분 가치를 무참히 분쇄하는 대규모 발행 물량은 강한 감점 요인입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">8. 전환사채(CB) 및 신주인수권부사채 과다 (-감점)</span></div><div class="guide-desc">잠재적 오버행(대량 매도 대기 물량) 리스크가 상존하여 가치 점수가 희석됩니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">9. 역성장 및 3개년 연속 매출 감소 (-감점)</span></div><div class="guide-desc">시장의 외면을 받으며 본업의 체급이 줄어드는 기업은 저평가 덫으로 간주합니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#22c55e;">10. 자사주 매입 후 소각 이력 (+가산)</span></div><div class="guide-desc">단순 매입을 넘어 유통 주식수를 영구 격리하여 주당 가치를 끌어올리는 주주환원입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#22c55e;">11. 최대주주 및 특수관계인 지분 확대 (+가산)</span></div><div class="guide-desc">내부 사정을 가장 잘 아는 지배주주의 장내 매수는 책임 경영과 강한 반등 신호입니다.</div></div>
             </div>
 
         </div>
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 900; font-size: 16px; letter-spacing: -0.5px;">
-            🔍 싸비싸
-        </a>
-        <div style="display: flex; gap: 4px; align-items: center;">
-            <a href="/ranking">랭킹</a>
-            <a href="/strategy">가이드</a>
-            <a href="/about" class="active">소개</a>
-            <a href="/privacy">약관</a>
-        </div>
+        <a href="/">검색</a>
+        <a href="/ranking">랭킹</a>
+        <a href="/strategy">가이드</a>
+        <a href="/about" class="active">소개</a>
+        <a href="/privacy">약관</a>
     </div>
 
     <script>

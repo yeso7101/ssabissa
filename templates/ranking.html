@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>증시 랭킹 - 싸비싸</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
         :root {
             --blue: #3b82f6;
@@ -59,7 +60,7 @@
             display: flex; 
             margin-bottom: -1px; 
             position: relative; 
-            z-index: 2; 
+            z-index: 10; 
         }
         .tab-button { 
             flex: 1; 
@@ -75,6 +76,7 @@
             border-top-right-radius: 12px;
             cursor: pointer; 
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
         .tab-button.active { 
             background-color: #ffffff; 
@@ -89,17 +91,18 @@
             border-radius: 0 0 16px 16px; 
             padding: 10px 16px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.06); 
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .rank-item { 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            padding: 14px 0; 
+            padding: 14px 12px; 
             border-bottom: 1px solid #f1f3f5; 
             cursor: pointer;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
         .rank-item:hover {
             background-color: #f8fafc;
@@ -122,7 +125,7 @@
             text-align: center;
             font-size: 1.05rem;
         }
-        .rank-1 { color: #f1eab308; font-size: 1.25rem; } 
+        .rank-1 { color: #f1c40f; font-size: 1.25rem; } 
         .rank-2 { color: #a8b2bd; font-size: 1.15rem; } 
         .rank-3 { color: #cd7f32; font-size: 1.1rem; }
         
@@ -166,16 +169,16 @@
             text-align: center;
         }
 
-        /* 💡 아코디언 가이드 전용 UI 엔진 */
+        /* 💡 아코디언 가이드 전용 UI */
         .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 25px; border: 1px solid #edf2f7; text-align: left; }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; text-align: left; }
-        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
+        .accordion-content.open { max-height: 2200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
         .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
         .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
         .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
         .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
 
-        /* 💬 주주방 타임라인 궤도 안착 트랙 스크롤 최적화 */
+        /* 💬 실시간 주주방 타임라인 궤도 안착 트랙 스크롤 최적화 */
         #talkTimeline {
             max-height: 250px;
             overflow-y: auto;
@@ -295,13 +298,21 @@
         </div>
 
         <div class="accordion-header" onclick="toggleAccordion()">
-            <span>💡 평가 기준 가이드 열어보기</span>
+            <span>💡 11대 핵심 종합 평가 기준표 열어보기</span>
             <span id="accArrow">▼</span>
         </div>
         <div class="accordion-content" id="accContent">
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 미래 성장성 대비 저렴한 상태입니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 자산 가치 저평가 국면입니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">주주가치 희석 유상증자 이력</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석시키는 대규모 유상증자는 가치 연산 점수에서 감점 처리됩니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">1. 선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 성장성 대비 저렴한 상태입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">2. PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 저평가 구간입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">3. 역사적 배당수익률 밴드 상단</span></div><div class="guide-desc">과거 평균 배당률 대비 현재 배당수익률이 극대화되어 강한 하방 경직성을 확보했습니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">4. 최근 3개년 순현금 흐름(FCF) 흑자</span></div><div class="guide-desc">영업활동을 통해 실제로 벌어들인 현금이 유출보다 많아 펀더멘탈이 견고합니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">5. ROE(자기자본이익률) 10% 이상 유지</span></div><div class="guide-desc">주주가 맡긴 자본을 활용하여 매년 안정적으로 이익을 창출해 내는 효율적 기업입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">6. 영업이익률(OPM) 동종업계 상위 20%</span></div><div class="guide-desc">경쟁사 대비 높은 마진율을 통해 가격 결정권과 독점적 시장 지위를 구축했습니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">7. 주주가치 희석 유상증자 이력 (-감점)</span></div><div class="guide-desc">기존 주주의 지분 가치를 무참히 분쇄하는 대규모 발행 물량은 강한 감점 요인입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">8. 전환사채(CB) 및 신주인수권부사채 과다 (-감점)</span></div><div class="guide-desc">잠재적 오버행 리스크가 상존하여 가치 점수가 희석됩니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">9. 역성장 및 3개년 연속 매출 감소 (-감점)</span></div><div class="guide-desc">시장의 외면을 받으며 본업의 체급이 줄어드는 기업은 저평가 덫으로 간주합니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#22c55e; font-weight: bold;">10. 자사주 매입 후 소각 이력 (+가산)</span></div><div class="guide-desc">단순 매입을 넘어 유통 주식수를 영구 격리하여 주당 가치를 끌어올리는 주주환원입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#22c55e; font-weight: bold;">11. 최대주주 및 특수관계인 지분 확대 (+가산)</span></div><div class="guide-desc">내부 사정을 가장 잘 아는 지배주주의 장내 매수는 책임 경영과 강한 반등 신호입니다.</div></div>
         </div>
     </div>
 
@@ -384,7 +395,7 @@
             document.getElementById('resultModal').style.display = 'none';
         }
 
-        // ✕ 단추 오작동 방지를 위한 전역 윈도우 클릭 방어막 마감
+        // ✕ 단추 오작동 방지를 위한 전역 윈도우 클릭 방어막 마감 완료
         window.addEventListener("click", function(event) {
             const modal = document.getElementById('resultModal');
             if (event.target === modal) { modal.style.display = 'none'; }
@@ -443,7 +454,7 @@
                     </div>
                 `;
 
-                # 🤝 메인페이지 공용 백엔드 파이프라인과 실시간 통합 믹싱
+                // 🤝 메인페이지 공용 백엔드 파이프라인과 실시간 통합 믹싱
                 await refreshCommunityData();
                 commSection.style.display = "block"; 
 
