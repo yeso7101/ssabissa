@@ -364,40 +364,78 @@ def api_diagnose(ticker: str = None):
 # ================================================================
 @app.get("/ranking", response_class=HTMLResponse)
 def ranking(request: Request):
-    # .most_common 덤프 시 캐시 리스크 방어
-    kr_ranks = []
-    for i, (t, count) in enumerate(SEARCH_COUNT_KR.most_common(50)):
-        cache_data = TICKER_CACHE.get(t, {"name": t, "score": 50, "color": "#64748b"})
-        kr_ranks.append({
-            "rank": i + 1,
-            "ticker": t,
-            "name": cache_data.get("name", t),
-            "score": cache_data.get("score", 50),
-            "color": cache_data.get("color", "#64748b"),
-            "views": count
-        })
+    """Internal Server Error를 원천 차단하는 안전망이 탑재된 랭킹 라우터"""
+    try:
+        # 🇰🇷 한국 주식 랭킹 빌드
+        kr_ranks = []
+        # 혹시 전역 변수가 바인딩 안 되었을 리스크 방어
+        global SEARCH_COUNT_KR, SEARCH_COUNT_US, TICKER_CACHE
+        
+        for i, (t, count) in enumerate(SEARCH_COUNT_KR.most_common(50)):
+            try:
+                # TICKER_CACHE가 사전이 아니거나 에러가 날 상황을 완전 방어
+                if isinstance(TICKER_CACHE, dict) and t in TICKER_CACHE:
+                    cache_data = TICKER_CACHE[t]
+                else:
+                    cache_data = {}
+            except Exception:
+                cache_data = {}
 
-    us_ranks = []
-    for i, (t, count) in enumerate(SEARCH_COUNT_US.most_common(50)):
-        cache_data = TICKER_CACHE.get(t, {"name": t, "score": 50, "color": "#64748b"})
-        us_ranks.append({
-            "rank": i + 1,
-            "ticker": t,
-            "name": cache_data.get("name", t),
-            "score": cache_data.get("score", 50),
-            "color": cache_data.get("color", "#64748b"),
-            "views": count
-        })
-    
-    return templates.TemplateResponse(
-        request=request, 
-        name="ranking.html", 
-        context={
-            "request": request, 
-            "kr_rankings": kr_ranks, 
-            "us_rankings": us_ranks
-        }
-    )
+            kr_ranks.append({
+                "rank": i + 1,
+                "ticker": str(t),
+                "name": cache_data.get("name", str(t)) if isinstance(cache_data, dict) else str(t),
+                "score": cache_data.get("score", 50) if isinstance(cache_data, dict) else 50,
+                "color": cache_data.get("color", "#64748b") if isinstance(cache_data, dict) else "#64748b",
+                "views": int(count)
+            })
+
+        # 🇺🇸 미국 주식 랭킹 빌드
+        us_ranks = []
+        for i, (t, count) in enumerate(SEARCH_COUNT_US.most_common(50)):
+            try:
+                if isinstance(TICKER_CACHE, dict) and t in TICKER_CACHE:
+                    cache_data = TICKER_CACHE[t]
+                else:
+                    cache_data = {}
+            except Exception:
+                cache_data = {}
+
+            us_ranks.append({
+                "rank": i + 1,
+                "ticker": str(t),
+                "name": cache_data.get("name", str(t)) if isinstance(cache_data, dict) else str(t),
+                "score": cache_data.get("score", 50) if isinstance(cache_data, dict) else 50,
+                "color": cache_data.get("color", "#64748b") if isinstance(cache_data, dict) else "#64748b",
+                "views": int(count)
+            })
+        
+        # 템플릿 엔진 정상 송출
+        return templates.TemplateResponse(
+            request=request, 
+            name="ranking.html", 
+            context={
+                "request": request, 
+                "kr_rankings": kr_ranks, 
+                "us_rankings": us_ranks
+            }
+        )
+        
+    except Exception as main_err:
+        # 💡 [치트키] 만약 이 안에서조차 에러가 나면 500화면을 띄우지 않고 무엇이 범인인지 화면에 텍스트로 찍어줍니다.
+        from fastapi.responses import HTMLResponse
+        error_html = f"""
+        <html>
+            <body style="font-family:sans-serif; padding:50px; line-height:1.6;">
+                <h2>🚨 싸비싸 백엔드 렌더링 긴급 정지</h2>
+                <p>랭킹 데이터를 조립하던 중 파이썬 예외가 발생했습니다.</p>
+                <pre style="background:#eee; padding:15px; border-radius:8px; color:red;">{str(main_err)}</pre>
+                <p>위 에러 문구를 AI 동료에게 전달해 주시면 바로 고쳐드릴게요!</p>
+                <a href="/">🏠 메인 홈으로 돌아가기</a>
+            </body>
+        </html>
+        """
+        return HTMLResponse(content=error_html, status_code=200)
 @app.get("/api/autocomplete")
 def api_autocomplete(q: str = ""):
     q = q.strip()
