@@ -286,7 +286,7 @@ def calculate_ssabissa_score(info, ticker):
             score += 5
             reasons.append("+ 월가 가치 프리미엄 가산 (컨센서스 확보)")
         else:
-            // 컨센서스가 잡히지 않는 중소형주나 성장 초입 주식
+            # 컨센서스가 잡히지 않는 중소형주나 성장 초입 주식
             score += 3
             reasons.append("+ 미국 증시 밸류에이션 기본 가산점")
 
