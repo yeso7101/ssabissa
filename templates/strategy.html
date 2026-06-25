@@ -12,24 +12,52 @@
     <meta property="og:url" content="https://ssabissa.com/strategy">
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
-        :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; }
-        body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; line-height: 1.6; }
+        :root { 
+            --blue: #3b82f6; 
+            --bg: #f0f7ff; 
+            --text-main: #1e293b; 
+            --card-bg: #ffffff; 
+            --border: #dee2e6;
+        }
+        body { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            font-family: 'Pretendard', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            line-height: 1.6; 
+            padding-top: 90px;
+        }
         
-        .mobile-top-bar { display: none; text-align: center; padding: 16px 0; background: var(--bg); position: sticky; top: 0; z-index: 101; }
-        .mobile-logo { font-size: 1.6rem; font-weight: 900; color: var(--blue); text-decoration: none; text-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
-
-        .floating-header { position: sticky; top: 0; z-index: 100; max-width: 900px; margin: 0 auto; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: var(--bg); }
-        .sub-logo { font-size: 1.4rem; font-weight: 900; color: var(--blue); text-decoration: none; text-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        /* 🖥️ 데스크탑 플로팅 상단 바 */
+        .sub-navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 65px; 
+            background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 24px; box-sizing: border-box; z-index: 1000;
+        }
+        .sub-nav { display: flex; gap: 16px; align-items: center; }
+        .sub-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; }
         
-        /* 🔍 검색창 내부 픽토그램 정렬 구조화 */
-        .mini-search { position: relative; width: 260px; display: flex; align-items: center; }
-        .mini-search input { width: 100%; padding: 12px 45px 12px 20px; border-radius: 30px; border: none; outline: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        /* 🔥 [주송이 초이스] 전광판 3중 레이어 네온 블루 캡슐 하이라이트 (전략/가이드 활성화) */
+        .sub-nav a.active {
+            color: #ffffff !important;
+            background-color: var(--blue);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 900;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.7), 
+                        0 0 20px rgba(59, 130, 246, 0.5),
+                        0 0 35px rgba(59, 130, 246, 0.3);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* 🔍 검색창 내부 정렬 구조화 */
+        .mini-search { position: relative; width: 260px; display: flex; align-items: center; margin: 0 20px; }
+        .mini-search input { width: 100%; padding: 10px 45px 10px 20px; border-radius: 30px; border: 1px solid var(--border); outline: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .mini-search button { position: absolute; right: 16px; background: none; border: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 1rem; }
         
-        .sub-nav { display: flex; gap: 16px; }
-        .sub-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-        
-        .container { max-width: 800px; margin: 0 auto 60px auto; padding: 0 20px; }
+        .container { max-width: 800px; margin: 0 auto 60px auto; padding: 0 20px; box-sizing: border-box; }
         .floating-card { background: var(--card-bg); border-radius: 24px; padding: 36px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: none; word-break: keep-all; }
         h1 { font-size: 1.5rem; font-weight: 900; color: var(--blue); text-align: center; margin: 0 0 10px 0; text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
         .subtitle { text-align: center; color: #718096; font-size: 0.95rem; margin-bottom: 35px; font-weight: 600; }
@@ -38,53 +66,49 @@
         .tip-box { background: rgba(255,255,255,0.8); padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #4a5568; font-weight: 700; display: flex; gap: 8px;}
 
         @media (max-width: 768px) {
-    .mobile-top-bar { display: block; }
-    .floating-header { display: none; }
-    
-    /* 양옆 정렬(space-between)과 패딩 정돈 */
-    .sub-nav { 
-        position: fixed; 
-        top: 0; 
-        bottom: auto; 
-        left: 0; 
-        right: 0; 
-        background: #ffffff; 
-        padding: 0 20px; /* 좌우 여백 */
-        height: 60px;    /* 상단바 높이 고정 */
-        box-shadow: 0 4px 25px rgba(0,0,0,0.06); 
-        justify-content: space-between; /* 👈 요게 타이틀과 메뉴를 양옆으로 찢어줍니다 */
-        align-items: center; /* 세로 가운데 정렬 */
-        width: 100%; 
-        box-sizing: border-box; 
-        display: flex !important; 
-        z-index: 1000; 
-    }
-    
-    .container { 
-        margin-top: 80px; 
-        margin-bottom: 40px; 
-        padding: 0 12px; 
-    }
-    
-    .floating-card { padding: 24px; border-radius: 20px; }
-}
+            .sub-navbar { display: none !important; }
+            body { padding-top: 30px; margin-bottom: 70px; }
+            
+            .container { 
+                margin-top: 20px; 
+                margin-bottom: 40px; 
+                padding: 0 12px; 
+            }
+            
+            .floating-card { padding: 24px; border-radius: 20px; }
+
+            /* 📱 모바일 하단바 활성화 그림자 캡슐 효과 */
+            .mobile-sub-nav a.active {
+                color: #ffffff !important;
+                background-color: #1a73e8;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-weight: 900;
+                box-shadow: 0 4px 10px rgba(26, 115, 232, 0.6), 0 0 15px rgba(26, 115, 232, 0.4);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="mobile-top-bar">
-        <a href="/" class="mobile-logo">SSABISSA</a>
-    </div>
 
-    <div style="padding: 0 20px;">
-        <div class="floating-header">
-            <a href="/" class="sub-logo">SSABISSA</a>
+    <div class="sub-navbar">
+        <div style="display: flex; align-items: center;">
+            <a href="/" style="text-decoration: none; color: var(--blue); font-weight: 900; font-size: 20px; letter-spacing: -0.5px; text-shadow: 0 4px 12px rgba(59,130,246,0.2);">
+                🔍 싸비싸
+            </a>
             <form action="/" method="POST" class="mini-search">
                 <input type="text" name="ticker" placeholder="종목코드 검색..." required autocomplete="off">
                 <button type="submit">🔍</button>
             </form>
-            <div class="sub-nav"><a href="/ranking">랭킹</a><a href="/strategy">전략</a><a href="/about">소개</a><a href="/privacy">약관</a></div>
+        </div>
+        <div class="sub-nav">
+            <a href="/ranking">랭킹</a>
+            <a href="/strategy" class="active">가이드</a>
+            <a href="/about">소개</a>
+            <a href="/privacy">약관</a>
         </div>
     </div>
+
     <div class="container">
         <div class="floating-card">
             <h1>📌 점수 200% 실전 활용법</h1>
@@ -116,17 +140,16 @@
         </div>
     </div>
 
-    <div class="sub-nav">
-    <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 800; font-size: 18px; letter-spacing: -0.5px;">
-        🔍 싸비싸
-    </a>
-    
-    <div style="display: flex; gap: 16px;">
-        <a href="/ranking" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📊 랭킹</a>
-        <a href="/strategy" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📖 가이드</a>
-        <a href="/about" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📝 소개</a>
+    <div class="mobile-sub-nav" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 0 20px; height: 60px; box-shadow: 0 -4px 25px rgba(0,0,0,0.06); justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; z-index: 1000;">
+        <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 800; font-size: 16px; letter-spacing: -0.5px;">
+            🔍 싸비싸
+        </a>
+        <div style="display: flex; gap: 14px; align-items: center;">
+            <a href="/ranking" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">📊 랭킹</a>
+            <a href="/strategy" class="active" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">📖 가이드</a>
+            <a href="/privacy" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">약관</a>
+        </div>
     </div>
 
-</div>
 </body>
 </html>

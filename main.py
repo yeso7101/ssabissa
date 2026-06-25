@@ -113,19 +113,24 @@ import time
 app = FastAPI()
 
 def update_all_stock_scores_task():
-    """1,200대장 종목의 실제 싸비싸 스코어를 백그라운드에서 주기적으로 수집하는 엔진"""
+    """1,200대장 종목의 실제 싸비싸 스코어를 백그라운드에서 주기적으로 수집하는 엔진 (차단 방어막 탑재)"""
     print("🔄 [싸비싸 스케줄러] 6시간 주기 1,200대장 진짜 점수 동기화 엔진 가동...")
     import yfinance as yf
+    import random  # ⏰ 인간형 랜덤 휴식을 위해 난수 라이브러리 추가
+    import time
     
-    # 시스템 과부하를 막기 위해 한 종목당 0.2초씩 쉬면서 안전하게 돕니다.
+    # 1. 1,200대장 종목 순회 연산
     for name, ticker in STOCK_MAP.items():
         try:
             ticker_upper = ticker.strip().upper()
             
-            # 이미 캐시에 진짜 점수가 들어가 있고, 최초 로드가 아니라면 굳이 야후를 또 찌르지 않고 패스 (네트워크 절약)
-            # 최초 실행 시에만 전체를 싹 긁어옵니다.
-            if ticker_upper in TICKER_CACHE and TICKER_CACHE[ticker_upper].get("score", 50) != 50:
-                continue
+            # 🛡️ [철벽 방어선 업그레이드] 
+            # 이미 캐시에 점수가 제대로 들어가 있다면(기본값 50점이 아닌 경우), 
+            # 야후 서버를 절대 다시 찌르지 않고 패스하여 Rate Limit을 완벽하게 봉쇄합니다.
+            if ticker_upper in TICKER_CACHE:
+                cached_score = TICKER_CACHE[ticker_upper].get("score", 50)
+                if cached_score != 50 and cached_score > 0:
+                    continue  # 👈 이미 진짜 점수가 장전된 종목은 야후 패스!
                 
             stock_obj = yf.Ticker(ticker_upper)
             info = stock_obj.info
@@ -151,16 +156,18 @@ def update_all_stock_scores_task():
                 if "000000" not in ticker_upper:
                     if SEARCH_COUNT_US[ticker_upper] == 0: SEARCH_COUNT_US[ticker_upper] = 1
             
-            # API 타임아웃 차단용 미세 휴식 (0.2초)
-            time.sleep(0.2)
+            # ⏰ [인간형 디레이팅 적용] 
+            # 고정 0.2초 대신 0.8초~1.2초 사이의 무작위 휴식을 주어 야후 디펜스 시스템을 속입니다.
+            time.sleep(random.uniform(0.8, 1.2))
             
         except Exception as e:
             # 특정 종목 오류 나도 멈추지 않고 다음 종목으로 패스
             continue
             
+    # 2. 1,200대장 순회가 완벽히 끝난 후 디스크 백업 및 한 달 경과 댓글 청소기 가동
     try:
-        save_ranking_to_file()
-        clear_expired_talks()
+        save_ranking_to_file()  # 랭킹 점수 디스크 백업
+        clear_expired_talks()   # 30일 지난 묵은 댓글 정화 
         print("✅ [싸비싸 스케줄러] 1,200대장 동기화 및 한 달 유통기한 댓글 자동 파기 프로세스 완전 성공!")
     except Exception as sched_err:
         print(f"⚠️ 스케줄러 후처리 백업 중 오류 발생: {sched_err}")
@@ -210,12 +217,13 @@ def calculate_ssabissa_score(info, ticker):
     reasons = []
     is_kr = ".KS" in ticker or ".KQ" in ticker
     
+    # 1. 최근 6개월 내 발행주식수 변동(유상증자) 리스크 연산 구역
     try:
         import yfinance as yf
         tk = yf.Ticker(ticker)
         shares_history = tk.get_shares_full(start="2025-12-01", end="2026-06-25")
         if shares_history is not None and len(shares_history) >= 2:
-            dilution_count = 0
+            dilation_count = 0
             prev_shares = shares_history.iloc[0]
             for current_shares in shares_history[1:]:
                 if current_shares > prev_shares * 1.005:
@@ -228,31 +236,38 @@ def calculate_ssabissa_score(info, ticker):
         if info.get("sharesOutstanding", 0) > 2000000000:
             score -= 5; reasons.append("- 유통 주식 물량 과다 부담")
 
+    # 2. 부채 비율 리스크 검증
     debt_eq = info.get("debtToEquity", 0)
     if debt_eq > 180: score -= 7; reasons.append("- 위험 수준의 고부채 재무 부담 리스크")
 
+    # 3. 선행 PER 밸류에이션 지표 비교
     per = info.get("forwardPE")
     if per:
         if is_kr and per < 8: score += 7; reasons.append("+ 선행 PER 기준 국장 저평가 메리트")
         elif not is_kr and per < 18: score += 7; reasons.append("+ 선행 PER 기준 미장 가성비 양호")
         elif per > 35: score -= 6; reasons.append("- 높은 멀티플 오버밸류 경계")
 
+    # 4. PBR 청산가치 지표 비교
     pbr = info.get("priceToBook")
     if pbr:
         if is_kr and pbr < 0.5: score += 6; reasons.append("+ 장부상 청산가치 이하 저PBR 수혜")
         elif not is_kr and pbr < 3.0: score += 4; reasons.append("+ 적정 수준의 자산 가치 반영")
         elif pbr > 10.0: score -= 5; reasons.append("- 자산 가치 대비 멀티플 과열 위험")
 
-    target, cur = info.get("targetMeanPrice"), info.get("currentPrice") or info.get("regularMarketPrice")
+    # 5. 증권사 목표가 컨센서스 갭 보정
+    target = info.get("targetMeanPrice")
+    cur = info.get("currentPrice") or info.get("regularMarketPrice")
     if target and cur:
         gap = (target - cur) / target * 100
         if gap > 25: score += 8; reasons.append("+ 증권사 목표가 대비 안전마진")
         elif gap < 0: score -= 10; reasons.append("- 목표가 상회로 인한 단기 고평가 영역")
     
+    # 6. 배당률, 영업이익률, 성장성 정량 체크
     if info.get("dividendYield", 0) * 100 >= 4.0: score += 4; reasons.append("+ 안정적인 배당 수익률 뒷받침")
     if info.get("operatingMargins", 0) < 0: score -= 12; reasons.append("- 영업이익 적자 구조 리스크")
     if info.get("earningsGrowth", 0) * 100 >= 25: score += 5; reasons.append("+ 고성장 기업 프리미엄 버프")
 
+    # 7. 최근 6개월 주가 모멘텀 트랙 추적
     try:
         import yfinance as yf
         hist = yf.Ticker(ticker).history(period="6mo")
@@ -262,11 +277,26 @@ def calculate_ssabissa_score(info, ticker):
             elif change >= 0.20: score += 4; reasons.append("+ 시장 선호 수급 유입")
     except: pass
 
+    # ================================================================
+    # 📈 [조립 지점] 미국 주식 프리미엄 가산점 시스템 (컨센서스 연동)
+    # ================================================================
+    if not is_kr:  # 미국 주식(미장)일 때만 발동
+        if target:
+            # S&P500급 우량주 등 월가 기관들의 목표 주가(컨센서스) 데이터가 풍부한 주식
+            score += 5
+            reasons.append("+ 월가 가치 프리미엄 가산 (컨센서스 확보)")
+        else:
+            // 컨센서스가 잡히지 않는 중소형주나 성장 초입 주식
+            score += 3
+            reasons.append("+ 미국 증시 밸류에이션 기본 가산점")
+
+    # 8. 평균값 조정 및 최종 100점 마지노선 캡핑
     deviation = score - 60
     score = 60 + int(deviation * 0.85)
-    score = max(0, min(100, int(score)))
+    score = max(0, min(100, int(score))) # 100점 초과 완전 방어
     color = get_score_color(score)
     
+    # 9. 등급별 한 줄 요약 진단 셔터
     if score >= 68: brief = "보수적인 기준에서도 안전마진이 비교적 안정적으로 확보된 진입 매력 구간입니다."
     elif score >= 48: brief = "현재 시장에서 기업의 기초 체력과 성장성에 알맞은 정상적인 대우를 받고 있습니다."
     else: brief = "단기 주가 거품이나 재무적 페널티가 중첩되어 있어 리스크 관리가 필요한 구간입니다."
