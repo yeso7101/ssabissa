@@ -11,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
 import json
 import os
-from fastapi import JsonResponse
 
 
 # ================================================================
@@ -306,28 +305,34 @@ def api_diagnose(ticker: str):
     """랭킹 페이지에서 종목 클릭 시 화면 전환 없이 결과를 반환하는 API"""
     try:
         import yfinance as yf
-        info = yf.Ticker(ticker).info
+        
+        # 소문자로 들어올 경우를 대비해 대문자로 변환
+        ticker_upper = ticker.upper()
+        
+        info = yf.Ticker(ticker_upper).info
         cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
         if not cur: 
             return {"error": "데이터를 불러올 수 없습니다."}
         
-        score, color, reasons, brief = calculate_ssabissa_score(info, ticker)
-        name = info.get("longName") or info.get("shortName") or ticker
+        score, color, reasons, brief = calculate_ssabissa_score(info, ticker_upper)
+        name = info.get("longName") or info.get("shortName") or ticker_upper
         currency = info.get("currency", "$")
         fmt = "{:,.0f}" if currency in ["KRW", "₩"] else "{:,.2f}"
         
         # 캐시 및 검색량 카운트 반영
-        TICKER_CACHE[ticker] = {"name": name, "score": score, "color": color}
-        if ".KS" in ticker or ".KQ" in ticker: 
-            SEARCH_COUNT_KR[ticker] += 1
+        TICKER_CACHE[ticker_upper] = {"name": name, "score": score, "color": color}
+        if ".KS" in ticker_upper or ".KQ" in ticker_upper: 
+            SEARCH_COUNT_KR[ticker_upper] += 1
         else: 
-            SEARCH_COUNT_US[ticker] += 1
+            SEARCH_COUNT_US[ticker_upper] += 1
+            
         save_ranking_to_file()
         
+        # 무겁게 래핑하지 않고 딕셔너리로 바로 주면 FastAPI가 알아서 JSON으로 넘겨줍니다!
         return {
             "success": True,
             "name": name,
-            "ticker": ticker,
+            "ticker": ticker_upper,
             "current_price": fmt.format(cur) + f" {currency}",
             "score": score,
             "color": color,
