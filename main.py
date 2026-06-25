@@ -17,6 +17,14 @@ STOCK_MAP = {}
 SEARCH_COUNT_KR = Counter()
 SEARCH_COUNT_US = Counter()
 TICKER_CACHE = {}
+# ================================================================
+# [커뮤니티 전역 데이터베이스 선언]
+# ================================================================
+# 종목별 투표 데이터 저장 구조: {"AAPL": {"up": 15, "down": 4}}
+VOTE_DB = {}
+
+# 종목별 한 줄 주주방 댓글 저장 구조: {"AAPL": [{"nickname": "익명", "text": "화이팅", "time": "22:45"}]}
+TALK_DB = {}
 
 # ================================================================
 # 2. 기반 파일(STOCK_MAP) 로드 및 기본 템플릿 세팅
@@ -366,3 +374,55 @@ Allow: /ranking
 Allow: /strategy
 Allow: /about
 Sitemap: https://www.ssabissa.com/sitemap.xml""".strip()
+
+# 1. 특정 종목의 커뮤니티 데이터(투표수 + 댓글목록) 가져오기 API
+@app.get("/api/community/{ticker}")
+def get_community_data(ticker: str):
+    t = ticker.strip().upper()
+    votes = VOTE_DB.get(t, {"up": 0, "down": 0})
+    talks = TALK_DB.get(t, [])
+    return {"votes": votes, "talks": talks}
+
+# 2. 상승/하락 투표하기 API
+@app.post("/api/community/{ticker}/vote")
+def post_vote(ticker: str, type: str = Form(...)):
+    t = ticker.strip().upper()
+    if t not in VOTE_DB:
+        VOTE_DB[t] = {"up": 0, "down": 0}
+        
+    if type in ["up", "down"]:
+        VOTE_DB[t][type] += 1
+        
+    return {"success": True, "votes": VOTE_DB[t]}
+
+# 3. 익명 한 줄 응원방 글쓰기 API
+@app.post("/api/community/{ticker}/talk")
+def post_talk(ticker: str, text: str = Form(...)):
+    t = ticker.strip().upper()
+    if not text.strip():
+        return {"error": "내용을 입력해 주세요."}
+        
+    from datetime import datetime
+    current_time = datetime.now().strftime("%H:%M")
+    
+    # 랜덤 익명 닉네임 생성기
+    import random
+    adjectives = ["용감한", "행복한", "돈많은", "존버하는", "화끈한", "스마트한"]
+    nouns = ["주주", "워런버핏", "피터린치", "개미", "고래", "기관"]
+    random_nickname = f"{random.choice(adjectives)} {random.choice(nouns)}"
+    
+    new_talk = {
+        "nickname": random_nickname,
+        "text": text.strip(),
+        "time": current_time
+    }
+    
+    if t not in TALK_DB:
+        TALK_DB[t] = []
+        
+    # 최신글이 맨 위로 오도록 list 앞에 삽입
+    TALK_DB[t].insert(0, new_talk)
+    # 메모리 방어를 위해 최근 30개만 유지
+    TALK_DB[t] = TALK_DB[t][:30]
+    
+    return {"success": True, "talks": TALK_DB[t]}
