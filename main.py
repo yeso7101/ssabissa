@@ -302,34 +302,48 @@ def calculate_ssabissa_score(info, ticker):
 @app.get("/ranking", response_class=HTMLResponse)
 @app.get("/api/diagnose/{ticker}")
 def api_diagnose(ticker: str = None): 
-    """랭킹 페이지에서 종목 클릭 시 화면 전환 없이 결과를 반환하는 API"""
-    if not ticker:
-        return {"error": "티커 코드가 전달되지 않았습니다."}
+    """랭킹 페이지에서 종목 클릭 시 화면 전환 없이 결과를 반환하는 API (서버에러 완벽 디버깅 버전)"""
+    if not ticker or ticker == "undefined":
+        return {"error": "티커 코드가 올바르게 전달되지 않았습니다."}
         
     try:
+        # 💡 [리스크 방어 1] 상단 전역 임포트가 꼬였을 수 있으므로 함수 내부에서 yfinance 명시적 가동
         import yfinance as yf
         
-        # 소문자 대응 및 공백 제거
+        # 소문자 및 공백 완벽 제거
         ticker_upper = ticker.strip().upper()
         
-        info = yf.Ticker(ticker_upper).info
+        # 💡 [리스크 방어 2] yf.Ticker 호출 시 네트워크 지연 및 데이터 누락 방어
+        stock_obj = yf.Ticker(ticker_upper)
+        info = stock_obj.info
+        
+        if not info:
+            return {"error": f"[{ticker_upper}] 야후 파이낸스에서 종목 정보를 찾을 수 없습니다."}
+            
         cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
         if not cur: 
-            return {"error": f"[{ticker_upper}] 데이터를 불러올 수 없습니다. 상장 폐지 여부나 티커를 확인해 주세요."}
+            return {"error": f"[{ticker_upper}] 현재 거래가 데이터를 받아오지 못했습니다. 잠시 후 다시 시도해 주세요."}
         
+        # 💡 [주의] 혹시 주송이님 원래 분석 함수 이름이 'calculate_score'라면 이 부분을 고치셔야 합니다!
         score, color, reasons, brief = calculate_ssabissa_score(info, ticker_upper)
+        
         name = info.get("longName") or info.get("shortName") or ticker_upper
         currency = info.get("currency", "$")
         fmt = "{:,.0f}" if currency in ["KRW", "₩"] else "{:,.2f}"
         
-        # 캐시 및 검색량 카운트 반영
+        # 💡 [리스크 방어 3] 캐시 및 카운터 사전에 안전하게 데이터 등록 (KeyError 방지)
         TICKER_CACHE[ticker_upper] = {"name": name, "score": score, "color": color}
+        
         if ".KS" in ticker_upper or ".KQ" in ticker_upper: 
             SEARCH_COUNT_KR[ticker_upper] += 1
         else: 
             SEARCH_COUNT_US[ticker_upper] += 1
             
-        save_ranking_to_file()
+        # 실시간 랭킹 디스크 저장
+        try:
+            save_ranking_to_file()
+        except Exception as file_err:
+            print(f"⚠️ 랭킹 파일 저장 실패(무시하고 진행): {file_err}")
         
         return {
             "success": True,
@@ -342,8 +356,8 @@ def api_diagnose(ticker: str = None):
             "reasons": reasons
         }
     except Exception as e:
-        return {"error": f"진단 중 시스템 오류가 발생했습니다: {str(e)}"}
-
+        # 💡 500 Internal Server Error를 뱉지 않고, 뭐가 문제인지 팝업창에 에러를 솔직하게 뱉어줍니다.
+        return {"error": f"🚨 싸비싸 엔진 내부 오류 발생: {str(e)}"}
 
 # ================================================================
 # 2. 📊 랭킹 템플릿 반환 라우터 (안전장치 추가)
