@@ -301,18 +301,21 @@ def calculate_ssabissa_score(info, ticker):
 @app.post("/", response_class=HTMLResponse)
 @app.get("/ranking", response_class=HTMLResponse)
 @app.get("/api/diagnose/{ticker}")
-def api_diagnose(ticker: str):
+def api_diagnose(ticker: str = None): 
     """랭킹 페이지에서 종목 클릭 시 화면 전환 없이 결과를 반환하는 API"""
+    if not ticker:
+        return {"error": "티커 코드가 전달되지 않았습니다."}
+        
     try:
         import yfinance as yf
         
-        # 소문자로 들어올 경우를 대비해 대문자로 변환
-        ticker_upper = ticker.upper()
+        # 소문자 대응 및 공백 제거
+        ticker_upper = ticker.strip().upper()
         
         info = yf.Ticker(ticker_upper).info
         cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
         if not cur: 
-            return {"error": "데이터를 불러올 수 없습니다."}
+            return {"error": f"[{ticker_upper}] 데이터를 불러올 수 없습니다. 상장 폐지 여부나 티커를 확인해 주세요."}
         
         score, color, reasons, brief = calculate_ssabissa_score(info, ticker_upper)
         name = info.get("longName") or info.get("shortName") or ticker_upper
@@ -328,7 +331,6 @@ def api_diagnose(ticker: str):
             
         save_ranking_to_file()
         
-        # 무겁게 래핑하지 않고 딕셔너리로 바로 주면 FastAPI가 알아서 JSON으로 넘겨줍니다!
         return {
             "success": True,
             "name": name,
@@ -340,12 +342,17 @@ def api_diagnose(ticker: str):
             "reasons": reasons
         }
     except Exception as e:
-        return {"error": f"진단 중 오류가 발생했습니다: {str(e)}"}
+        return {"error": f"진단 중 시스템 오류가 발생했습니다: {str(e)}"}
+
+
+# ================================================================
+# 2. 📊 랭킹 템플릿 반환 라우터 (안전장치 추가)
+# ================================================================
+@app.get("/ranking", response_class=HTMLResponse)
 def ranking(request: Request):
-    # 🇰🇷 한국 주식 랭킹: 50등까지 추출 및 안전한 딕셔너리 추출법(.get) 적용
+    # .most_common 덤프 시 캐시 리스크 방어
     kr_ranks = []
     for i, (t, count) in enumerate(SEARCH_COUNT_KR.most_common(50)):
-        # TICKER_CACHE에 해당 티커가 없더라도 서버가 터지지 않게 기본값 배치
         cache_data = TICKER_CACHE.get(t, {"name": t, "score": 50, "color": "#64748b"})
         kr_ranks.append({
             "rank": i + 1,
@@ -353,10 +360,9 @@ def ranking(request: Request):
             "name": cache_data.get("name", t),
             "score": cache_data.get("score", 50),
             "color": cache_data.get("color", "#64748b"),
-            "views": count  # 👁️ 프론트엔드에 뿌려줄 조회수 데이터 주입!
+            "views": count
         })
 
-    # 🇺🇸 미국 주식 랭킹: 50등까지 추출 및 안전한 딕셔너리 추출법(.get) 적용
     us_ranks = []
     for i, (t, count) in enumerate(SEARCH_COUNT_US.most_common(50)):
         cache_data = TICKER_CACHE.get(t, {"name": t, "score": 50, "color": "#64748b"})
@@ -366,10 +372,9 @@ def ranking(request: Request):
             "name": cache_data.get("name", t),
             "score": cache_data.get("score", 50),
             "color": cache_data.get("color", "#64748b"),
-            "views": count  # 👁️ 프론트엔드에 뿌려줄 조회수 데이터 주입!
+            "views": count
         })
     
-    # 주송이님이 빌드해 두신 ranking.html 템플릿 엔진으로 데이터 바인딩 송출!
     return templates.TemplateResponse(
         request=request, 
         name="ranking.html", 
