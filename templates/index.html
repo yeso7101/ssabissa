@@ -16,19 +16,73 @@
     :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; --border: #dee2e6; }
     body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
     
-    /* 🖥️ 데스크탑 플로팅 상단 메뉴 우측 정렬 기본형 */
-    .top-nav { position: absolute; top: 24px; right: 28px; display: flex; gap: 16px; z-index: 100;}
-    .top-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; transition: all 0.3s; }
-    
-    /* 🎨 박스 상자 없이 글자 뒤로 촉촉하게 스며드는 수채화 후광 효과 */
-    .top-nav a:hover {
-        color: #1e293b !important;
-        text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.2);
+    /* 🖥️ 데스크탑 상단 내비게이션 (글래스모피즘 캡슐 형태) */
+    .top-nav { 
+        position: fixed; 
+        top: 24px; 
+        left: 50%; 
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 500px;
+        display: flex; 
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.55); 
+        backdrop-filter: blur(12px); 
+        -webkit-backdrop-filter: blur(12px);
+        padding: 12px 24px;
+        border-radius: 100px; 
+        box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-sizing: border-box;
+        z-index: 1000;
+    }
+    .top-nav .nav-logo {
+        text-decoration: none;
+        color: var(--blue);
+        font-weight: 900;
+        font-size: 1rem;
+        letter-spacing: -0.5px;
+    }
+    .top-nav .nav-links { display: flex; gap: 16px; }
+    .top-nav a:not(.nav-logo) { 
+        text-decoration: none; 
+        color: #64748b; 
+        font-size: 0.85rem; 
+        font-weight: 700; 
+        transition: all 0.3s; 
+    }
+    .top-nav a:not(.nav-logo):hover {
+        color: var(--blue);
+        text-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
     }
 
-    .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
-    .title-text { display: inline-block; font-size: 2.8rem; font-weight: 900; color: #ffffff; margin: 0 0 25px 0; letter-spacing: -1px; text-shadow: 0 8px 20px rgba(59, 130, 246, 0.65), 0 15px 40px rgba(59, 130, 246, 0.45); }
+    .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; margin-top: 40px; }
+    .title-text {
+    /* 기본 레이아웃 */
+    display: inline-block;
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin: 0 0 25px 0;
+    letter-spacing: -2px;
     
+    /* 1. 유리 질감 구현 */
+    color: transparent;
+    background: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0.6) 0%, 
+        rgba(255, 255, 255, 0.2) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* 2. 유리의 모서리 선명도 (테두리) */
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.8);
+    
+    /* 3. 뒤로 은은하게 번지는 후광 */
+    text-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
     .search-box { position: relative; width: 100%; margin: 0 auto; }
     .search-input { width: 100%; box-sizing: border-box; padding: 18px 56px 18px 26px; font-size: 0.95rem; border: none; border-radius: 40px; outline: none; background: #ffffff; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); font-family: inherit; font-weight: 600; color: var(--text-main); }
     .search-input::placeholder { color: #cbd5e1; font-weight: 500; }
@@ -77,42 +131,58 @@
 
     @media (max-width: 768px) {
         .top-nav { display: none !important; } 
-        body { padding-top: 20px; margin-bottom: 80px; justify-content: center; min-height: calc(100vh - 80px); }
+        body { padding-top: 20px; margin-bottom: 90px; justify-content: center; min-height: calc(100vh - 90px); }
         .main-wrapper { margin-top: 10px; margin-bottom: 20px; padding: 12px; }
-        .title-text { font-size: 2.3rem; margin-top: 10px; }
+        .title-text {
+        font-size: 2.5rem;
+        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.8);
+    }
         .floating-card { padding: 22px; border-radius: 20px; }
         .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
         
-        /* 📱 모바일 하단 내비게이션 반투명 바 */
+        /* 📱 모바일 하단 내비게이션 (답답하지 않은 여백형 플로팅 캡슐 형태) */
         .mobile-sub-nav { 
             position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: rgba(255, 255, 255, 0.96); 
-            backdrop-filter: blur(10px);
-            padding: 0 24px; 
-            height: 65px;    
-            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.04); 
+            bottom: 24px; 
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.75); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 0 20px; 
+            height: 56px;    
+            border-radius: 100px; 
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12); 
             justify-content: space-between; 
             align-items: center; 
-            width: 100%; 
+            width: calc(100% - 40px); 
+            max-width: 400px;
             box-sizing: border-box; 
             display: flex !important; 
             z-index: 10000; 
         }
-        .mobile-sub-nav a {
+        .mobile-sub-nav .nav-logo {
+            text-decoration: none; 
+            color: var(--blue); 
+            font-weight: 900; 
+            font-size: 15px; 
+            letter-spacing: -0.5px;
+        }
+        .mobile-sub-nav .nav-links {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .mobile-sub-nav a:not(.nav-logo) {
             text-decoration: none;
             color: #64748b;
             font-weight: 700;
-            font-size: 14px;
-            padding: 8px 12px;
+            font-size: 13px;
+            padding: 6px 8px;
             transition: all 0.3s;
-            background: transparent !important;
         }
-        .mobile-sub-nav a:hover {
-            color: #1a73e8 !important;
-            text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25);
+        .mobile-sub-nav a:not(.nav-logo):hover {
+            color: var(--blue);
+            text-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
         }
     }
 </style>
@@ -120,10 +190,13 @@
 <body>
 
     <div class="top-nav">
-        <a href="/ranking">랭킹</a>
-        <a href="/strategy">가이드</a>
-        <a href="/about">소개</a>
-        <a href="/privacy">약관</a>
+        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <div class="nav-links">
+            <a href="/ranking">랭킹</a>
+            <a href="/strategy">가이드</a>
+            <a href="/about">소개</a>
+            <a href="/privacy">약관</a>
+        </div>
     </div>
 
     <div class="main-wrapper">
@@ -234,7 +307,7 @@
                         <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">8. 전환사채(CB) 및 신주인수권부사채 과다 (-감점)</span></div><div class="guide-desc">잠재적 오버행 리스크가 상존하여 가치 점수가 희석됩니다.</div></div>
                         <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">9. 역성장 및 3개년 연속 매출 감소 (-감점)</span></div><div class="guide-desc">시장의 외면을 받으며 본업의 체급이 줄어드는 기업은 저평가 덫으로 간주합니다.</div></div>
                         <div class="guide-item"><div class="guide-title"><span style="color:#22c55e;">10. 자사주 매입 후 소각 이력 (+가산)</span></div><div class="guide-desc">단순 매입을 넘어 유통 주식수를 영구 격리하여 주당 가치를 끌어올리는 주주환원입니다.</div></div>
-                        <div class="guide-item"><div class="guide-title"><span style="color:#22c55e;">11. 최대주주 및 특수관계인 지분 확대 (+가산)</span></div><div class="guide-desc">내부 사정을 가장 잘 아는 지배주주의 장내 매수는 책임 경영과 강한 반등 신호입니다.</div></div>
+                        <div class="guide-item"><div class="guide-title"><span style="color:#22c55e;">11. 최대주주 및 특수관계인 지분 확대 (+가산)</span></div><div class="guide-desc">내부 사정을 가장 가장 잘 아는 지배주주의 장내 매수는 책임 경영과 강한 반등 신호입니다.</div></div>
                     </div>
                 {% endif %}
             </div>
@@ -243,10 +316,8 @@
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 900; font-size: 16px; letter-spacing: -0.5px;">
-            🔍 싸비싸
-        </a>
-        <div style="display: flex; gap: 4px; align-items: center;">
+        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <div class="nav-links">
             <a href="/ranking">랭킹</a>
             <a href="/strategy">가이드</a>
             <a href="/about">소개</a>
@@ -308,7 +379,6 @@
         if (modal) { modal.style.display = 'none'; }
     }
 
-    // 🚨 [치유 완료] 누락되었던 마감 브래킷과 가둠 괄호 바인딩 복구 완료
     window.addEventListener("click", function(event) {
         const modal = document.getElementById('resultModal');
         if (event.target === modal) { modal.style.display = 'none'; }
@@ -404,6 +474,6 @@
             refreshMainCommunity();
         }
     });
-</script>
+    </script>
 </body>
 </html>
