@@ -158,40 +158,44 @@
         </div>
 
         <div id="kr-board" class="ranking-board">
-            {% for item in kr_rankings %}
-            <div class="rank-item">
-                <div class="rank-left">
-                    <span class="rank-number {% if item.rank <= 3 %}rank-{{item.rank}}{% endif %}">{{item.rank}}</span>
-                    <div class="stock-info">
-                        <span class="stock-name">{{item.name}}</span>
-                        <span class="stock-ticker">{{item.ticker}}</span>
-                    </div>
-                </div>
-                <div class="rank-right">
-                    <span class="view-count">👀 {{item.views}}회</span>
-                    <span class="score-badge" style="background-color: {{item.color}};">{{item.score}}점</span>
+    {% for item in kr_rankings %}
+    <a href="/?ticker={{item.ticker}}" style="text-decoration: none; color: inherit; display: block;">
+        <div class="rank-item" style="cursor: pointer;">
+            <div class="rank-left">
+                <span class="rank-number {% if item.rank <= 3 %}rank-{{item.rank}}{% endif %}">{{item.rank}}</span>
+                <div class="stock-info">
+                    <span class="stock-name">{{item.name}}</span>
+                    <span class="stock-ticker">{{item.ticker}}</span>
                 </div>
             </div>
-            {% endfor %}
+            <div class="rank-right">
+                <span class="view-count">👀 {{item.views}}회</span>
+                <span class="score-badge" style="background-color: {{item.color}};">{{item.score}}점</span>
+            </div>
         </div>
+    </a>
+    {% endfor %}
+</div>
 
-        <div id="us-board" class="ranking-board" style="display: none;">
-            {% for item in us_rankings %}
-            <div class="rank-item">
-                <div class="rank-left">
-                    <span class="rank-number {% if item.rank <= 3 %}rank-{{item.rank}}{% endif %}">{{item.rank}}</span>
-                    <div class="stock-info">
-                        <span class="stock-name">{{item.name}}</span>
-                        <span class="stock-ticker">{{item.ticker}}</span>
-                    </div>
-                </div>
-                <div class="rank-right">
-                    <span class="view-count">👀 {{item.views}}회</span>
-                    <span class="score-badge" style="background-color: {{item.color}};">{{item.score}}점</span>
+       <div id="us-board" class="ranking-board" style="display: none;">
+    {% for item in us_rankings %}
+    <a href="/?ticker={{item.ticker}}" style="text-decoration: none; color: inherit; display: block;">
+        <div class="rank-item" style="cursor: pointer;">
+            <div class="rank-left">
+                <span class="rank-number {% if item.rank <= 3 %}rank-{{item.rank}}{% endif %}">{{item.rank}}</span>
+                <div class="stock-info">
+                    <span class="stock-name">{{item.name}}</span>
+                    <span class="stock-ticker">{{item.ticker}}</span>
                 </div>
             </div>
-            {% endfor %}
+            <div class="rank-right">
+                <span class="view-count">👀 {{item.views}}회</span>
+                <span class="score-badge" style="background-color: {{item.color}};">{{item.score}}점</span>
+            </div>
         </div>
+    </a>
+    {% endfor %}
+</div>
     </div>
 
     <style>
