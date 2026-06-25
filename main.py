@@ -10,7 +10,8 @@ import os
 # ================================================================
 # 1. 전역 설정 데이터 및 변수 기초 선언
 # ================================================================
-DATA_FILE = "ranking_data.json"
+DATA_FILE = "/data/ranking_data.json"
+COMMUNITY_FILE = "/data/community_data.json"
 STOCK_MAP_FILE = "stock_map.json"
 
 STOCK_MAP = {}
@@ -81,9 +82,31 @@ def save_ranking_to_file():
     }
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=4)
+
+# 💬 [신설] 투표 및 주주방 단톡방 데이터를 파일로 저장하는 백업 함수
+def save_community_to_file():
+    global VOTE_DB, TALK_DB
+    payload = {
+        "VOTE": VOTE_DB,
+        "TALK": TALK_DB
+    }
+    with open(COMMUNITY_FILE, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=4)
+
+# 🔄 [신설] 서버가 새로 켜질 때 외장하드(/data/)에 보존되어 있던 커뮤니티 데이터 자동 부활 로직
+if os.path.exists(COMMUNITY_FILE):
+    with open(COMMUNITY_FILE, "r", encoding="utf-8") as f:
+        try:
+            past_comm = json.load(f)
+            VOTE_DB = past_comm.get("VOTE", {})
+            TALK_DB = past_comm.get("TALK", {})
+            print("🚀 [싸비싸] Render 디스크로부터 과거 주주방 토크/투표 데이터 복구 성공!")
+        except Exception as e:
+            print(f"⚠️ 커뮤니티 복구 중 예외 발생(무시하고 초기화): {e}")
+
+# (이어서 기존의 import threading, import time 및 6시간 스케줄러 로직이 위치하게 됩니다)
 import threading
 import time
-
 # ================================================================
 # 4. [신설] 6시간 주기 자동 가치점수 동기화 백그라운드 엔진
 # ================================================================
@@ -434,7 +457,11 @@ Allow: /strategy
 Allow: /about
 Sitemap: https://www.ssabissa.com/sitemap.xml""".strip()
 
-# 1. 특정 종목의 커뮤니티 데이터(투표수 + 댓글목록) 가져오기 API
+# ================================================================
+# 6. 실시간 영구 백업 기능이 결합된 커뮤니티 API 구역
+# ================================================================
+
+# 1. 특정 종목의 커뮤니티 데이터(투표수 + 댓글목록) 가져오기 API (단순 읽기라 백업 불필요)
 @app.get("/api/community/{ticker}")
 def get_community_data(ticker: str):
     t = ticker.strip().upper()
@@ -452,6 +479,8 @@ def post_vote(ticker: str, type: str = Form(...)):
     if type in ["up", "down"]:
         VOTE_DB[t][type] += 1
         
+    # 💾 [수정] 투표 숫자가 올라가는 즉시 외장하드 파일에 실시간 영구 박음질!
+    save_community_to_file() 
     return {"success": True, "votes": VOTE_DB[t]}
 
 # 3. 익명 한 줄 응원방 글쓰기 API
@@ -484,4 +513,6 @@ def post_talk(ticker: str, text: str = Form(...)):
     # 메모리 방어를 위해 최근 30개만 유지
     TALK_DB[t] = TALK_DB[t][:30]
     
+    # 💾 [수정] 주주방 댓글이 달리는 즉시 외장하드 파일에 실시간 영구 박음질!
+    save_community_to_file() 
     return {"success": True, "talks": TALK_DB[t]}
