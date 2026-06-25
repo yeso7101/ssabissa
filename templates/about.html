@@ -40,17 +40,20 @@
         .sub-nav { display: flex; gap: 16px; align-items: center; }
         .sub-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; }
         
-        /* 🔥 [주송이 초이스] 전광판 3중 레이어 네온 블루 캡슐 하이라이트 (소개 활성화) */
+        /* 🎨 [데스크탑 active] 사각형 캡슐을 완전히 부수고 글자 뒤로 몽환적으로 번지는 수채화 후광 효과 */
         .sub-nav a.active {
-            color: #ffffff !important;
-            background-color: var(--blue);
-            padding: 6px 14px;
-            border-radius: 20px;
+            color: #1e293b !important;          /* 활성화 시 깊고 어두운 메인 글자색 보존 */
+            background: transparent !important;   /* ❌ 딱딱한 사각형 상자 배경 제거 */
+            padding: 6px 12px;
             font-weight: 900;
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.7), 
-                        0 0 20px rgba(59, 130, 246, 0.5),
-                        0 0 35px rgba(59, 130, 246, 0.3);
-            transition: all 0.2s ease-in-out;
+            font-size: 0.95rem;
+            border-bottom: none !important;      /* ❌ 단순 밑줄 제거 */
+            
+            /* 수채화 전용 대형 글로우 매트릭스 광원 */
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 
+                         0 0 30px rgba(59, 130, 246, 0.25), 
+                         0 0 45px rgba(59, 130, 246, 0.15);
+            transition: all 0.3s ease-in-out;
         }
         
         /* 🔍 검색창 내부 정렬 구조화 */
@@ -68,25 +71,56 @@
 
         @media (max-width: 768px) {
             .sub-navbar { display: none !important; }
-            body { padding-top: 30px; margin-bottom: 70px; }
+            body { padding-top: 20px; margin-bottom: 75px; }
             
+            /* 🚨 Bug Fix: 반투명 크리스탈 하단 가둠막 시스템 가동 */
+            .mobile-sub-nav { 
+                position: fixed; 
+                top: auto !important;
+                bottom: 0 !important; 
+                left: 0; 
+                right: 0; 
+                background: rgba(255, 255, 255, 0.96); 
+                backdrop-filter: blur(10px);
+                padding: 0 24px; 
+                height: 65px;    
+                box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.04); 
+                justify-content: space-between; 
+                align-items: center; 
+                width: 100%; 
+                box-sizing: border-box; 
+                display: flex !important; /* 👈 모바일 강제 팝업 바인딩 */
+                z-index: 10000; 
+            }
+
+            .mobile-sub-nav a {
+                text-decoration: none;
+                color: #64748b;
+                font-weight: 700;
+                font-size: 14px;
+                padding: 8px 12px;
+                transition: all 0.3s;
+                background: transparent !important;
+            }
+            
+            /* 📱 [모바일 active] 소개 메뉴 뒤 수채화 물감 번짐효과 정렬 */
+            .mobile-sub-nav a.active {
+                color: #1a73e8 !important;
+                background: transparent !important;
+                font-weight: 900;
+                border-bottom: none !important;
+                box-shadow: none !important;
+                text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 
+                             0 0 24px rgba(26, 115, 232, 0.25);
+            }
+
             .container { 
-                margin-top: 20px; 
+                margin-top: 10px; 
                 margin-bottom: 40px; 
                 padding: 0 12px; 
             }
             
             .floating-card { padding: 24px; border-radius: 20px; }
-
-            /* 📱 모바일 하단바 활성화 그림자 캡슐 효과 */
-            .mobile-sub-nav a.active {
-                color: #ffffff !important;
-                background-color: #1a73e8;
-                padding: 4px 10px;
-                border-radius: 12px;
-                font-weight: 900;
-                box-shadow: 0 4px 10px rgba(26, 115, 232, 0.6), 0 0 15px rgba(26, 115, 232, 0.4);
-            }
         }
     </style>
 </head>
@@ -119,7 +153,7 @@
             <p>우리가 주식을 할 때 가장 궁금한 건 사실 저 단순한 한 문장입니다. 하지만 HTS나 금융 포털을 켜면 PER, PBR 등 수많은 지표들이 개인 투자자들의 판단을 흐리게 만듭니다.</p>
             
             <h2>🎯 복잡한 건 기계에게, 우리는 직관만</h2>
-            <p>이러한 답답함을 해소하고자 직접 백엔드 엔진을 깎아 만들었습니다. 종목명만 입력하면 기계가 재무 지표와 컨센서스를 초고속으로 긁어모아 <b>단 하나의 보수적이고 엄격한 점수</b>로 변환해 줍니다.</p>
+            <p>이러한 답답함을 해소하고자 직접 백엔드 엔진을 깎아 만들었습니다. 종목명만 입력하면 기계가 재무 지표 및 컨센서스를 초고속으로 긁어모아 <b>단 하나의 보수적이고 엄격한 점수</b>로 변환해 줍니다.</p>
             
             <h2>🇰🇷 국장과 미장은 잣대가 달라야 합니다</h2>
             <p>한국 주식은 만성적인 저평가를 받고, 미국 주식은 프리미엄을 받습니다. 똑같은 잣대로 평가하면 오류가 생깁니다. 싸비싸는 <b>국장과 미장의 알고리즘 허들을 분리</b>하여 코리아 디스카운트 왜곡을 잡아냈습니다.</p>
@@ -128,16 +162,16 @@
         </div>
     </div>
 
-    <!-- 📱 모바일 하단 플로팅 내비바 구조 및 클래스 동기화 -->
-    <div class="mobile-sub-nav" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 0 20px; height: 60px; box-shadow: 0 -4px 25px rgba(0,0,0,0.06); justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; z-index: 1000;">
-        <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 800; font-size: 16px; letter-spacing: -0.5px;">
+    <!-- 📱 모바일 하단 플로팅 내비바 (버그 완치 및 수채화 하이라이트 동기화) -->
+    <div class="mobile-sub-nav" style="display: none;">
+        <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 900; font-size: 16px; letter-spacing: -0.5px;">
             🔍 싸비싸
         </a>
-        <div style="display: flex; gap: 14px; align-items: center;">
-            <a href="/ranking" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">📊 랭킹</a>
-            <a href="/strategy" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">📖 가이드</a>
-            <a href="/about" class="active" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">📝 소개</a>
-            <a href="/privacy" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">약관</a>
+        <div style="display: flex; gap: 4px; align-items: center;">
+            <a href="/ranking">랭킹</a>
+            <a href="/strategy">가이드</a>
+            <a href="/about" class="active">소개</a>
+            <a href="/privacy">약관</a>
         </div>
     </div>
 </body>

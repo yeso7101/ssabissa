@@ -16,9 +16,15 @@
     :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; --border: #dee2e6; }
     body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
     
-    /* 📱 반응형 플로팅 상단 메뉴 */
-    .top-nav { position: absolute; top: 24px; right: 28px; display: flex; gap: 20px; z-index: 100;}
-    .top-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; text-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+    /* 🖥️ 데스크탑 플로팅 상단 메뉴 우측 정렬 기본형 */
+    .top-nav { position: absolute; top: 24px; right: 28px; display: flex; gap: 16px; z-index: 100;}
+    .top-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; transition: all 0.3s; }
+    
+    /* 🎨 [메인 active 방어] 메인은 홈이므로 서브페이지 이동을 위한 기본 링크 상태를 유지하되 호버 시 수채화 가동 */
+    .top-nav a:hover {
+        color: #1e293b !important;
+        text-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 0 24px rgba(59, 130, 246, 0.2);
+    }
 
     .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
     
@@ -51,10 +57,10 @@
     .share-pill { display: inline-flex; align-items: center; gap: 6px; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer; }
     .share-pill:hover { background: #e2e8f0; color: var(--blue); }
 
-    /* 💬 [부활 및 교체] 실시간 주주방 타임라인 피드 스크롤 바운더리 박스 */
+    /* 💬 실시간 주주방 타임라인 피드 스크롤바 최적화 */
     #mainTalkTimeline {
-        max-height: 280px;      /* 🚨 댓글이 일정 수준 이상 쌓이면 모달창이 아래로 깨지지 않게 가두는 한계 높이 */
-        overflow-y: auto;        /* 🚨 높이를 초과할 때만 이쁘고 슬림한 스크롤바 생성 */
+        max-height: 280px;      
+        overflow-y: auto;        
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -62,10 +68,8 @@
         padding: 12px;
         border-radius: 12px;
         border: 1px solid #edf2f7;
-        scrollbar-width: thin;   /* 파이어폭스용 슬림 스크롤바 */
+        scrollbar-width: thin;   
     }
-
-    /* 크롬, 사파리, 웨일용 스크롤바 슬림 최적화 트랙 커스텀 */
     #mainTalkTimeline::-webkit-scrollbar { width: 6px; }
     #mainTalkTimeline::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
     #mainTalkTimeline::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -73,12 +77,46 @@
 
     footer { text-align: center; font-size: 0.72rem; color: #94a3b8; margin-top: 50px; line-height: 1.6; font-weight: 600; width: 100%; max-width: 500px; padding: 0 20px; box-sizing: border-box; word-break: keep-all; }
 
-    @media (max-width: 540px) {
-        .top-nav { position: fixed; top: 0; left: 0; right: 0; background: #ffffff; padding: 14px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); justify-content: space-around; border-radius: 0 0 20px 20px; }
-        .main-wrapper { margin-top: 70px; margin-bottom: 20px; padding: 12px; }
-        .title-text { font-size: 2.3rem; margin-top: 30px; }
+    @media (max-width: 768px) {
+        .top-nav { display: none !important; } /* 📱 모바일 상단 바 전면 소멸 */
+        body { padding-top: 20px; margin-bottom: 80px; justify-content: center; min-height: calc(100vh - 80px); }
+        .main-wrapper { margin-top: 10px; margin-bottom: 20px; padding: 12px; }
+        .title-text { font-size: 2.3rem; margin-top: 10px; }
         .floating-card { padding: 22px; border-radius: 20px; }
         .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
+        
+        /* 🚨 대통합: 메인 홈 하단에도 크리스탈 반투명 모바일 하단 내비바 상시 구동 고정 */
+        .mobile-sub-nav { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: rgba(255, 255, 255, 0.96); 
+            backdrop-filter: blur(10px);
+            padding: 0 24px; 
+            height: 65px;    
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.04); 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%; 
+            box-sizing: border-box; 
+            display: flex !important; 
+            z-index: 10000; 
+        }
+        .mobile-sub-nav a {
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 8px 12px;
+            transition: all 0.3s;
+            background: transparent !important;
+        }
+        /* 메인 홈에서는 서브페이지들이 링크 상태이므로 호버링 스며듬만 적용 */
+        .mobile-sub-nav a:hover {
+            color: #1a73e8 !important;
+            text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25);
+        }
     }
 </style>
 </head>
@@ -86,7 +124,7 @@
 
     <div class="top-nav">
         <a href="/ranking">랭킹</a>
-        <a href="/strategy">전략</a>
+        <a href="/strategy">가이드</a>
         <a href="/about">소개</a>
         <a href="/privacy">약관</a>
     </div>
@@ -108,13 +146,13 @@
         <div id="loadingBox" style="display: none; margin-top: 20px; color: var(--blue); font-size: 0.85rem; font-weight: 700;">기업 가치 연산 중...</div>
 
         {% if result %}
-<div id="resultModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-    
-    <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none;">
-        
-        <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 2100; margin-bottom: -20px; pointer-events: none;">
-            <button onclick="closeModal()" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
-        </div>
+        <div id="resultModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+            
+            <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none;">
+                
+                <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 2100; margin-bottom: -20px; pointer-events: none;">
+                    <button onclick="closeModal()" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
+                </div>
 
                 {% if result.error %}
                     <div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0; font-size: 1.1rem;">
@@ -162,7 +200,6 @@
                         </div>
                     </div>
 
-                    <!-- 🔥 [부활 및 전면 연동] 실시간 찬반 투표 및 토크방 피드 구역 -->
                     <div style="border-top: 2px solid #edf2f7; padding-top: 25px; margin-top: 20px;">
                         <h3 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 800; color: #1a202c;">🔥 실시간 주가 투표방</h3>
                         
@@ -182,12 +219,10 @@
                             <button onclick="submitMainTalk()" style="padding: 10px 16px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;">등록</button>
                         </div>
 
-                        <div id="mainTalkTimeline" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #edf2f7;">
-                            <!-- 실시간 타임라인 데이터 수해 구역 -->
-                        </div>
+                        <div id="mainTalkTimeline">
+                            </div>
                     </div>
 
-                    <!-- 💡 [보완 완료] 평가 기준 가이드 컴팩트 아코디언 -->
                     <div class="accordion-header" onclick="toggleAccordion()" style="cursor: pointer; margin-top: 25px;">
                         <span>💡 평가 기준 가이드 열어보기</span>
                         <span id="accArrow">▼</span>
@@ -195,22 +230,24 @@
                     <div class="accordion-content" id="accContent">
                         {% for guide in metrics_guide %}
                             {% set matched = false %}
-                            {% for r in result.reasons %}{% if guide.keyword in r %}{% set matched = true %}{% endif %}{% endfor %}
-                            <div class="guide-item">
-                                <div class="guide-title">
-                                    <span style="color:{% if guide.type == 'plus' %}#3b82f6{% else %}#ef4444{% endif %}; font-weight: bold;">
-                                        {{ guide.title }}
-                                    </span>
-                                    {% if matched %}<span style="color:var(--blue); font-size:0.75rem; background:#eff6ff; padding:2px 8px; border-radius:10px; font-weight: bold;">해당됨</span>{% endif %}
-                                </div>
-                                <div class="guide-desc" style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">{{ guide.desc }}</div>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
                     </div>
                 {% endif %}
             </div>
         </div>
         {% endif %}
+    </div>
+
+    <div class="mobile-sub-nav" style="display: none;">
+        <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 900; font-size: 16px; letter-spacing: -0.5px;">
+            🔍 싸비싸
+        </a>
+        <div style="display: flex; gap: 4px; align-items: center;">
+            <a href="/ranking">랭킹</a>
+            <a href="/strategy">가이드</a>
+            <a href="/about">소개</a>
+            <a href="/privacy">약관</a>
+        </div>
     </div>
 
     <footer>
@@ -219,19 +256,16 @@
     </footer>
 
     <script>
-    // 1. 아코디언 토글 제어 (원본 상태 완전 유지 및 충돌 방어)
     function toggleAccordion() {
         const content = document.getElementById("accContent");
         content.classList.toggle("open");
         document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
     }
 
-    // 2. 검색 제출 시 로딩바 활성화
     document.getElementById("searchForm").addEventListener("submit", () => { 
         document.getElementById("loadingBox").style.display = "block"; 
     });
 
-    // 3. 실시간 티커 자동완성 엔진
     const tickerInput = document.getElementById("ticker"), autoBox = document.getElementById("autocompleteBox");
     let timeout = null;
     tickerInput.addEventListener("input", function(e) {
@@ -273,11 +307,8 @@
     window.addEventListener("click", function(event) {
         const modal = document.getElementById('resultModal');
         if (event.target === modal) { modal.style.display = 'none'; }
-    });
+    }
 
-    // =============================================================
-    // 🔗 [메인 전용 실시간 커뮤니티 AJAX 바인딩 구역]
-    // =============================================================
     const mainTickerElement = document.getElementById('activeTickerHolder');
     const currentMainTicker = mainTickerElement ? mainTickerElement.getAttribute('data-ticker') : '';
 
@@ -287,7 +318,6 @@
             const res = await fetch(`/api/community/${currentMainTicker}`);
             const data = await res.json();
             
-            // 📊 1. 투표 프로그레스 바 렌더링
             const up = data.votes.up || 0;
             const down = data.votes.down || 0;
             const total = up + down;
@@ -304,7 +334,6 @@
                 `;
             }
 
-            // 💬 2. 주주방 타임라인 렌더링
             const timeline = document.getElementById('mainTalkTimeline');
             if (!data.talks || data.talks.length === 0) {
                 timeline.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 0;">작성된 주주방 대화가 없습니다. 첫 글을 남겨보세요!</div>`;
@@ -336,42 +365,35 @@
         } catch(e) {}
     }
 
-    // 🤖 무지성 광클 및 매크로 연타 도배를 방어할 실시간 락(Lock) 셔터 변수
-let isTalkSending = false;
+    let isTalkSending = false;
 
-async function submitMainTalk() {
-    // 락이 닫혀(true)있으면 유저가 아무리 클릭해도 여기서 함수를 강제 종료하여 철벽 방어합니다.
-    if (isTalkSending) return; 
-    
-    if (!currentMainTicker) return;
-    const input = document.getElementById('mainTalkInput');
-    const text = input.value.trim();
-    if (!text) return;
+    async function submitMainTalk() {
+        if (isTalkSending) return; 
+        if (!currentMainTicker) return;
+        const input = document.getElementById('mainTalkInput');
+        const text = input.value.trim();
+        if (!text) return;
 
-    // 🔒 전송 시작과 동시에 차단막을 내립니다 (락 온).
-    isTalkSending = true; 
-    
-    const formData = new FormData();
-    formData.append('text', text);
-    
-    try {
-        const res = await fetch(`/api/community/${currentMainTicker}/talk`, { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
-            input.value = "";
-            await refreshMainCommunity();
-        } else if (data.error) {
-            // 백엔드가 보낸 🚨 초강력 금지어 필터링 안내 경고창을 경고 팝업으로 출력합니다.
-            alert(data.error); 
-        }
-    } catch(e) {}
-    
-    // ⏰ 댓글 전송 완료 후 3초(3000ms) 동안 대기 시간을 준 뒤에 락을 열어줍니다.
-    setTimeout(() => {
-        isTalkSending = false;
-    }, 3000);
-}
-    // 윈도우 로딩 시 자동 실행 장치
+        isTalkSending = true; 
+        const formData = new FormData();
+        formData.append('text', text);
+        
+        try {
+            const res = await fetch(`/api/community/${currentMainTicker}/talk`, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                input.value = "";
+                await refreshMainCommunity();
+            } else if (data.error) {
+                alert(data.error); 
+            }
+        } catch(e) {}
+        
+        setTimeout(() => {
+            isTalkSending = false;
+        }, 3000);
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         if (currentMainTicker) {
             refreshMainCommunity();
