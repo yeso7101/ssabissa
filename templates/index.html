@@ -13,54 +13,74 @@
     <meta property="og:description" content="유상증자 리스크 및 보정이 완료된 100점 만점 직관적 계량 리포트">
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
-        :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; --border: #dee2e6; }
-        body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
-        
-        /* 📱 반응형 플로팅 상단 메뉴 */
-        .top-nav { position: absolute; top: 24px; right: 28px; display: flex; gap: 20px; z-index: 100;}
-        .top-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; text-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+    :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; --border: #dee2e6; }
+    body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+    
+    /* 📱 반응형 플로팅 상단 메뉴 */
+    .top-nav { position: absolute; top: 24px; right: 28px; display: flex; gap: 20px; z-index: 100;}
+    .top-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; text-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
 
-        .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
-        
-        .title-text { display: inline-block; font-size: 2.8rem; font-weight: 900; color: #ffffff; margin: 0 0 25px 0; letter-spacing: -1px; text-shadow: 0 8px 20px rgba(59, 130, 246, 0.65), 0 15px 40px rgba(59, 130, 246, 0.45); }
-        
-        .search-box { position: relative; width: 100%; margin: 0 auto; }
-        .search-input { width: 100%; box-sizing: border-box; padding: 18px 56px 18px 26px; font-size: 0.95rem; border: none; border-radius: 40px; outline: none; background: #ffffff; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); font-family: inherit; font-weight: 600; color: var(--text-main); }
-        .search-input::placeholder { color: #cbd5e1; font-weight: 500; }
-        
-        .search-icon { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; color: #abc4e8; transition: color 0.2s; }
-        .search-icon:hover { color: var(--blue); }
-        
-        .sub-text { font-size: 0.75rem; color: #abc4e8; margin-top: 14px; font-weight: 600; }
+    .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
+    
+    .title-text { display: inline-block; font-size: 2.8rem; font-weight: 900; color: #ffffff; margin: 0 0 25px 0; letter-spacing: -1px; text-shadow: 0 8px 20px rgba(59, 130, 246, 0.65), 0 15px 40px rgba(59, 130, 246, 0.45); }
+    
+    .search-box { position: relative; width: 100%; margin: 0 auto; }
+    .search-input { width: 100%; box-sizing: border-box; padding: 18px 56px 18px 26px; font-size: 0.95rem; border: none; border-radius: 40px; outline: none; background: #ffffff; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); font-family: inherit; font-weight: 600; color: var(--text-main); }
+    .search-input::placeholder { color: #cbd5e1; font-weight: 500; }
+    
+    .search-icon { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; color: #abc4e8; transition: color 0.2s; }
+    .search-icon:hover { color: var(--blue); }
+    
+    .sub-text { font-size: 0.75rem; color: #abc4e8; margin-top: 14px; font-weight: 600; }
 
-        .floating-card { background: var(--card-bg); border-radius: 24px; padding: 32px; margin-top: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: none; text-align: left; word-break: keep-all; }
-        
-        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: var(--card-bg); border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 20px; border: 1px solid #edf2f7; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: var(--card-bg); border-radius: 0 0 16px 16px; }
-        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; margin-bottom: 20px; border: 1px solid #edf2f7; border-top: none; }
-        
-        .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
-        .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
-        .guide-title { font-size: 0.9rem; font-weight: 800; display: flex; justify-content: space-between; margin-bottom: 4px;}
-        .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
+    .floating-card { background: var(--card-bg); border-radius: 24px; padding: 32px; margin-top: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: none; text-align: left; word-break: keep-all; }
+    
+    .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: var(--card-bg); border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 20px; border: 1px solid #edf2f7; }
+    .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: var(--card-bg); border-radius: 0 0 16px 16px; }
+    .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; margin-bottom: 20px; border: 1px solid #edf2f7; border-top: none; }
+    
+    .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
+    .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
+    .guide-title { font-size: 0.9rem; font-weight: 800; display: flex; justify-content: space-between; margin-bottom: 4px;}
+    .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
 
-        .autocomplete-list { position: absolute; top: 65px; left: 0; right: 0; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); z-index: 99; overflow: hidden; display: none; text-align: left; border: none; }
-        .auto-item { padding: 16px 24px; cursor: pointer; font-size: 0.9rem; font-weight: 700; border-bottom: 1px dashed #e2e8f0;}
-        .auto-item:hover { background-color: var(--bg); color: var(--blue); }
-        
-        .share-pill { display: inline-flex; align-items: center; gap: 6px; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer; }
-        .share-pill:hover { background: #e2e8f0; color: var(--blue); }
+    .autocomplete-list { position: absolute; top: 65px; left: 0; right: 0; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); z-index: 99; overflow: hidden; display: none; text-align: left; border: none; }
+    .auto-item { padding: 16px 24px; cursor: pointer; font-size: 0.9rem; font-weight: 700; border-bottom: 1px dashed #e2e8f0;}
+    .auto-item:hover { background-color: var(--bg); color: var(--blue); }
+    
+    .share-pill { display: inline-flex; align-items: center; gap: 6px; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer; }
+    .share-pill:hover { background: #e2e8f0; color: var(--blue); }
 
-        footer { text-align: center; font-size: 0.72rem; color: #94a3b8; margin-top: 50px; line-height: 1.6; font-weight: 600; width: 100%; max-width: 500px; padding: 0 20px; box-sizing: border-box; word-break: keep-all; }
+    /* 💬 [부활 및 교체] 실시간 주주방 타임라인 피드 스크롤 바운더리 박스 */
+    #mainTalkTimeline {
+        max-height: 280px;      /* 🚨 댓글이 일정 수준 이상 쌓이면 모달창이 아래로 깨지지 않게 가두는 한계 높이 */
+        overflow-y: auto;        /* 🚨 높이를 초과할 때만 이쁘고 슬림한 스크롤바 생성 */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #edf2f7;
+        scrollbar-width: thin;   /* 파이어폭스용 슬림 스크롤바 */
+    }
 
-        @media (max-width: 540px) {
-            .top-nav { position: fixed; top: 0; left: 0; right: 0; background: #ffffff; padding: 14px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); justify-content: space-around; border-radius: 0 0 20px 20px; }
-            .main-wrapper { margin-top: 70px; margin-bottom: 20px; padding: 12px; }
-            .title-text { font-size: 2.3rem; margin-top: 30px; }
-            .floating-card { padding: 22px; border-radius: 20px; }
-            .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
-        }
-    </style>
+    /* 크롬, 사파리, 웨일용 스크롤바 슬림 최적화 트랙 커스텀 */
+    #mainTalkTimeline::-webkit-scrollbar { width: 6px; }
+    #mainTalkTimeline::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+    #mainTalkTimeline::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    #mainTalkTimeline::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    footer { text-align: center; font-size: 0.72rem; color: #94a3b8; margin-top: 50px; line-height: 1.6; font-weight: 600; width: 100%; max-width: 500px; padding: 0 20px; box-sizing: border-box; word-break: keep-all; }
+
+    @media (max-width: 540px) {
+        .top-nav { position: fixed; top: 0; left: 0; right: 0; background: #ffffff; padding: 14px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); justify-content: space-around; border-radius: 0 0 20px 20px; }
+        .main-wrapper { margin-top: 70px; margin-bottom: 20px; padding: 12px; }
+        .title-text { font-size: 2.3rem; margin-top: 30px; }
+        .floating-card { padding: 22px; border-radius: 20px; }
+        .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
+    }
+</style>
 </head>
 <body>
 
@@ -314,26 +334,41 @@
         } catch(e) {}
     }
 
-    async function submitMainTalk() {
-        if (!currentMainTicker) return;
-        const input = document.getElementById('mainTalkInput');
-        const text = input.value.trim();
-        if (!text) return;
+    // 🤖 무지성 광클 및 매크로 연타 도배를 방어할 실시간 락(Lock) 셔터 변수
+let isTalkSending = false;
 
-        const formData = new FormData();
-        formData.append('text', text);
-        try {
-            const res = await fetch(`/api/community/${currentMainTicker}/talk`, { method: 'POST', body: formData });
-            const data = await res.json();
-            if (data.success) {
-                input.value = "";
-                await refreshMainCommunity();
-            } else if (data.error) {
-                alert(data.error);
-            }
-        } catch(e) {}
-    }
+async function submitMainTalk() {
+    // 락이 닫혀(true)있으면 유저가 아무리 클릭해도 여기서 함수를 강제 종료하여 철벽 방어합니다.
+    if (isTalkSending) return; 
+    
+    if (!currentMainTicker) return;
+    const input = document.getElementById('mainTalkInput');
+    const text = input.value.trim();
+    if (!text) return;
 
+    // 🔒 전송 시작과 동시에 차단막을 내립니다 (락 온).
+    isTalkSending = true; 
+    
+    const formData = new FormData();
+    formData.append('text', text);
+    
+    try {
+        const res = await fetch(`/api/community/${currentMainTicker}/talk`, { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+            input.value = "";
+            await refreshMainCommunity();
+        } else if (data.error) {
+            // 백엔드가 보낸 🚨 초강력 금지어 필터링 안내 경고창을 경고 팝업으로 출력합니다.
+            alert(data.error); 
+        }
+    } catch(e) {}
+    
+    // ⏰ 댓글 전송 완료 후 3초(3000ms) 동안 대기 시간을 준 뒤에 락을 열어줍니다.
+    setTimeout(() => {
+        isTalkSending = false;
+    }, 3000);
+}
     // 윈도우 로딩 시 자동 실행 장치
     window.addEventListener('DOMContentLoaded', () => {
         if (currentMainTicker) {

@@ -21,7 +21,6 @@
         .floating-header { position: sticky; top: 20px; background: var(--bg); max-width: 900px; margin: 0 auto 40px auto; padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: none; }
         .sub-logo { font-size: 1.4rem; font-weight: 900; color: var(--blue); text-decoration: none; text-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
         
-        /* 🔍 검색창 내부 픽토그램 정렬 구조화 */
         .mini-search { position: relative; width: 260px; display: flex; align-items: center; }
         .mini-search input { width: 100%; padding: 10px 45px 10px 20px; border-radius: 30px; border: none; outline: none; font-size: 0.85rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .mini-search button { position: absolute; right: 16px; background: none; border: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 1rem; }
@@ -37,36 +36,35 @@
         .warning-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px 20px; border-radius: 0 12px 12px 0; margin-top: 30px; }
 
         @media (max-width: 768px) {
-    .mobile-top-bar { display: block; }
-    .floating-header { display: none; }
-    
-    /* 양옆 정렬(space-between)과 패딩 정돈 */
-    .sub-nav { 
-        position: fixed; 
-        top: 0; 
-        bottom: auto; 
-        left: 0; 
-        right: 0; 
-        background: #ffffff; 
-        padding: 0 20px; /* 좌우 여백 */
-        height: 60px;    /* 상단바 높이 고정 */
-        box-shadow: 0 4px 25px rgba(0,0,0,0.06); 
-        justify-content: space-between; /* 👈 요게 타이틀과 메뉴를 양옆으로 찢어줍니다 */
-        align-items: center; /* 세로 가운데 정렬 */
-        width: 100%; 
-        box-sizing: border-box; 
-        display: flex !important; 
-        z-index: 1000; 
-    }
-    
-    .container { 
-        margin-top: 80px; 
-        margin-bottom: 40px; 
-        padding: 0 12px; 
-    }
-    
-    .floating-card { padding: 24px; border-radius: 20px; }
-}
+            .mobile-top-bar { display: block; }
+            .floating-header { display: none; }
+            
+            .mobile-sub-nav { 
+                position: fixed; 
+                top: 0; 
+                bottom: auto; 
+                left: 0; 
+                right: 0; 
+                background: #ffffff; 
+                padding: 0 20px; 
+                height: 60px;    
+                box-shadow: 0 4px 25px rgba(0,0,0,0.06); 
+                justify-content: space-between; 
+                align-items: center; 
+                width: 100%; 
+                box-sizing: border-box; 
+                display: flex !important; 
+                z-index: 1000; 
+            }
+            
+            .container { 
+                margin-top: 80px; 
+                margin-bottom: 40px; 
+                padding: 0 12px; 
+            }
+            
+            .floating-card { padding: 24px; border-radius: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -81,41 +79,55 @@
                 <input type="text" name="ticker" placeholder="종목코드 검색..." required autocomplete="off">
                 <button type="submit">🔍</button>
             </form>
-            <div class="sub-nav"><a href="/ranking">랭킹</a><a href="/strategy">전략</a><a href="/about">소개</a><a href="/privacy">약관</a></div>
+            <div class="sub-nav">
+                <a href="/ranking">랭킹</a>
+                <a href="/strategy">전략</a>
+                <a href="/about">소개</a>
+                <a href="/privacy">약관</a>
+            </div>
         </div>
     </div>
+
     <div class="container">
         <div class="floating-card">
             <h1>🔒 개인정보처리방침 및 약관</h1>
             
             <h2>1. 데이터 무수집 원칙</h2>
-            <p>싸비싸는 순수 유틸리티 웹 서비스입니다. 회원가입이 없으며, 어떠한 개인 식별 정보도 서버에 보관하지 않습니다.</p>
+            <p>싸비싸는 회원가입 제도가 없는 순수 오픈 유틸리티 웹 서비스입니다. 어떠한 형태의 개인 식별 정보(이름, 이메일, IP 주소 등)도 서버에 무단 수집 및 보관하지 않는 것을 원칙으로 합니다.</p>
             
-            <h2>2. 랭킹 데이터의 익명화</h2>
-            <p>입력되는 '종목 검색어(티커)'는 서비스 내 [실시간 인기 증시 랭킹] 구성을 위해 <b>완벽하게 익명화</b>되어 카운팅됩니다.</p>
-            
-            <h2>3. 쿠키(Cookie) 및 서드파티</h2>
+            <h2>2. 랭킹 데이터의 익명화 처리</h2>
+            <p>유저가 입력하는 '종목 검색어(티커)'는 플랫폼 내 [실시간 인기 증시 랭킹] 구성을 통계 산출용 카운트로만 활용되며, 유저의 환경 정보와 결합되지 않고 <b>완벽하게 파편화 및 익명화</b>되어 단순 누적 연산 처리됩니다.</p>
+
+            <h2>3. 💬 실시간 주주 응원방 이용 준칙 및 데이터 파기 고지</h2>
             <ul>
-                <li>원활한 운영을 위해 구글 애드센스 등 제3자 광고 시스템이 연동될 수 있습니다.</li>
-                <li>광고 파트너사는 제한적으로 쿠키를 읽을 수 있으며, 유저는 브라우저 설정에서 이를 거부할 수 있습니다.</li>
+                <li>실시간 주주 응원방은 투자자 간 의견 공유를 위한 <b>100% 전면 익명 소통 공간</b>입니다.</li>
+                <li><b>[📅 30일 만료 자동 영구 파기 정책]:</b> 싸비싸 커뮤니티는 이용자의 잊혀질 권리와 철저한 익명성 보장, 그리고 불필요한 데이터 누적으로 인한 서버 과부하를 방지하기 위하여 <b>모든 댓글 게시물을 작성일 기준 30일(한 달)이 경과하면 복구 불가능한 형태로 시스템에서 자동 영구 삭제</b>합니다.</li>
+                <li><b>[🤖 도배 및 불법 행위 통제]:</b> 악의적인 매크로 연타 및 도배를 방어하기 위해 시스템적으로 3초 이내의 연속 작성이 제한됩니다. 광고성 리딩방 유도, 사설 단톡방 링크, 불법 급등주 추천 정보, 무차별적 비방 및 욕설 문구는 실시간 고도화 필터망에 의해 차단되며, 발견 즉시 어드민 권한으로 무통보 즉각 소멸 처리됩니다.</li>
+                <li>각 게시물에 대한 <b>민·형사상 모든 법적 책임(명예훼손, 모욕, 허위사실 유포, 자본시장법 위반 등)은 전적으로 해당 글을 작성한 이용자 본인</b>에게 있으며, 본 엔진은 유저 간 발생한 분쟁에 대해 일체의 책임을 지지 않습니다.</li>
             </ul>
+            
+            <h2>4. 쿠키(Cookie) 및 서드파티 시스템</h2>
+            <ul>
+                <li>싸비싸는 웹 호스팅 안정화와 원활한 운영 자원 조달을 위하여 구글 애드센스(Google AdSense) 등 제3자 광고 시스템을 연동할 수 있습니다.</li>
+                <li>광고 파트너사는 맞춤형 광고 송출을 위해 제한적인 비식별 쿠키를 읽을 수 있으며, 유저는 언제든지 브라우저 보안 설정을 통해 쿠키 수집을 전면 거부할 수 있습니다.</li>
+            </ul>
+
             <div class="warning-box">
-                <div style="font-weight: 900; color: #b91c1c; margin-bottom: 5px; font-size: 1rem;">⚠️ 법적 면책 조항</div>
-                <p style="margin: 0; color: #b91c1c; font-weight: 600;">싸비싸가 제공하는 모든 스코어 및 분석 코멘트는 특정 종목에 대한 <b>매수/매도 추천이 절대 아닙니다.</b> 가치 상향 패치 알고리즘 정량 참고 지표일 뿐이므로, 이를 맹신하여 발생한 투자 손실에 대해 당사는 어떠한 법적 책임도 지지 않습니다.</p>
+                <div style="font-weight: 900; color: #b91c1c; margin-bottom: 5px; font-size: 1rem;">⚠️ 금융 투자 법적 면책 고지</div>
+                <p style="margin: 0; color: #b91c1c; font-weight: 600;">싸비싸가 산출하는 모든 밸류 스코어 및 자동 생성 진단 코멘트는 정량적 계량 지표 공식을 기반으로 한 연산 결과물일 뿐, 특정 종목에 대한 <b>매수·매도 추천이 절대 아닙니다.</b> 본 정보는 단순 참고용 지표이므로 투자자 본인의 판단에 기반해야 하며, 이를 신뢰하여 발생한 일체의 금융 투자 결과 및 손실 위험에 대해 당사는 어떠한 법적 책임 및 배상 의무도 지지 않습니다.</p>
             </div>
         </div>
     </div>
 
-    <div class="sub-nav">
-    <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 800; font-size: 18px; letter-spacing: -0.5px;">
-        🔍 싸비싸
-    </a>
-    
-    <div style="display: flex; gap: 16px;">
-        <a href="/ranking" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📊 랭킹</a>
-        <a href="/strategy" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📖 가이드</a>
-        <a href="/about" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 14px;">📝 소개</a>
+    <div class="mobile-sub-nav" style="display: none;">
+        <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 800; font-size: 16px; letter-spacing: -0.5px;">
+            🔍 싸비싸
+        </a>
+        <div style="display: flex; gap: 14px;">
+            <a href="/ranking" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">📊 랭킹</a>
+            <a href="/strategy" style="text-decoration: none; color: #4a5568; font-weight: bold; font-size: 13px;">📖 가이드</a>
+            <a href="/privacy" style="text-decoration: none; color: #1a73e8; font-weight: 900; font-size: 13px; border-bottom: 2px solid #1a73e8;">약관</a>
+        </div>
     </div>
-</div>
 </body>
 </html>

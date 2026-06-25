@@ -160,9 +160,10 @@ def update_all_stock_scores_task():
             
     try:
         save_ranking_to_file()
-        print("✅ [싸비싸 스케줄러] 1,200대장 진짜 점수 배치 업데이트 완료 및 디스크 보존 성공!")
-    except:
-        pass
+        clear_expired_talks()
+        print("✅ [싸비싸 스케줄러] 1,200대장 동기화 및 한 달 유통기한 댓글 자동 파기 프로세스 완전 성공!")
+    except Exception as sched_err:
+        print(f"⚠️ 스케줄러 후처리 백업 중 오류 발생: {sched_err}")
 
 def start_scheduler():
     """서버가 켜진 후 5초 뒤에 최초 1회 전체 동기화를 돌리고, 이후 6시간마다 무한 반복합니다."""
@@ -458,10 +459,10 @@ Allow: /about
 Sitemap: https://www.ssabissa.com/sitemap.xml""".strip()
 
 # ================================================================
-# 6. 실시간 영구 백업 기능이 결합된 커뮤니티 API 구역
+# 6. 정품 가치 보존 및 초정밀 필터링 기반 커뮤니티 API 엔진 구역
 # ================================================================
 
-# 1. 특정 종목의 커뮤니티 데이터(투표수 + 댓글목록) 가져오기 API (단순 읽기라 백업 불필요)
+# 1. 특정 종목의 커뮤니티 데이터(투표수 + 댓글목록) 가져오기 API
 @app.get("/api/community/{ticker}")
 def get_community_data(ticker: str):
     t = ticker.strip().upper()
@@ -479,40 +480,114 @@ def post_vote(ticker: str, type: str = Form(...)):
     if type in ["up", "down"]:
         VOTE_DB[t][type] += 1
         
-    # 💾 [수정] 투표 숫자가 올라가는 즉시 외장하드 파일에 실시간 영구 박음질!
     save_community_to_file() 
     return {"success": True, "votes": VOTE_DB[t]}
 
-# 3. 익명 한 줄 응원방 글쓰기 API
+# 3. 🚨 익명 한 줄 응원방 글쓰기 API (서울시간 고정 + 닉네임 숫자 조합 + 초강력 필터)
 @app.post("/api/community/{ticker}/talk")
 def post_talk(ticker: str, text: str = Form(...)):
     t = ticker.strip().upper()
-    if not text.strip():
+    clean_text = text.strip()
+    
+    # ❌ [주송이 초강력 블랙리스트] 교묘한 특수문자나 유도 문구를 필터링할 정밀 단어장
+    BAD_WORDS = [
+        "리딩방", "카톡방", "추천주", "수익보장", "시발", "개새끼", "조까", "급등주", 
+        "대박 정보", "대박정보", "무료리딩", "오픈채팅", "카카오톡", "방입장", "선착순",
+        "비밀방", "t.me", "open.kakao", "입장하기", "목표수익", "원금보장"
+    ]
+    
+    # 공백이나 엔터를 다 걷어내고 글자만 순수 비교해서 숨겨둔 광고 단어까지 탐지
+    compressed_text = clean_text.replace(" ", "").replace("\n", "").replace("\r", "")
+    if any(word in compressed_text for word in BAD_WORDS):
+        return {"error": "🚨 싸비싸 운영 정책에 따라 광고성 문구나 부적절한 표현은 등록할 수 없습니다."}
+        
+    if not clean_text:
         return {"error": "내용을 입력해 주세요."}
         
-    from datetime import datetime
-    current_time = datetime.now().strftime("%H:%M")
+    # ⏰ [서울 시간 완전 보정] 싱가포르 등 클라우드 해외 서버 시차 무조건 교정
+    from datetime import datetime, timezone, timedelta
+    kst = timezone(timedelta(hours=9)) # KST 대한민국 표준시 강제 주입
+    now_dt = datetime.now(kst)
     
-    # 랜덤 익명 닉네임 생성기
+    current_time = now_dt.strftime("%H:%M")
+    current_date = now_dt.strftime("%Y-%m-%d") # 30일 만료 체크용 타임스탬프
+    
+    # 🎰 [주송이 초이스] 기분 좋은 형용사 + 동물 + 0~100 숫자 완벽 크래프트
     import random
-    adjectives = ["용감한", "행복한", "돈많은", "존버하는", "화끈한", "스마트한"]
-    nouns = ["주주", "워런버핏", "피터린치", "개미", "고래", "기관"]
-    random_nickname = f"{random.choice(adjectives)} {random.choice(nouns)}"
+    adjectives = ["용감한", "행복한", "돈많은", "존버하는", "화끈한", "스마트한", "아름다운", "매력적인", "멋있는", "신중한", "똑똑한"]
+    nouns = ["코알라", "기린", "얼룩말", "개미", "고래", "호랑이", "사자", "판다", "고양이", "강아지", "돌고래", "기러기", "참새", "베짱이"]
+    random_num = random.randint(0, 100) # 0~100 무작위 숫자 스택
+    
+    # 👤 최종 완성형 유니크 닉네임 (예시: '돈많은 판다 77')
+    random_nickname = f"{random.choice(adjectives)} {random.choice(nouns)} {random_num}"
     
     new_talk = {
         "nickname": random_nickname,
-        "text": text.strip(),
-        "time": current_time
+        "text": clean_text,
+        "time": current_time,
+        "date": current_date
     }
     
     if t not in TALK_DB:
         TALK_DB[t] = []
         
-    # 최신글이 맨 위로 오도록 list 앞에 삽입
     TALK_DB[t].insert(0, new_talk)
-    # 메모리 방어를 위해 최근 30개만 유지
-    TALK_DB[t] = TALK_DB[t][:30]
+    TALK_DB[t] = TALK_DB[t][:50] # 스크롤 구현을 위해 최대 저장선을 50개로 넉넉히 상향 조정
     
-    # 💾 [수정] 주주방 댓글이 달리는 즉시 외장하드 파일에 실시간 영구 박음질!
     save_community_to_file() 
     return {"success": True, "talks": TALK_DB[t]}
+
+
+# 🧹 4. 30일(한 달) 경과 묵은 데이터 영구 자동 폭파 정화 엔진
+def clear_expired_talks():
+    """6시간마다 스케줄러 루프가 동기화할 때 작동하여, 한 달이 지난 옛날 데이터를 외장하드에서 제거합니다."""
+    global TALK_DB
+    from datetime import datetime, timezone, timedelta
+    
+    kst = timezone(timedelta(hours=9))
+    now_dt = datetime.now(kst)
+    
+    print("🧹 [싸비싸 디스크 정화기] 유통기한(30일)이 지난 익명 댓글 파기 프로세스를 작동합니다...")
+    removed_count = 0
+    
+    for ticker in list(TALK_DB.keys()):
+        valid_talks = []
+        for talk in TALK_DB[ticker]:
+            talk_date_str = talk.get("date")
+            if not talk_date_str:
+                valid_talks.append(talk)
+                continue
+            try:
+                talk_date = datetime.strptime(talk_date_str, "%Y-%m-%d").replace(tzinfo=kst)
+                # 현재 시점과 대조하여 30일 미만으로 남은 쌩쌩한 글만 필터링해서 생존
+                if (now_dt - talk_date).days < 30:
+                    valid_talks.append(talk)
+                else:
+                    removed_count += 1
+            except:
+                valid_talks.append(talk)
+                
+        TALK_DB[ticker] = valid_talks
+        
+    if removed_count > 0:
+        save_community_to_file()
+        print(f"✅ [싸비싸 디스크 정화기] 기한 만료된 오래된 익명 댓글 총 {removed_count}개 영구 소멸 완료!")
+
+
+# 🧹 5. 마스터 암행어사 댓글 강제 즉시 삭제 API
+@app.delete("/api/admin/clear/talk")
+def admin_clear_talk(ticker: str, password: str, index: int = 0):
+    """주송이님만 아는 마스터 비밀번호로 특정 종목의 N번째 댓글을 브라우저에서 즉시 지웁니다."""
+    # 🤫 노출 방지를 위해 마음에 드는 패스워드로 고치셔도 됩니다!
+    MASTER_PASSWORD = "jusongsecret123" 
+    
+    if password != MASTER_PASSWORD:
+        raise HTTPException(status_code=403, detail="권한이 없습니다.")
+        
+    t = ticker.strip().upper()
+    if t in TALK_DB and len(TALK_DB[t]) > index:
+        removed = TALK_DB[t].pop(index)
+        save_community_to_file() # 삭제 즉시 Render 외장하드 동기화 구워버리기
+        return {"success": True, "message": f"[{removed['text']}] 댓글을 정상 소거했습니다."}
+        
+    return {"error": "삭제할 대상 댓글이 존재하지 않습니다."}
