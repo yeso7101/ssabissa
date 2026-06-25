@@ -142,6 +142,7 @@
 </head>
 <body>
 
+    <!-- 🏠 상단 내비바 -->
     <div class="sub-navbar" style="position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 1000;">
         <a href="/" style="text-decoration: none; color: var(--blue); font-weight: 800; font-size: 20px; letter-spacing: -0.5px;">
             🔍 싸비싸
@@ -153,11 +154,13 @@
     </div>
 
     <div class="container">
+        <!-- 📂 서류함 카테고리 탭 -->
         <div class="tab-container">
             <div id="tab-kr" class="tab-button active" onclick="switchTab('kr')">🇰🇷 국내 주식 TOP 50</div>
             <div id="tab-us" class="tab-button" onclick="switchTab('us')">🇺🇸 미국 주식 TOP 50</div>
         </div>
 
+        <!-- 📊 국내 주식 순위판 -->
         <div id="kr-board" class="ranking-board">
             {% for item in kr_rankings %}
             <div class="rank-item" onclick="diagnoseStock('{{item.ticker}}')">
@@ -176,6 +179,7 @@
             {% endfor %}
         </div>
 
+        <!-- 📊 미국 주식 순위판 -->
         <div id="us-board" class="ranking-board" style="display: none;">
             {% for item in us_rankings %}
             <div class="rank-item" onclick="diagnoseStock('{{item.ticker}}')">
@@ -195,19 +199,52 @@
         </div>
     </div>
 
+    <!-- 📥 실시간 진단 결과 + 주주방 대통합 미니 모달 팝업 -->
     <div id="resultModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-        <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box;">
+        <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box;">
             
             <button onclick="closeModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 22px; color: #a0aec0; cursor: pointer; font-weight: bold; padding: 4px; z-index: 10; line-height: 1;">✕</button>
 
+            <!-- 1. 기본 싸비싸 AI 분석 컨텐츠 박스 -->
             <div id="modalContent">
                 <div style="text-align: center; padding: 40px 0; font-weight: bold; color: var(--blue);">싸비싸 엔진 분석 중...</div>
             </div>
+
+            <!-- 2. 🔥 불타는 실시간 투표 및 한 줄 토크 커뮤니티 엔진 구역 -->
+            <div id="communitySection" style="display: none; border-top: 2px solid #edf2f7; margin-top: 30px; padding-top: 25px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 1.05rem; font-weight: 800; color: #1a202c;">🔥 실시간 주가 투표방</h3>
+                
+                <!-- 투표 버튼 스택 -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button onclick="submitVote('up')" style="flex: 1; padding: 12px; background: #fee2e2; border: none; border-radius: 10px; color: #dc2626; font-weight: bold; cursor: pointer; font-size: 0.9rem;">📈 상승 투표</button>
+                    <button onclick="submitVote('down')" style="flex: 1; padding: 12px; background: #e0f2fe; border: none; border-radius: 10px; color: #0284c7; font-weight: bold; cursor: pointer; font-size: 0.9rem;">📉 하락 투표</button>
+                </div>
+
+                <!-- 실시간 동적 투표 프로그레스 바 -->
+                <div id="voteProgressBar" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; font-size: 10px; color: white; font-weight: bold; text-align: center; line-height: 16px; margin-bottom: 25px;">
+                    <!-- JS로 비율 채워질 공간 -->
+                </div>
+
+                <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: 800; color: #1a202c;">💬 실시간 익명 주주 응원방</h3>
+                
+                <!-- 댓글 작성 폼 -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <input type="text" id="talkInput" placeholder="주주방에 힘이 되는 한 줄을 남겨주세요." style="flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.85rem; outline: none; font-weight: 600;">
+                    <button onclick="submitTalk()" style="padding: 10px 16px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;">등록</button>
+                </div>
+
+                <!-- 실시간 단톡방 타임라인 피드 -->
+                <div id="talkTimeline" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 12px; border-radius: 12px;">
+                    <!-- JS로 피드가 랜더링될 공간 -->
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // 탭 스위칭
+        let currentActiveTicker = ""; // 현재 활성화된 모달 종목 보관함
+
         function switchTab(market) {
             const tabKr = document.getElementById('tab-kr');
             const tabUs = document.getElementById('tab-us');
@@ -227,17 +264,18 @@
             }
         }
 
-        // 닫기 기능
         function closeModal() {
             document.getElementById('resultModal').style.display = 'none';
         }
 
-        // 🔗 랭킹 내부에서 비동기로 바로 진단창 띄우는 핵심 스크립트 엔진
+        // 🔗 메인 진단 데이터 패치 및 주주 커뮤니티 엔진 결합 로직
         async function diagnoseStock(ticker) {
+            currentActiveTicker = ticker;
             const modal = document.getElementById('resultModal');
             const content = document.getElementById('modalContent');
+            const commSection = document.getElementById('communitySection');
             
-            // 모달 먼저 열고 로딩 표시
+            commSection.style.display = "none"; // 새 데이터 로딩 전 숨김 처리
             content.innerHTML = `<div style="text-align: center; padding: 40px 0; font-weight: bold; color: var(--blue); font-size: 1.1rem;">🔍 싸비싸 실시간 진단 엔진 가동 중...</div>`;
             modal.style.display = 'flex';
             
@@ -250,7 +288,6 @@
                     return;
                 }
                 
-                // 사유 리스트 빌드
                 let reasonsHtml = '';
                 data.reasons.forEach(reason => {
                     const isPlus = reason.includes('+');
@@ -262,19 +299,14 @@
                     `;
                 });
 
-                // 모달 내부를 아까 구현한 싸비싸 시그니처 UI 구조로 렌더링
                 content.innerHTML = `
                     <div style="text-align: left;">
-                        <div style="display: block; margin-bottom: 25px; padding-right: 30px;">
-                            <h2 style="margin: 0 0 6px 0; font-size: 1.35rem; font-weight: 900; color: var(--text-main); word-break: break-all;">
-                                ${data.name} (${data.ticker})
-                            </h2>
+                        <div style="display: block; margin-bottom: 25px;">
+                            <h2 style="margin: 0 0 6px 0; font-size: 1.35rem; font-weight: 900; color: var(--text-main);">${data.name} (${data.ticker})</h2>
                         </div>
-
                         <div style="font-size:0.9rem; color:#64748b; margin-bottom:30px; font-weight: 600; border-top: 1px solid #f1f5f9; padding-top: 15px;">
                             현재 거래가: <span style="color: var(--text-main); font-weight: 700;">${data.current_price}</span>
                         </div>
-                        
                         <div style="display: flex; justify-content: center; margin-bottom: 35px;">
                             <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(${data.color} ${data.score}%, #e2e8f0 0deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.05);">
                                 <div style="width: 130px; height: 130px; border-radius: 50%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -283,19 +315,105 @@
                                 </div>
                             </div>
                         </div>
-
                         <div style="background:#f8fafc; padding:20px; border-radius:16px; margin-bottom:20px; font-size:0.95rem; line-height:1.6;">
                             <b style="color:var(--blue);">요약 진단:</b> <span style="font-weight: 600; color: var(--text-main);">${data.brief}</span>
                         </div>
-
-                        <div style="font-size:0.9rem; margin-bottom: 10px;">
-                            ${reasonsHtml}
-                        </div>
+                        <div style="font-size:0.9rem; margin-bottom: 10px;">${reasonsHtml}</div>
                     </div>
                 `;
+
+                // 🚀 진단 완료 후 실시간 커뮤니티 데이터 동적 렌더링 시작
+                await refreshCommunityData();
+                commSection.style.display = "block"; // 커뮤니티 창 오픈!
+
             } catch (err) {
                 content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">진단 데이터를 가져오는 중 통신 에러가 발생했습니다.</div>`;
             }
+        }
+
+        // 🔄 커뮤니티(투표량 + 댓글 피드) 화면 실시간 갱신 서브시스템
+        async function refreshCommunityData() {
+            try {
+                const res = await fetch(`/api/community/${currentActiveTicker}`);
+                const data = await res.json();
+                
+                // 1. 투표 프로그레스 바 정렬
+                const up = data.votes.up || 0;
+                const down = data.votes.down || 0;
+                const total = up + down;
+                const progressBar = document.getElementById('voteProgressBar');
+                
+                if (total === 0) {
+                    progressBar.innerHTML = `<div style="width: 100%; background: #cbd5e1; color: #475569;">첫 투표를 행사해 주세요!</div>`;
+                } else {
+                    const upPercent = Math.round((up / total) * 100);
+                    const downPercent = 100 - upPercent;
+                    progressBar.innerHTML = `
+                        <div style="width: ${upPercent}%; background: #ef4444;">상승 ${upPercent}%</div>
+                        <div style="width: ${downPercent}%; background: #3b82f6;">하락 ${downPercent}%</div>
+                    `;
+                }
+
+                // 2. 한 줄 톡 피드 새로고침
+                const timeline = document.getElementById('talkTimeline');
+                if (!data.talks || data.talks.length === 0) {
+                    timeline.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 0;">작성된 주주방 대화가 없습니다. 첫 글을 남겨보세요!</div>`;
+                } else {
+                    let talksHtml = '';
+                    data.talks.forEach(talk => {
+                        talksHtml += `
+                            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-weight: 800; color: #475569;">👤 ${talk.nickname}</span>
+                                    <span style="color: #94a3b8; font-size: 0.75rem;">${talk.time}</span>
+                                </div>
+                                <span style="font-weight: 600; color: #1e293b; padding-left: 14px; word-break: break-all;">${talk.text}</span>
+                            </div>
+                        `;
+                    });
+                    timeline.innerHTML = talksHtml;
+                }
+            } catch(e) {}
+        }
+
+        // 🗳️ 실시간 투표 API 전송
+        async function submitVote(type) {
+            const formData = new FormData();
+            formData.append('type', type);
+
+            try {
+                const res = await fetch(`/api/community/${currentActiveTicker}/vote`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if(res.ok) {
+                    await refreshCommunityData();
+                }
+            } catch(e) {}
+        }
+
+        // 💬 실시간 한 줄 토크 API 전송
+        async function submitTalk() {
+            const input = document.getElementById('talkInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const formData = new FormData();
+            formData.append('text', text);
+
+            try {
+                const res = await fetch(`/api/community/${currentActiveTicker}/talk`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if(data.success) {
+                    input.value = ""; // 입력창 초기화
+                    await refreshCommunityData();
+                } else if(data.error) {
+                    alert(data.error);
+                }
+            } catch(e) {}
         }
     </script>
 </body>
