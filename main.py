@@ -89,19 +89,87 @@ def save_ranking_to_file():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=4)
 
-if not os.path.exists(DATA_FILE):
+from fastapi_utils.tasks import repeat_every # 👈 만약 이 모듈이 없다면 파이썬 내장 스케줄러로 안전하게 돌리기 위해 아래 백그라운드 스레드 방식을 사용합니다.
+import threading
+import time
+
+# ================================================================
+# 4. [신설] 6시간 주기 자동 가치점수 동기화 백그라운드 엔진
+# ================================================================
+app = FastAPI()
+
+def update_all_stock_scores_task():
+    """1,200대장 종목의 실제 싸비싸 스코어를 백그라운드에서 주기적으로 수집하는 엔진"""
+    print("🔄 [싸비싸 스케줄러] 6시간 주기 1,200대장 진짜 점수 동기화 엔진 가동...")
+    import yfinance as yf
+    
+    # 시스템 과부하를 막기 위해 한 종목당 0.2초씩 쉬면서 안전하게 돕니다.
     for name, ticker in STOCK_MAP.items():
-        if ticker not in TICKER_CACHE:
-            TICKER_CACHE[ticker] = {"name": name, "score": 50, "color": "#64748b"}
-        if ".KS" in ticker or ".KQ" in ticker:
-            if SEARCH_COUNT_KR[ticker] == 0: SEARCH_COUNT_KR[ticker] = 1
-        else:
-            if "000000" not in ticker:
-                if SEARCH_COUNT_US[ticker] == 0: SEARCH_COUNT_US[ticker] = 1
+        try:
+            ticker_upper = ticker.strip().upper()
+            
+            # 이미 캐시에 진짜 점수가 들어가 있고, 최초 로드가 아니라면 굳이 야후를 또 찌르지 않고 패스 (네트워크 절약)
+            # 최초 실행 시에만 전체를 싹 긁어옵니다.
+            if ticker_upper in TICKER_CACHE and TICKER_CACHE[ticker_upper].get("score", 50) != 50:
+                continue
+                
+            stock_obj = yf.Ticker(ticker_upper)
+            info = stock_obj.info
+            if not info: continue
+                
+            cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
+            if not cur: continue
+                
+            # 진짜 싸비싸 연산 엔진 통과
+            score, color, reasons, brief = calculate_ssabissa_score(info, ticker_upper)
+            
+            # 캐시 사전 최신화
+            TICKER_CACHE[ticker_upper] = {
+                "name": name,
+                "score": score,
+                "color": color
+            }
+            
+            # 초기 조회수 기본 방어벽
+            if ".KS" in ticker_upper or ".KQ" in ticker_upper:
+                if SEARCH_COUNT_KR[ticker_upper] == 0: SEARCH_COUNT_KR[ticker_upper] = 1
+            else:
+                if "000000" not in ticker_upper:
+                    if SEARCH_COUNT_US[ticker_upper] == 0: SEARCH_COUNT_US[ticker_upper] = 1
+            
+            # API 타임아웃 차단용 미세 휴식 (0.2초)
+            time.sleep(0.2)
+            
+        except Exception as e:
+            # 특정 종목 오류 나도 멈추지 않고 다음 종목으로 패스
+            continue
+            
     try:
         save_ranking_to_file()
-    except: pass
+        print("✅ [싸비싸 스케줄러] 1,200대장 진짜 점수 배치 업데이트 완료 및 디스크 보존 성공!")
+    except:
+        pass
 
+def start_scheduler():
+    """서버가 켜진 후 5초 뒤에 최초 1회 전체 동기화를 돌리고, 이후 6시간마다 무한 반복합니다."""
+    def run_forever():
+        # 서버 초기 구동 안정화를 위해 5초 대기
+        time.sleep(5)
+        while True:
+            try:
+                update_all_stock_scores_task()
+            except Exception as e:
+                print(f"⚠️ 스케줄러 루프 에러: {e}")
+            
+            # 6시간 대기 (6시간 = 6 * 60 * 60 초 = 21600초)
+            # 테스트해 보고 싶으시다면 이 숫자를 60(1분)이나 300(5분)으로 바꿔서 확인해 보세요!
+            time.sleep(21600)
+
+    # 서버 메인 스레드가 멈추지 않도록 백그라운드 스레드로 격리하여 가동
+    threading.Thread(target=run_forever, daemon=True).start()
+
+# 🚀 서버 기동과 동시에 백그라운드 타이머 시동!
+start_scheduler()
 def get_score_color(score):
     if score <= 50: hue = int((score / 50) * 35)
     else: hue = int(35 + ((score - 50) / 50) * 85)
