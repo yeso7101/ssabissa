@@ -83,7 +83,7 @@ if not os.path.exists(DATA_FILE):
 @app.get("/")
 @app.post("/")
 def home(request: Request, ticker: str = Form(None), q: str = None):
-    search_target = ticker or q
+    search_target = ticker or q or request.query_params.get("ticker")
     result = None
     
     if search_target:
