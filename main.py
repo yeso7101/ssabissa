@@ -1,17 +1,11 @@
-import yfinance as yf
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, Form, Response, HTTPException
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from collections import Counter
 import requests
-from fastapi import FastAPI
-from fastapi.responses import PlainTextResponse
-from fastapi import FastAPI, Response
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException
 import json
 import os
-
 
 # ================================================================
 # 1. 전역 설정 데이터 및 변수 기초 선언
@@ -23,6 +17,8 @@ STOCK_MAP = {}
 SEARCH_COUNT_KR = Counter()
 SEARCH_COUNT_US = Counter()
 TICKER_CACHE = {}
+
+
 
 # ================================================================
 # 2. [필수 순서 1] 변수 선언을 위해 기반 파일(STOCK_MAP)을 최우선으로 로드
@@ -83,7 +79,8 @@ if not os.path.exists(DATA_FILE):
 @app.get("/")
 @app.post("/")
 def home(request: Request, ticker: str = Form(None), q: str = None):
-    search_target = ticker or q or request.query_params.get("ticker")
+    import yfinance as yf
+    search_target = ticker or q
     result = None
     
     if search_target:
