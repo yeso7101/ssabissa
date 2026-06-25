@@ -20,14 +20,13 @@
     .top-nav { position: absolute; top: 24px; right: 28px; display: flex; gap: 16px; z-index: 100;}
     .top-nav a { text-decoration: none; color: var(--blue); font-size: 0.85rem; font-weight: 800; transition: all 0.3s; }
     
-    /* 🎨 [메인 active 방어] 메인은 홈이므로 서브페이지 이동을 위한 기본 링크 상태를 유지하되 호버 시 수채화 가동 */
+    /* 🎨 박스 상자 없이 글자 뒤로 촉촉하게 스며드는 수채화 후광 효과 */
     .top-nav a:hover {
         color: #1e293b !important;
-        text-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 0 24px rgba(59, 130, 246, 0.2);
+        text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.2);
     }
 
     .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; }
-    
     .title-text { display: inline-block; font-size: 2.8rem; font-weight: 900; color: #ffffff; margin: 0 0 25px 0; letter-spacing: -1px; text-shadow: 0 8px 20px rgba(59, 130, 246, 0.65), 0 15px 40px rgba(59, 130, 246, 0.45); }
     
     .search-box { position: relative; width: 100%; margin: 0 auto; }
@@ -57,9 +56,9 @@
     .share-pill { display: inline-flex; align-items: center; gap: 6px; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer; }
     .share-pill:hover { background: #e2e8f0; color: var(--blue); }
 
-    /* 💬 실시간 주주방 타임라인 피드 스크롤바 최적화 */
+    /* 💬 실시간 주주방 타임라인 트랙 스크롤 최적화 */
     #mainTalkTimeline {
-        max-height: 280px;      
+        max-height: 250px;      
         overflow-y: auto;        
         display: flex;
         flex-direction: column;
@@ -73,19 +72,18 @@
     #mainTalkTimeline::-webkit-scrollbar { width: 6px; }
     #mainTalkTimeline::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
     #mainTalkTimeline::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    #mainTalkTimeline::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
     footer { text-align: center; font-size: 0.72rem; color: #94a3b8; margin-top: 50px; line-height: 1.6; font-weight: 600; width: 100%; max-width: 500px; padding: 0 20px; box-sizing: border-box; word-break: keep-all; }
 
     @media (max-width: 768px) {
-        .top-nav { display: none !important; } /* 📱 모바일 상단 바 전면 소멸 */
+        .top-nav { display: none !important; } 
         body { padding-top: 20px; margin-bottom: 80px; justify-content: center; min-height: calc(100vh - 80px); }
         .main-wrapper { margin-top: 10px; margin-bottom: 20px; padding: 12px; }
         .title-text { font-size: 2.3rem; margin-top: 10px; }
         .floating-card { padding: 22px; border-radius: 20px; }
         .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
         
-        /* 🚨 대통합: 메인 홈 하단에도 크리스탈 반투명 모바일 하단 내비바 상시 구동 고정 */
+        /* 📱 모바일 하단 내비게이션 크리스탈 가둠막 바 부활 */
         .mobile-sub-nav { 
             position: fixed; 
             bottom: 0; 
@@ -112,7 +110,6 @@
             transition: all 0.3s;
             background: transparent !important;
         }
-        /* 메인 홈에서는 서브페이지들이 링크 상태이므로 호버링 스며듬만 적용 */
         .mobile-sub-nav a:hover {
             color: #1a73e8 !important;
             text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25);
@@ -146,11 +143,11 @@
         <div id="loadingBox" style="display: none; margin-top: 20px; color: var(--blue); font-size: 0.85rem; font-weight: 700;">기업 가치 연산 중...</div>
 
         {% if result %}
-        <div id="resultModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+        <div id="resultModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50000; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
             
             <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none;">
                 
-                <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 2100; margin-bottom: -20px; pointer-events: none;">
+                <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 51000; margin-bottom: -20px; pointer-events: none;">
                     <button onclick="closeModal()" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
                 </div>
 
@@ -219,8 +216,7 @@
                             <button onclick="submitMainTalk()" style="padding: 10px 16px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;">등록</button>
                         </div>
 
-                        <div id="mainTalkTimeline">
-                            </div>
+                        <div id="mainTalkTimeline"></div>
                     </div>
 
                     <div class="accordion-header" onclick="toggleAccordion()" style="cursor: pointer; margin-top: 25px;">
@@ -228,9 +224,9 @@
                         <span id="accArrow">▼</span>
                     </div>
                     <div class="accordion-content" id="accContent">
-                        {% for guide in metrics_guide %}
-                            {% set matched = false %}
-                            {% endfor %}
+                        <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 미래 성장성 대비 저렴한 상태입니다.</div></div>
+                        <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 자산 가치 저평가 국면입니다.</div></div>
+                        <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">최근 1년 내 주주가치 희석 유상증자 이력</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석시키는 대규모 유상증자(특히 운영자금 조달 목적)는 감점 요인입니다.</div></div>
                     </div>
                 {% endif %}
             </div>
@@ -304,10 +300,11 @@
         if (modal) { modal.style.display = 'none'; }
     }
 
+    // 🚨 [완치] 중괄호 및 세미콜론 오류 수정을 완료하여 스크립트 마비 버그 완치
     window.addEventListener("click", function(event) {
         const modal = document.getElementById('resultModal');
         if (event.target === modal) { modal.style.display = 'none'; }
-    }
+    });
 
     const mainTickerElement = document.getElementById('activeTickerHolder');
     const currentMainTicker = mainTickerElement ? mainTickerElement.getAttribute('data-ticker') : '';
@@ -389,6 +386,7 @@
             }
         } catch(e) {}
         
+        #3초 매너타임 지정 후 차단 해제
         setTimeout(() => {
             isTalkSending = false;
         }, 3000);

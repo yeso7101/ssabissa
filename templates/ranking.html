@@ -41,14 +41,13 @@
         
         /* 🎨 [데스크탑 active] 사각형 캡슐을 완전히 부수고 글자 뒤로 몽환적으로 번지는 수채화 후광 효과 */
         .sub-nav a.active {
-            color: #1e293b !important;          /* 활성화 시 깊고 어두운 메인 글자색 보존 */
-            background: transparent !important;   /* ❌ 딱딱한 사각형 상자 배경 제거 */
+            color: #1e293b !important;          
+            background: transparent !important;   
             padding: 6px 12px;
             font-weight: 900;
             font-size: 0.95rem;
-            border-bottom: none !important;      /* ❌ 단순 밑줄 제거 */
+            border-bottom: none !important;      
             
-            /* 수채화 전용 대형 글로우 매트릭스 광원 */
             text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 
                          0 0 30px rgba(59, 130, 246, 0.25), 
                          0 0 45px rgba(59, 130, 246, 0.15);
@@ -90,6 +89,7 @@
             border-radius: 0 0 16px 16px; 
             padding: 10px 16px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.06); 
+            margin-bottom: 20px;
         }
         
         .rank-item { 
@@ -122,7 +122,7 @@
             text-align: center;
             font-size: 1.05rem;
         }
-        .rank-1 { color: #f1c40f; font-size: 1.25rem; } 
+        .rank-1 { color: #f1eab308; font-size: 1.25rem; } 
         .rank-2 { color: #a8b2bd; font-size: 1.15rem; } 
         .rank-3 { color: #cd7f32; font-size: 1.1rem; }
         
@@ -166,7 +166,16 @@
             text-align: center;
         }
 
-        /* 💬 주주방 타임라인 10개 한계 스크롤바 방어막 장착 */
+        /* 💡 아코디언 가이드 전용 UI 엔진 */
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 25px; border: 1px solid #edf2f7; text-align: left; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; text-align: left; }
+        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
+        .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
+        .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
+        .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
+        .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
+
+        /* 💬 주주방 타임라인 궤도 안착 트랙 스크롤 최적화 */
         #talkTimeline {
             max-height: 250px;
             overflow-y: auto;
@@ -182,13 +191,12 @@
         #talkTimeline::-webkit-scrollbar { width: 6px; }
         #talkTimeline::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         #talkTimeline::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        #talkTimeline::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         @media (max-width: 768px) {
             .sub-navbar { display: none !important; }
             body { padding-top: 20px; margin-bottom: 75px; }
             
-            /* 🚨 Bug Fix: 반투명 크리스탈 하단 가둠막 시스템 가동 */
+            /* 📱 모바일 하단 가둠막 시스템 가동 */
             .mobile-sub-nav { 
                 position: fixed; 
                 top: auto !important;
@@ -204,7 +212,7 @@
                 align-items: center; 
                 width: 100%; 
                 box-sizing: border-box; 
-                display: flex !important; /* 👈 모바일 강제 팝업 바인딩 */
+                display: flex !important; 
                 z-index: 10000; 
             }
 
@@ -218,7 +226,6 @@
                 background: transparent !important;
             }
             
-            /* 📱 [모바일 active] 랭킹 메뉴 뒤 수채화 물감 번짐효과 정렬 */
             .mobile-sub-nav a.active {
                 color: #1a73e8 !important;
                 background: transparent !important;
@@ -286,12 +293,22 @@
             </div>
             {% endfor %}
         </div>
+
+        <div class="accordion-header" onclick="toggleAccordion()">
+            <span>💡 평가 기준 가이드 열어보기</span>
+            <span id="accArrow">▼</span>
+        </div>
+        <div class="accordion-content" id="accContent">
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 미래 성장성 대비 저렴한 상태입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 자산 가치 저평가 국면입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">주주가치 희석 유상증자 이력</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석시키는 대규모 유상증자는 가치 연산 점수에서 감점 처리됩니다.</div></div>
+        </div>
     </div>
 
-    <div id="resultModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+    <div id="resultModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50000; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
         <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none;">
             
-            <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 2100; margin-bottom: -20px; pointer-events: none;">
+            <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 51000; margin-bottom: -20px; pointer-events: none;">
                 <button onclick="closeModal()" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
             </div>
 
@@ -307,8 +324,7 @@
                     <button onclick="submitVote('down')" style="flex: 1; padding: 12px; background: #e0f2fe; border: none; border-radius: 10px; color: #0284c7; font-weight: bold; cursor: pointer; font-size: 0.9rem;">📉 하락 투표</button>
                 </div>
 
-                <div id="voteProgressBar" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; font-size: 10px; color: white; font-weight: bold; text-align: center; line-height: 16px; margin-bottom: 25px;">
-                    </div>
+                <div id="voteProgressBar" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; font-size: 10px; color: white; font-weight: bold; text-align: center; line-height: 16px; margin-bottom: 25px;"></div>
 
                 <h3 style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: 800; color: #1a202c;">💬 실시간 익명 주주 응원방</h3>
                 
@@ -317,8 +333,7 @@
                     <button onclick="submitTalk()" style="padding: 10px 16px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;">등록</button>
                 </div>
 
-                <div id="talkTimeline">
-                    </div>
+                <div id="talkTimeline"></div>
             </div>
 
         </div>
@@ -339,6 +354,12 @@
     <script>
         let currentActiveTicker = ""; 
         let isTalkSending = false; 
+
+        function toggleAccordion() {
+            const content = document.getElementById("accContent");
+            content.classList.toggle("open");
+            document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
+        }
 
         function switchTab(market) {
             const tabKr = document.getElementById('tab-kr');
@@ -362,6 +383,12 @@
         function closeModal() {
             document.getElementById('resultModal').style.display = 'none';
         }
+
+        // ✕ 단추 오작동 방지를 위한 전역 윈도우 클릭 방어막 마감
+        window.addEventListener("click", function(event) {
+            const modal = document.getElementById('resultModal');
+            if (event.target === modal) { modal.style.display = 'none'; }
+        });
 
         async function diagnoseStock(ticker) {
             currentActiveTicker = ticker;
@@ -416,15 +443,17 @@
                     </div>
                 `;
 
+                # 🤝 메인페이지 공용 백엔드 파이프라인과 실시간 통합 믹싱
                 await refreshCommunityData();
                 commSection.style.display = "block"; 
 
             } catch (err) {
-                content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">진단 데이터를 가져오는 중통신 에러가 발생했습니다.</div>`;
+                content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">진단 데이터를 가져오는 중 통신 에러가 발생했습니다.</div>`;
             }
         }
 
         async function refreshCommunityData() {
+            if (!currentActiveTicker) return;
             try {
                 const res = await fetch(`/api/community/${currentActiveTicker}`);
                 const data = await res.json();
@@ -435,7 +464,7 @@
                 const progressBar = document.getElementById('voteProgressBar');
                 
                 if (total === 0) {
-                    progressBar.innerHTML = `<div style="width: 100%; background: #cbd5e1; color: #475569;">첫 투표를 행사해 주세요!</div>`;
+                    progressBar.innerHTML = `<div style="width: 100%; background: #cbd5e1; color: #475569; font-size: 11px;">첫 투표를 행사해 주세요!</div>`;
                 } else {
                     const upPercent = Math.round((up / total) * 100);
                     const downPercent = 100 - upPercent;
@@ -455,9 +484,9 @@
                             <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
                                 <div style="display: flex; justify-content: space-between;">
                                     <span style="font-weight: 800; color: #475569;">👤 ${talk.nickname}</span>
-                                    <span style="color: #94a3b8; font-size: 0.75rem;">${talk.time}</span>
+                                    <span style="color: #94a3b8; font-size: 0.72rem;">${talk.time}</span>
                                 </div>
-                                <span style="font-weight: 600; color: #1e293b; padding-left: 14px; word-break: break-all;">${talk.text}</span>
+                                <span style="font-weight: 600; color: #1e293b; padding-left: 4px; word-break: break-all;">${talk.text}</span>
                             </div>
                         `;
                     });
@@ -467,6 +496,7 @@
         }
 
         async function submitVote(type) {
+            if (!currentActiveTicker) return;
             const formData = new FormData();
             formData.append('type', type);
 
@@ -482,7 +512,7 @@
         }
 
         async function submitTalk() {
-            if (isTalkSending) return; 
+            if (isTalkSending || !currentActiveTicker) return; 
             
             const input = document.getElementById('talkInput');
             const text = input.value.trim();

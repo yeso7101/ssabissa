@@ -42,14 +42,13 @@
         
         /* 🎨 [데스크탑 active] 사각형 캡슐을 완전히 부수고 글자 뒤로 몽환적으로 번지는 수채화 후광 효과 */
         .sub-nav a.active {
-            color: #1e293b !important;          /* 활성화 시 깊고 어두운 메인 글자색 보존 */
-            background: transparent !important;   /* ❌ 딱딱한 사각형 상자 배경 제거 */
+            color: #1e293b !important;          
+            background: transparent !important;   
             padding: 6px 12px;
             font-weight: 900;
             font-size: 0.95rem;
-            border-bottom: none !important;      /* ❌ 단순 밑줄 제거 */
+            border-bottom: none !important;      
             
-            /* 수채화 전용 대형 글로우 매트릭스 광원 */
             text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 
                          0 0 30px rgba(59, 130, 246, 0.25), 
                          0 0 45px rgba(59, 130, 246, 0.15);
@@ -64,10 +63,19 @@
         .container { max-width: 700px; margin: 0 auto 60px auto; padding: 0 20px; box-sizing: border-box; }
         .floating-card { background: var(--card-bg); border-radius: 24px; padding: 40px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: none; word-break: keep-all; }
         h1 { font-size: 1.6rem; font-weight: 900; color: var(--blue); text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); text-align: center; margin-bottom: 30px; }
-        h2 { font-size: 1.2rem; font-weight: 900; margin: 35px 0 12px 0; color: var(--text-main); }
-        p { margin: 0 0 15px 0; font-size: 0.95rem; color: #475569; font-weight: 600; }
-        .quote-box { padding: 20px; background: #eff6ff; border-radius: 16px; font-weight: 800; color: var(--blue); font-size: 1.1rem; margin: 30px 0; text-align: center; }
-        .contact-box { background: #f8fafc; padding: 20px; border-radius: 16px; margin-top: 40px; text-align: center; font-size: 0.9rem; font-weight: 700; color: #64748b; }
+        h2 { font-size: 1.2rem; font-weight: 900; margin: 35px 0 12px 0; color: var(--text-main); border-left: 4px solid var(--blue); padding-left: 10px; }
+        p { margin: 0 0 15px 0; font-size: 0.95rem; color: #475569; font-weight: 600; text-align: justify; }
+        .quote-box { padding: 22px; background: #eff6ff; border-radius: 16px; font-weight: 800; color: var(--blue); font-size: 1.15rem; margin: 30px 0; text-align: center; box-shadow: inset 0 2px 8px rgba(59,130,246,0.04); }
+        .contact-box { background: #f8fafc; padding: 20px; border-radius: 16px; margin-top: 40px; text-align: center; font-size: 0.9rem; font-weight: 700; color: #64748b; border: 1px solid #f1f5f9; }
+
+        /* 💡 아코디언 컴포넌트 전용 UI */
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 35px; border: 1px solid #edf2f7; text-align: left; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; text-align: left; }
+        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
+        .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
+        .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
+        .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
+        .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
 
         @media (max-width: 768px) {
             .sub-navbar { display: none !important; }
@@ -89,7 +97,7 @@
                 align-items: center; 
                 width: 100%; 
                 box-sizing: border-box; 
-                display: flex !important; /* 👈 모바일 강제 팝업 바인딩 */
+                display: flex !important; 
                 z-index: 10000; 
             }
 
@@ -103,7 +111,6 @@
                 background: transparent !important;
             }
             
-            /* 📱 [모바일 active] 소개 메뉴 뒤 수채화 물감 번짐효과 정렬 */
             .mobile-sub-nav a.active {
                 color: #1a73e8 !important;
                 background: transparent !important;
@@ -126,7 +133,6 @@
 </head>
 <body>
 
-    <!-- 🖥️ 데스크탑 플로팅 상단바 구조 통일 -->
     <div class="sub-navbar">
         <div style="display: flex; align-items: center;">
             <a href="/" style="text-decoration: none; color: var(--blue); font-weight: 900; font-size: 20px; letter-spacing: -0.5px; text-shadow: 0 4px 12px rgba(59,130,246,0.2);">
@@ -145,24 +151,42 @@
         </div>
     </div>
 
-    <!-- 📄 본문 컨테이너 -->
     <div class="container">
         <div class="floating-card">
             <h1>💬 왜 '싸비싸' 프로젝트인가?</h1>
-            <div class="quote-box">"그래서 이 주식, 지금 싼가요? 비싼가요?"</div>
-            <p>우리가 주식을 할 때 가장 궁금한 건 사실 저 단순한 한 문장입니다. 하지만 HTS나 금융 포털을 켜면 PER, PBR 등 수많은 지표들이 개인 투자자들의 판단을 흐리게 만듭니다.</p>
+            <div class="quote-box">"그래서 이 주식, 지금 가치 대비 싼가요? 비싼가요?"</div>
             
-            <h2>🎯 복잡한 건 기계에게, 우리는 직관만</h2>
-            <p>이러한 답답함을 해소하고자 직접 백엔드 엔진을 깎아 만들었습니다. 종목명만 입력하면 기계가 재무 지표 및 컨센서스를 초고속으로 긁어모아 <b>단 하나의 보수적이고 엄격한 점수</b>로 변환해 줍니다.</p>
+            <p>우리가 일상에서 금융 기술을 다룰 때 직면하는 가장 본질적인 의문은 언제나 저 단순한 한 문장으로 수렴됩니다. 하지만 HTS나 금융 포털을 켜는 순간, 화면을 가득 채우는 PER, PBR, EV/EBITDA, 선행 이익 전망치 등의 파편화된 지표들은 개인 투자자들을 깊은 소음 속으로 몰아넣고 직관적인 판단을 방해하곤 합니다.</p>
             
-            <h2>🇰🇷 국장과 미장은 잣대가 달라야 합니다</h2>
-            <p>한국 주식은 만성적인 저평가를 받고, 미국 주식은 프리미엄을 받습니다. 똑같은 잣대로 평가하면 오류가 생깁니다. 싸비싸는 <b>국장과 미장의 알고리즘 허들을 분리</b>하여 코리아 디스카운트 왜곡을 잡아냈습니다.</p>
+            <h2>🎯 복잡한 정량 연산은 기계에게, 인간은 직관적 결론만</h2>
+            <p>싸비싸(SsaBiSsa) 프로젝트는 이러한 투자 환경의 답답함을 해소하고자 1인 엔지니어의 철저한 계량 공식 설계를 통해 백엔드 연산 데이터 파이프라인을 깎아 만들었습니다. 복잡하게 얽혀 있는 재무 원천 펀더멘탈과 미래 컨센서스를 초고속으로 수집하여 실시간 분석을 거친 뒤, 오직 보수적이고 엄격한 <b>'단 하나의 100점 만점 밸류 스코어'</b>로 변환하여 유저에게 제공합니다.</p>
             
-            <div class="contact-box">따뜻한 피드백은 언제든 환영합니다.<br><br><b style="color:var(--blue); font-size: 1rem;">📬 개발자 이메일:</b> yeso7101@gmail.com</div>
+            <h2>🇰🇷 코리아 디스카운트와 미장 프리미엄의 이분법적 설계</h2>
+            <p>한국 주식 시장은 고질적인 지배구조 리스크와 만성적 저평가(국장 디스카운트)를 겪고 있으며, 미국 주식 시장은 글로벌 유동성의 중심에서 미래 성장성에 대한 가치 프리미엄을 인정받습니다. 이 두 시장을 동일한 잣대로 재단하는 것은 치명적인 연산 오류를 낳습니다.</p>
+            <p>싸비싸 엔진은 **국내 주식과 미국 주식의 감점/가산 허들 로직을 철저히 분리**하였습니다. 특히 국내 주식 시장에서 기존 주주의 지분 가치를 무참히 파괴하는 '무분별한 유상증자 발행 리스크'를 역추적해 강한 감점 조치를 내리며, 미국 우량 대형주에는 알고리즘 프리미엄 가산점을 적용하는 등 왜곡된 밸류에이션 리스크를 가장 담백하게 정정해 냅니다.</p>
+            
+            <h2>🌱 투자자가 주도하는 투명한 공유 생태계</h2>
+            <p>이 플랫폼은 회원가입이나 개인 식별 데이터의 수집이 전혀 없는 100% 익명 유틸리티 공간입니다. 산출된 가치 점수 리포트를 기반으로 실시간 주주 응원방과 찬반 투표 시스템을 구축하여, 투자자들이 정량적 데이터 지표 위에서 감정적인 선동 없이 오직 숫자를 무기로 현명하게 토론할 수 있는 투명한 환경을 지향합니다.</p>
+
+            <div class="contact-box">
+                더 안전하고 고도화된 정량적 스크리닝을 향한 피드백은 언제든 환영합니다.<br><br>
+                <b style="color:var(--blue); font-size: 1rem;">📬 개발자 이메일:</b> yeso7101@gmail.com
+            </div>
+
+            <!-- 💡 [3번 실현] 소개 페이지 하단에도 공용 가이드 서랍 최종 장착 -->
+            <div class="accordion-header" onclick="toggleAccordion()">
+                <span>💡 평가 기준 가이드 열어보기</span>
+                <span id="accArrow">▼</span>
+            </div>
+            <div class="accordion-content" id="accContent">
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 미래 성장성 대비 저렴한 상태입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 자산 가치 저평가 국면입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">주주가치 희석 유상증자 이력</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석시키는 대규모 유상증자는 가치 연산 점수에서 감점 처리됩니다.</div></div>
+            </div>
+
         </div>
     </div>
 
-    <!-- 📱 모바일 하단 플로팅 내비바 (버그 완치 및 수채화 하이라이트 동기화) -->
     <div class="mobile-sub-nav" style="display: none;">
         <a href="/" style="text-decoration: none; color: #1a73e8; font-weight: 900; font-size: 16px; letter-spacing: -0.5px;">
             🔍 싸비싸
@@ -174,5 +198,13 @@
             <a href="/privacy">약관</a>
         </div>
     </div>
+
+    <script>
+        function toggleAccordion() {
+            const content = document.getElementById("accContent");
+            content.classList.toggle("open");
+            document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
+        }
+    </script>
 </body>
 </html>

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>투자 등급별 포지션 실전 전략 가이드 - 싸비싸</title>
+    <title>투자 등급별 포지션 실전 가이드 - 싸비싸</title>
     <meta name="description" content="싸비싸 알고리즘이 도출한 저평가, 적정 가치, 고평가 구간별 개인 투자자 행동요령 및 유상증자 희석 리스크 관리 조견 가이드라인을 제공합니다.">
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="투자 등급별 포지션 실전 전략 가이드 - 싸비싸">
+    <meta property="og:title" content="투자 등급별 포지션 실전 가이드 - 싸비싸">
     <meta property="og:description" content="안전마진 확보 스코어 기반 펀더멘탈 실전 주식 가이드북">
     <meta property="og:url" content="https://ssabissa.com/strategy">
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -67,11 +67,19 @@
         .zone-desc { font-size: 0.95rem; color: var(--text-main); font-weight: 600; margin-bottom: 15px; line-height: 1.6; }
         .tip-box { background: rgba(255,255,255,0.8); padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #4a5568; font-weight: 700; display: flex; gap: 8px;}
 
+        /* 💡 아코디언 컴포넌트 스타일링 */
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 30px; border: 1px solid #edf2f7; text-align: left; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; text-align: left; }
+        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
+        .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
+        .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
+        .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
+        .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
+
         @media (max-width: 768px) {
             .sub-navbar { display: none !important; }
             body { padding-top: 20px; margin-bottom: 75px; }
             
-            /* 🚨 Bug Fix: 반투명 크리스탈 필터를 입혀 바닥에 강제 상시 고정하는 정품 모바일 바 */
             .mobile-sub-nav { 
                 position: fixed; 
                 top: auto !important;
@@ -101,7 +109,6 @@
                 background: transparent !important;
             }
             
-            /* 📱 [모바일 active] 글자 뒤 수채화 번짐 하이라이트 매칭 */
             .mobile-sub-nav a.active {
                 color: #1a73e8 !important;
                 background: transparent !important;
@@ -170,6 +177,17 @@
                     <span style="color: #dc2626; flex-shrink: 0;">💡 꿀팁:</span> <span>추가 매수를 지양하고 모멘텀 소멸 전 비중 축소 혹은 수익 실현을 통해 자산을 보호하세요.</span>
                 </div>
             </div>
+
+            <div class="accordion-header" onclick="toggleAccordion()">
+                <span>💡 평가 기준 가이드 열어보기</span>
+                <span id="accArrow">▼</span>
+            </div>
+            <div class="accordion-content" id="accContent">
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 미래 성장성 대비 저렴한 상태입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 자산 가치 저평가 국면입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">주주가치 희석 유상증자 이력</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석시키는 대규모 유상증자는 가치 연산 점수에서 감점 처리됩니다.</div></div>
+            </div>
+
         </div>
     </div>
 
@@ -185,5 +203,12 @@
         </div>
     </div>
 
+    <script>
+        function toggleAccordion() {
+            const content = document.getElementById("accContent");
+            content.classList.toggle("open");
+            document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
+        }
+    </script>
 </body>
 </html>

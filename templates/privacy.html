@@ -41,14 +41,13 @@
         
         /* 🎨 [데스크탑 active] 사각형 캡슐을 완전히 부수고 글자 뒤로 몽환적으로 번지는 수채화 후광 효과 */
         .sub-nav a.active {
-            color: #1e293b !important;          /* 활성화 시 깊고 어두운 메인 글자색 보존 */
-            background: transparent !important;   /* ❌ 딱딱한 사각형 상자 배경 제거 */
+            color: #1e293b !important;          
+            background: transparent !important;   
             padding: 6px 12px;
             font-weight: 900;
             font-size: 0.95rem;
-            border-bottom: none !important;      /* ❌ 단순 밑줄 제거 */
+            border-bottom: none !important;      
             
-            /* 수채화 전용 대형 글로우 매트릭스 광원 */
             text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 
                          0 0 30px rgba(59, 130, 246, 0.25), 
                          0 0 45px rgba(59, 130, 246, 0.15);
@@ -67,11 +66,19 @@
         p, li { font-weight: 600; color: #4b5563; font-size: 0.95rem; }
         .warning-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px 20px; border-radius: 0 12px 12px 0; margin-top: 30px; }
 
+        /* 💡 아코디언 컴포넌트 전용 UI */
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 30px; border: 1px solid #edf2f7; text-align: left; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; text-align: left; }
+        .accordion-content.open { max-height: 1200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
+        .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
+        .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
+        .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
+        .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
+
         @media (max-width: 768px) {
             .sub-navbar { display: none !important; }
             body { padding-top: 20px; margin-bottom: 75px; }
             
-            /* 🚨 Bug Fix: 반투명 크리스탈 하단 가둠막 시스템 가동 */
             .mobile-sub-nav { 
                 position: fixed; 
                 top: auto !important;
@@ -87,7 +94,7 @@
                 align-items: center; 
                 width: 100%; 
                 box-sizing: border-box; 
-                display: flex !important; /* 👈 모바일 강제 팝업 바인딩 */
+                display: flex !important; 
                 z-index: 10000; 
             }
 
@@ -101,7 +108,6 @@
                 background: transparent !important;
             }
             
-            /* 📱 [모바일 active] 약관 메뉴 뒤 수채화 물감 번짐효과 정렬 */
             .mobile-sub-nav a.active {
                 color: #1a73e8 !important;
                 background: transparent !important;
@@ -170,6 +176,17 @@
                 <div style="font-weight: 900; color: #b91c1c; margin-bottom: 5px; font-size: 1rem;">⚠️ 금융 투자 법적 면책 고지</div>
                 <p style="margin: 0; color: #b91c1c; font-weight: 600;">싸비싸가 산출하는 모든 밸류 스코어 및 자동 생성 진단 코멘트는 정량적 계량 지표 공식을 기반으로 한 연산 결과물일 뿐, 특정 종목에 대한 <b>매수·매도 추천이 절대 아닙니다.</b> 본 정보는 단순 참고용 지표이므로 투자자 본인의 판단에 기반해야 하며, 이를 신뢰하여 발생한 일체의 금융 투자 결과 및 손실 위험에 대해 당사는 어떠한 법적 책임 및 배상 의무도 지지 않습니다.</p>
             </div>
+
+            <div class="accordion-header" onclick="toggleAccordion()">
+                <span>💡 평가 기준 가이드 열어보기</span>
+                <span id="accArrow">▼</span>
+            </div>
+            <div class="accordion-content" id="accContent">
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 미래 성장성 대비 저렴한 상태입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 자산 가치 저평가 국면입니다.</div></div>
+                <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">주주가치 희석 유상증자 이력</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석시키는 대규모 유상증자는 가치 연산 점수에서 감점 처리됩니다.</div></div>
+            </div>
+
         </div>
     </div>
 
@@ -184,5 +201,13 @@
             <a href="/privacy" class="active">약관</a>
         </div>
     </div>
+
+    <script>
+        function toggleAccordion() {
+            const content = document.getElementById("accContent");
+            content.classList.toggle("open");
+            document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
+        }
+    </script>
 </body>
 </html>
