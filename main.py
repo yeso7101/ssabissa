@@ -14,11 +14,43 @@ import os
 
 
 
+# ================================================================
+# 1. 전역 설정 데이터 및 변수 기초 선언
+# ================================================================
 DATA_FILE = "ranking_data.json"
+STOCK_MAP_FILE = "stock_map.json"
+
+STOCK_MAP = {}
+SEARCH_COUNT_KR = Counter()
+SEARCH_COUNT_US = Counter()
+TICKER_CACHE = {}
+
+# ================================================================
+# 2. [필수 순서 1] 변수 선언을 위해 기반 파일(STOCK_MAP)을 최우선으로 로드
+# ================================================================
+if os.path.exists(STOCK_MAP_FILE):
+    with open(STOCK_MAP_FILE, "r", encoding="utf-8") as f:
+        STOCK_MAP = json.load(f)
+else:
+    print(f"⚠️ 경고: {STOCK_MAP_FILE} 파일이 존재하지 않습니다!")
+
+# ================================================================
+# 3. [필수 순서 2] 하위 로직에서 안전하게 호출할 유틸 함수 정의
+# ================================================================
+def save_ranking_to_file():
+    # 현재 메모리에 있는 카운트 데이터를 통합해서 JSON 파일로 저장합니다.
+    payload = {
+        "KR": dict(SEARCH_COUNT_KR),
+        "US": dict(SEARCH_COUNT_US)
+    }
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=4)
+
+# ================================================================
+# 4. FastAPI 객체 생성 및 랭킹 초기화 데이터 주입 (조회수 1 세팅)
+# ================================================================
 app = FastAPI()
-# ================================================================
-# [랭킹 초기화 엔진] 1,200대장 종목을 조회수 1로 기본 세팅하기
-# ================================================================
+
 # 데이터 파일(ranking_data.json)이 없는 최초 실행 시에만 1로 초기화합니다.
 if not os.path.exists(DATA_FILE):
     for name, ticker in STOCK_MAP.items():
@@ -45,16 +77,10 @@ if not os.path.exists(DATA_FILE):
         print("🚀 [가치 스캐너] 1,200대장 종목 랭킹 초기화 완료! (기본 조회수 1 세팅)")
     except Exception as e:
         print(f"⚠️ 랭킹 초기화 파일 저장 중 오류 발생: {e}")
-# [파일 저장용 유틸 함수]
-def save_ranking_to_file():
-    # 현재 메모리에 있는 카운트 데이터를 통합해서 JSON 파일로 저장합니다.
-    payload = {
-        "KR": dict(SEARCH_COUNT_KR),
-        "US": dict(SEARCH_COUNT_US)
-    }
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=4)
 
+# ================================================================
+# 5. 비즈니스 로직 라우터 시작 (이 아래로 기존 home 함수가 이어집니다)
+# ================================================================
 @app.get("/")
 @app.post("/")
 def home(request: Request, ticker: str = Form(None), q: str = None):
@@ -109,16 +135,6 @@ def home(request: Request, ticker: str = Form(None), q: str = None):
             "metrics_guide": SYSTEM_METRICS_GUIDE
         }
     )
-
-STOCK_MAP_FILE = "stock_map.json"
-STOCK_MAP = {}
-
-# 서버가 켜질 때 stock_map.json 파일을 읽어옵니다.
-if os.path.exists(STOCK_MAP_FILE):
-    with open(STOCK_MAP_FILE, "r", encoding="utf-8") as f:
-        STOCK_MAP = json.load(f)
-else:
-    print(f"⚠️ 경고: {STOCK_MAP_FILE} 파일이 존재하지 않습니다!")
 
 @app.get("/sitemap.xml")
 def get_sitemap():
@@ -286,11 +302,34 @@ def calculate_ssabissa_score(info, ticker):
 @app.post("/", response_class=HTMLResponse)
 @app.get("/ranking", response_class=HTMLResponse)
 def ranking(request: Request):
-    # 주송이님이 깎아두신 1등~10등 추출 알고리즘 원본 그대로 가동!
-    kr_ranks = [{"rank": i+1, "ticker": t, "name": TICKER_CACHE[t]["name"], "score": TICKER_CACHE[t]["score"], "color": TICKER_CACHE[t]["color"]} for i, (t, _) in enumerate(SEARCH_COUNT_KR.most_common(10)) if t in TICKER_CACHE]
-    us_ranks = [{"rank": i+1, "ticker": t, "name": TICKER_CACHE[t]["name"], "score": TICKER_CACHE[t]["score"], "color": TICKER_CACHE[t]["color"]} for i, (t, _) in enumerate(SEARCH_COUNT_US.most_common(10)) if t in TICKER_CACHE]
+    # 🇰🇷 한국 주식 랭킹: 50등까지 추출 및 안전한 딕셔너리 추출법(.get) 적용
+    kr_ranks = []
+    for i, (t, count) in enumerate(SEARCH_COUNT_KR.most_common(50)):
+        # TICKER_CACHE에 해당 티커가 없더라도 서버가 터지지 않게 기본값 배치
+        cache_data = TICKER_CACHE.get(t, {"name": t, "score": 50, "color": "#64748b"})
+        kr_ranks.append({
+            "rank": i + 1,
+            "ticker": t,
+            "name": cache_data.get("name", t),
+            "score": cache_data.get("score", 50),
+            "color": cache_data.get("color", "#64748b"),
+            "views": count  # 👁️ 프론트엔드에 뿌려줄 조회수 데이터 주입!
+        })
+
+    # 🇺🇸 미국 주식 랭킹: 50등까지 추출 및 안전한 딕셔너리 추출법(.get) 적용
+    us_ranks = []
+    for i, (t, count) in enumerate(SEARCH_COUNT_US.most_common(50)):
+        cache_data = TICKER_CACHE.get(t, {"name": t, "score": 50, "color": "#64748b"})
+        us_ranks.append({
+            "rank": i + 1,
+            "ticker": t,
+            "name": cache_data.get("name", t),
+            "score": cache_data.get("score", 50),
+            "color": cache_data.get("color", "#64748b"),
+            "views": count  # 👁️ 프론트엔드에 뿌려줄 조회수 데이터 주입!
+        })
     
-    # /ranking 주소로 들어오면 무조건 ranking.html을 보여줍니다!
+    # 주송이님이 빌드해 두신 ranking.html 템플릿 엔진으로 데이터 바인딩 송출!
     return templates.TemplateResponse(
         request=request, 
         name="ranking.html", 
@@ -300,7 +339,6 @@ def ranking(request: Request):
             "us_rankings": us_ranks
         }
     )
-
 @app.get("/api/autocomplete")
 def api_autocomplete(q: str = ""):
     q = q.strip()
