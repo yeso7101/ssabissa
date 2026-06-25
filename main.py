@@ -88,8 +88,6 @@ def save_ranking_to_file():
     }
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=4)
-
-from fastapi_utils.tasks import repeat_every # 👈 만약 이 모듈이 없다면 파이썬 내장 스케줄러로 안전하게 돌리기 위해 아래 백그라운드 스레드 방식을 사용합니다.
 import threading
 import time
 
