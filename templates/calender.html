@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일정 및 리스크 캘린더 - 싸비싸</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --border: #dee2e6; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg); margin: 0; padding-top: 100px; padding-bottom: 40px; box-sizing: border-box; }
+        
+        /* 네비게이션 (통일) */
+        .top-nav { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px 24px; border-radius: 100px; box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); z-index: 1000; }
+        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 1rem; }
+        .top-nav .nav-links { display: flex; gap: 16px; }
+        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
+        .top-nav a.active { color: #1e293b; font-weight: 900; text-shadow: 0 0 15px rgba(59,130,246,0.4); }
+
+        .container { max-width: 700px; margin: 0 auto; padding: 0 16px; }
+        
+        /* 탭 디자인 */
+        .tab-container { display: flex; margin-bottom: -1px; position: relative; z-index: 10; gap: 4px; }
+        .tab-button { flex: 1; padding: 16px; text-align: center; font-weight: 800; font-size: 0.95rem; background-color: #e2e8f0; color: #64748b; border-radius: 16px 16px 0 0; cursor: pointer; transition: all 0.2s; }
+        .tab-button.active { background-color: #ffffff; color: var(--blue); box-shadow: 0 -4px 15px rgba(0,0,0,0.02); }
+
+        /* 컨텐츠 보드 */
+        .board { background: #ffffff; border-radius: 0 0 20px 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); min-height: 400px; }
+        
+        /* 유상증자 리스트 UI */
+        .risk-item { padding: 16px; border: 1px solid #fee2e2; background: #fff5f5; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .risk-info .name { font-weight: 800; color: #b91c1c; font-size: 1.05rem; }
+        .risk-info .desc { font-size: 0.8rem; color: #7f1d1d; margin-top: 4px; font-weight: 600; }
+        .risk-badge { background: #ef4444; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+
+        /* 어닝 캘린더 UI */
+        .earning-date { font-weight: 900; color: var(--text-main); margin: 20px 0 10px 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
+        .earning-item { display: flex; gap: 12px; padding: 10px 0; align-items: center; }
+        .earning-item .time { font-size: 0.8rem; color: #64748b; font-weight: 700; width: 50px; }
+        .earning-item .stock { font-weight: 800; font-size: 0.95rem; color: var(--blue); }
+
+        @media (max-width: 768px) {
+            .top-nav { display: none !important; }
+            body { padding-top: 20px; margin-bottom: 90px; }
+            .mobile-sub-nav { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); padding: 0 20px; height: 56px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 8px 32px rgba(59,130,246,0.12); justify-content: space-between; align-items: center; width: calc(100% - 40px); max-width: 400px; display: flex !important; z-index: 10000; box-sizing: border-box; }
+            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; }
+            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; }
+            .mobile-sub-nav a.active { color: #1a73e8 !important; font-weight: 900; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <div class="nav-links">
+            <a href="/calendar" class="active">캘린더</a>
+            <a href="/ranking">랭킹</a>
+            <a href="/strategy">가이드</a>
+            <a href="/about">소개</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tab-container">
+            <div id="tab-risk" class="tab-button active" onclick="switchTab('risk')">⚠️ 유상증자 위험 스캐너 (Daily)</div>
+            <div id="tab-earn" class="tab-button" onclick="switchTab('earn')">📅 어닝 캘린더 (Weekly)</div>
+        </div>
+
+        <div id="risk-board" class="board">
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px; font-weight: 600;">※ 싸비싸 알고리즘이 매일 업데이트하는 유상증자/CB발행 지분희석 경계 종목입니다.</div>
+            
+            <div class="risk-item">
+                <div class="risk-info">
+                    <div class="name">에코프로머티 (450080)</div>
+                    <div class="desc">제3자배정 유상증자 결의 (발행예정주식수 12% 희석)</div>
+                </div>
+                <span class="risk-badge">-15점 감점</span>
+            </div>
+            <div class="risk-item">
+                <div class="risk-info">
+                    <div class="name">HLB (028300)</div>
+                    <div class="desc">대규모 전환사채(CB) 청구권 행사 대기 물량 포착</div>
+                </div>
+                <span class="risk-badge">오버행 주의</span>
+            </div>
+        </div>
+
+        <div id="earn-board" class="board" style="display: none;">
+            <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">※ 이번 주 주요 기업 실적 발표 일정입니다. (매주 일요일 업데이트)</div>
+            
+            <div class="earning-date">10월 24일 (목)</div>
+            <div class="earning-item"><span class="time">장전</span><span class="stock">SK하이닉스 (000660)</span></div>
+            <div class="earning-item"><span class="time">장후</span><span class="stock">현대자동차 (005380)</span></div>
+
+            <div class="earning-date">10월 25일 (금)</div>
+            <div class="earning-item"><span class="time">장전</span><span class="stock">LG에너지솔루션 (373220)</span></div>
+        </div>
+    </div>
+
+    <div class="mobile-sub-nav" style="display: none;">
+        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/calendar" class="active">캘린더</a>
+        <a href="/ranking">랭킹</a>
+        <a href="/strategy">가이드</a>
+        <a href="/about">소개</a>
+    </div>
+
+    <script>
+        function switchTab(type) {
+            document.getElementById('tab-risk').classList.remove('active');
+            document.getElementById('tab-earn').classList.remove('active');
+            document.getElementById('risk-board').style.display = 'none';
+            document.getElementById('earn-board').style.display = 'none';
+            
+            document.getElementById(`tab-${type}`).classList.add('active');
+            document.getElementById(`${type}-board`).style.display = 'block';
+        }
+    </script>
+</body>
+</html>
