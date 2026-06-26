@@ -27,6 +27,7 @@ except Exception:
 STOCK_MAP_FILE = "stock_map.json"
 
 STOCK_MAP = {}
+print("STOCK_MAP 개수:", len(STOCK_MAP))
 SEARCH_COUNT_KR = Counter()
 SEARCH_COUNT_US = Counter()
 TICKER_CACHE = {}
@@ -178,55 +179,55 @@ def get_score_color(score):
 
 def resolve_ticker_by_name(query: str) -> str:
     query = query.strip()
+
+    if not query:
+        return ""
+
+    # 이미 Yahoo 티커 형식이면 그대로 사용
     if query.upper().endswith((".KS", ".KQ")):
-    return query.upper()
+        return query.upper()
 
-# 숫자 6자리면 한국 종목으로 변환
-if query.isdigit():
+    # 숫자 6자리(한국 종목코드)
+    if query.isdigit() and len(query) == 6:
 
-    if len(query) == 6:
-
+        # stock_map.json 우선 사용
         if query in STOCK_MAP:
             return STOCK_MAP[query]
 
+        # 없으면 기본 KS
         return query + ".KS"
-    if not query: return ""
-    if query.isdigit() and len(query) == 6: return f"{query}.KS"
-    try:
-        url = f"https://query2.finance.yahoo.com/v1/finance/search?q={query}&lang=ko-KR&region=KR&quotesCount=3"
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=3).json()
-        for q in response.get("quotes", []):
-            if q.get("quoteType") in ["EQUITY", "ETF"]:
-                sym = q.get("symbol", "").upper()
-                return sym + ".KS" if sym.isdigit() and len(sym) == 6 else sym
-    except: pass
-    if query.replace(".", "").isalnum() and not any(ord(c) >= 12593 for c in query): return query.upper()
-    return query
 
-# ================================================================
-# ⚙️ 점수 변동성 대폭 상향 업데이트 버전 (유저 원본 유지)
-# ================================================================
-def calculate_ssabissa_score(info, ticker):
-    # 기본 점수를 50점(중립)으로 낮춰서 위아래 변동폭을 극대화
-    score = 50 
-    reasons = []
-    is_kr = ".KS" in ticker or ".KQ" in ticker
-    
-    # 1. 유상증자 리스크 (감점폭 대폭 확대)
+    # Yahoo 검색
     try:
-        import yfinance as yf
-        tk = yf.Ticker(ticker)
-        shares_history = tk.get_shares_full(start="2025-12-01", end="2026-06-25")
-        if shares_history is not None and len(shares_history) >= 2:
-            dilution_count = 0
-            prev_shares = shares_history.iloc[0]
-            for current_shares in shares_history[1:]:
-                if current_shares > prev_shares * 1.005:
-                    dilution_count += 1
-                prev_shares = current_shares
-            if dilution_count > 0:
-                score -= (dilution_count * 8) 
-                reasons.append(f"- 최근 6개월 내 유상증자 리스크 유발 ({dilution_count}회 진행)")
+        url = (
+            f"https://query2.finance.yahoo.com/v1/finance/search"
+            f"?q={query}&lang=ko-KR&region=KR&quotesCount=5"
+        )
+
+        response = requests.get(
+            url,
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=5,
+        ).json()
+
+        for q in response.get("quotes", []):
+
+            if q.get("quoteType") not in ("EQUITY", "ETF"):
+                continue
+
+            symbol = q.get("symbol", "").upper()
+
+            if symbol:
+                return symbol
+
+    except Exception as e:
+        print("Yahoo Search Error:", e)
+
+    # 영문 티커
+    if query.replace(".", "").isalnum():
+        return query.upper()
+
+    return query
     except:
         if info.get("sharesOutstanding", 0) > 2000000000:
             score -= 5; reasons.append("- 유통 주식 물량 과다 부담")
@@ -388,8 +389,24 @@ def api_diagnose(ticker: str = None):
     try:
         import yfinance as yf
         ticker_upper = resolve_ticker_by_name(ticker)
+
+        print("입력:", ticker)
+        print("변환:", ticker_upper)
         stock_obj = yf.Ticker(ticker_upper)
+        hist = stock_obj.history(period="1d")
+
+if hist.empty:
+    return {
+        "error": f"{ticker_upper} 종목을 Yahoo Finance에서 찾을 수 없습니다."
+    }
         info = stock_obj.info
+
+        if not info or "symbol" not in info:
+
+    try:
+        info = stock_obj.fast_info
+    except:
+        pass
         
         if not info: return {"error": f"[{ticker_upper}] 야후 파이낸스에서 종목 정보를 찾을 수 없습니다."}
             
