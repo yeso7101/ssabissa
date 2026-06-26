@@ -178,6 +178,18 @@ def get_score_color(score):
 
 def resolve_ticker_by_name(query: str) -> str:
     query = query.strip()
+    if query.upper().endswith((".KS", ".KQ")):
+    return query.upper()
+
+# 숫자 6자리면 한국 종목으로 변환
+if query.isdigit():
+
+    if len(query) == 6:
+
+        if query in STOCK_MAP:
+            return STOCK_MAP[query]
+
+        return query + ".KS"
     if not query: return ""
     if query.isdigit() and len(query) == 6: return f"{query}.KS"
     try:
@@ -375,7 +387,7 @@ def api_diagnose(ticker: str = None):
         
     try:
         import yfinance as yf
-        ticker_upper = ticker.strip().upper()
+        ticker_upper = resolve_ticker_by_name(ticker)
         stock_obj = yf.Ticker(ticker_upper)
         info = stock_obj.info
         
