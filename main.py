@@ -228,44 +228,55 @@ def resolve_ticker_by_name(query: str) -> str:
         return query.upper()
 
     return query
-    except:
-        if info.get("sharesOutstanding", 0) > 2000000000:
-            score -= 5; reasons.append("- 유통 주식 물량 과다 부담")
+    # ================================================================
+# ⚙️ 점수 변동성 대폭 상향 업데이트 버전
+# ================================================================
+def calculate_ssabissa_score(info, ticker):
+    score = 50
+    reasons = []
+    is_kr = ".KS" in ticker or ".KQ" in ticker
+    
+    # 1. 유통 주식 물량 체크
+    if info.get("sharesOutstanding", 0) > 2000000000:
+        score -= 5
+        reasons.append("- 유통 주식 물량 과다 부담")
 
-    # 2. 부채 비율 (기준 하향 & 감점 강화)
+    # 2. 부채 비율
     debt_eq = info.get("debtToEquity", 0)
-    if debt_eq > 150: score -= 10; reasons.append("- 위험 수준의 고부채 재무 부담 리스크")
+    if debt_eq and debt_eq > 150: 
+        score -= 10
+        reasons.append("- 위험 수준의 고부채 재무 부담 리스크")
 
-    # 3. 선행 PER (가/감점 강화)
+    # 3. 선행 PER
     per = info.get("forwardPE")
     if per:
         if is_kr and per < 8: score += 12; reasons.append("+ 선행 PER 기준 국장 극저평가 메리트")
         elif not is_kr and per < 18: score += 9; reasons.append("+ 선행 PER 기준 미장 가성비 양호")
         elif per > 35: score -= 10; reasons.append("- 높은 멀티플 오버밸류 경계")
 
-    # 4. PBR 청산가치 (가/감점 강화)
+    # 4. PBR 청산가치
     pbr = info.get("priceToBook")
     if pbr:
         if is_kr and pbr < 0.5: score += 10; reasons.append("+ 장부상 청산가치 이하 저PBR 수혜")
         elif not is_kr and pbr < 3.0: score += 6; reasons.append("+ 적정 수준의 자산 가치 반영")
         elif pbr > 8.0: score -= 8; reasons.append("- 자산 가치 대비 멀티플 과열 위험")
 
-    # 5. 증권사 목표가 컨센서스 갭 보정
+    # 5. 목표가 갭 보정
     target = info.get("targetMeanPrice")
     cur = info.get("currentPrice") or info.get("regularMarketPrice")
-    if target and cur:
+    if target and cur and target > 0:
         gap = (target - cur) / target * 100
         if gap > 20: score += 12; reasons.append("+ 증권사 목표가 대비 탁월한 안전마진")
         elif gap < 0: score -= 12; reasons.append("- 목표가 상회로 인한 단기 고평가 영역")
     
-    # 6. 배당, 영업이익률, 성장성 정량 체크
-    if info.get("dividendYield", 0) * 100 >= 4.0: score += 6; reasons.append("+ 안정적인 고배당 수익률 뒷받침")
-    if info.get("operatingMargins", 0) < 0: score -= 15; reasons.append("- 영업이익 적자 구조 치명적 리스크")
-    if info.get("earningsGrowth", 0) * 100 >= 20: score += 8; reasons.append("+ 고성장 기업 프리미엄 버프")
+    # 6. 정량 지표
+    if info.get("dividendYield", 0) and info.get("dividendYield", 0) * 100 >= 4.0: 
+        score += 6; reasons.append("+ 안정적인 고배당 수익률 뒷받침")
+    if info.get("operatingMargins", 0) and info.get("operatingMargins", 0) < 0: 
+        score -= 15; reasons.append("- 영업이익 적자 구조 치명적 리스크")
 
-    # 7. 최근 6개월 주가 모멘텀 
+    # 7. 모멘텀
     try:
-        import yfinance as yf
         hist = yf.Ticker(ticker).history(period="6mo")
         if len(hist) >= 2:
             change = (hist['Close'].iloc[-1] - hist['Close'].iloc[0]) / hist['Close'].iloc[0]
@@ -273,6 +284,14 @@ def resolve_ticker_by_name(query: str) -> str:
             elif change >= 0.20: score += 7; reasons.append("+ 시장 선호 수급 유입")
     except: pass
 
+    score = max(0, min(100, int(score))) 
+    color = get_score_color(score)
+    
+    if score >= 75: brief = "탁월한 안전마진이 확보되어 중장기적으로 매우 매력적인 저평가 구간입니다."
+    elif score >= 45: brief = "현재 시장에서 기업의 기초 체력과 성장성에 알맞은 정상적인 대우를 받고 있습니다."
+    else: brief = "단기 고평가 버블이나 치명적인 재무 리스크가 중첩되어 철저한 관리가 필요한 구간입니다."
+
+    return score, color, reasons, brief
     # 8. 미국 주식 프리미엄 가산점 
     if not is_kr:  
         if target:
@@ -395,7 +414,7 @@ def api_diagnose(ticker: str = None):
         stock_obj = yf.Ticker(ticker_upper)
         hist = stock_obj.history(period="1d")
 
-if hist.empty:
+    if hist.empty:
     return {
         "error": f"{ticker_upper} 종목을 Yahoo Finance에서 찾을 수 없습니다."
     }
