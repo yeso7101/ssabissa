@@ -10,6 +10,8 @@ import random
 import time
 import threading
 from datetime import datetime, timezone, timedelta, date
+import yfinance as yf
+
 
 # ================================================================
 # 1. 전역 설정 데이터 및 변수 기초 선언
@@ -24,8 +26,26 @@ except Exception:
     DATA_FILE = "ranking_data.json"
     COMMUNITY_FILE = "community_data.json"
 
-STOCK_MAP_FILE = "stock_map.json"
+try:
+    os.makedirs("/data", exist_ok=True)
+    CALENDAR_FILE = "/data/calendar_data.json"
+except:
+    CALENDAR_FILE = "calendar_data.json"
+    
+    # 캘린더 데이터 저장 경로 설정
+DATA_DIR = "/data"
+CALENDAR_FILE = os.path.join(DATA_DIR, "calendar_data.json")
 
+# 💡 이 로직이 있어야 폴더가 자동으로 생성됩니다!
+try:
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR, exist_ok=True)
+except Exception as e:
+    print(f"데이터 폴더 생성 실패, 현재 경로에 저장합니다: {e}")
+    CALENDAR_FILE = "calendar_data.json" # 폴더 생성 실패 시 현재 디렉토리에 저장
+
+STOCK_MAP_FILE = "stock_map.json"
+CALENDAR_FILE = "/data/calendar_data.json"
 STOCK_MAP = {}
 print("STOCK_MAP 개수:", len(STOCK_MAP))
 SEARCH_COUNT_KR = Counter()
@@ -49,6 +69,78 @@ else:
 
 templates = Jinja2Templates(directory="templates")
 templates.env.cache = None
+
+# [자동 데이터 수집 함수]
+
+def update_market_calendar():
+
+    # 추적할 종목 (실제 필요한 티커들로 구성하세요)
+
+    tickers = ["005930.KS", "000660.KS", "AAPL", "MSFT"]
+
+    dividend_events = []
+
+    earning_events = []
+
+   
+
+    for t in tickers:
+
+        stock = yf.Ticker(t)
+
+        info = stock.info
+
+        name = info.get('shortName', t)
+
+       
+
+        # 배당락일
+
+        ex_date = info.get("exDividendDate")
+
+        if ex_date:
+
+            date_str = datetime.fromtimestamp(ex_date).strftime('%Y-%m-%d')
+
+            dividend_events.append({"date": date_str, "title": f"{name} 배당"})
+
+           
+
+        # 어닝 발표일
+
+        next_date = info.get("nextEarningsDate")
+
+        if next_date:
+
+            date_str = datetime.fromtimestamp(next_date).strftime('%Y-%m-%d')
+
+            earning_events.append({"date": date_str, "title": f"{name} 실적발표"})
+
+           
+
+    data = {"dividend": dividend_events, "earning": earning_events}
+
+    with open(CALENDAR_FILE, "w", encoding="utf-8") as f:
+
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+    print("✅ 캘린더 데이터 자동 업데이트 완료")
+
+
+
+# 스케줄러 실행 (앱 시작 시 스레드로 자동화)
+
+def start_calendar_automation():
+
+    def run():
+
+        while True:
+
+            update_market_calendar()
+
+            time.sleep(86400) # 하루에 한 번 실행
+
+    threading.Thread(target=run, daemon=True).start()
 
 # ================================================================
 # 3. 데이터 복구 (정품 인프라 버전)
@@ -90,7 +182,7 @@ SYSTEM_METRICS_GUIDE = [
 ]
 
 app = FastAPI()
-
+start_calendar_automation()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -215,85 +307,70 @@ def resolve_ticker_by_name(query: str) -> str:
 
     # 5. 위에서 모두 실패 시, 영문 티커일 가능성 고려하여 그대로 반환
     return query.upper()
-# ================================================================
-# ⚙️ 점수 변동성 대폭 상향 업데이트 버전
-# ================================================================
+
 def calculate_ssabissa_score(info, ticker):
     score = 50
     reasons = []
     is_kr = ".KS" in ticker or ".KQ" in ticker
     
-    # 1. 유통 주식 물량 체크
-    if info.get("sharesOutstanding", 0) > 2000000000:
-        score -= 5
-        reasons.append("- 유통 주식 물량 과다 부담")
-
-    # 2. 부채 비율
-    debt_eq = info.get("debtToEquity", 0)
-    if debt_eq and debt_eq > 150: 
-        score -= 10
-        reasons.append("- 위험 수준의 고부채 재무 부담 리스크")
-
-    # 3. 선행 PER
-    per = info.get("forwardPE")
-    if per:
-        if is_kr and per < 8: score += 12; reasons.append("+ 선행 PER 기준 국장 극저평가 메리트")
-        elif not is_kr and per < 18: score += 9; reasons.append("+ 선행 PER 기준 미장 가성비 양호")
-        elif per > 35: score -= 10; reasons.append("- 높은 멀티플 오버밸류 경계")
-
-    # 4. PBR 청산가치
-    pbr = info.get("priceToBook")
-    if pbr:
-        if is_kr and pbr < 0.5: score += 10; reasons.append("+ 장부상 청산가치 이하 저PBR 수혜")
-        elif not is_kr and pbr < 3.0: score += 6; reasons.append("+ 적정 수준의 자산 가치 반영")
-        elif pbr > 8.0: score -= 8; reasons.append("- 자산 가치 대비 멀티플 과열 위험")
-
-    # 5. 목표가 갭 보정
+    # [가점 항목] - 국장 기준 강화
+    # 1. 괴리율 (목표가 안전마진)
     target = info.get("targetMeanPrice")
     cur = info.get("currentPrice") or info.get("regularMarketPrice")
-    if target and cur and target > 0:
+    if target and cur and target > cur:
         gap = (target - cur) / target * 100
-        if gap > 20: score += 12; reasons.append("+ 증권사 목표가 대비 탁월한 안전마진")
-        elif gap < 0: score -= 12; reasons.append("- 목표가 상회로 인한 단기 고평가 영역")
+        if gap > 20: score += 8; reasons.append("+ 괴리율 안전마진")
     
-    # 6. 정량 지표
-    if info.get("dividendYield", 0) and info.get("dividendYield", 0) * 100 >= 4.0: 
-        score += 6; reasons.append("+ 안정적인 고배당 수익률 뒷받침")
-    if info.get("operatingMargins", 0) and info.get("operatingMargins", 0) < 0: 
-        score -= 15; reasons.append("- 영업이익 적자 구조 치명적 리스크")
+    # 2. 선행 PER (국장/미장 차등화)
+    per = info.get("forwardPE")
+    if per:
+        # 국장은 PER 10 미만일 때만 가점 (기존 15에서 하향 조정)
+        if is_kr and per < 10: score += 7; reasons.append("+ 국장 극저평가 메리트")
+        # 미장은 PER 20 미만일 때 가점
+        elif not is_kr and per < 20: score += 7; reasons.append("+ 미장 합리적 밸류에이션")
 
-    # 7. 모멘텀
+    # 3. PBR (자산 가치)
+    pbr = info.get("priceToBook")
+    if pbr and pbr < 0.8: # 기준 강화
+        score += 5; reasons.append("+ PBR 0.8배 미만 저평가")
+
+    # 4. 배당
+    if (info.get("dividendYield", 0) or 0) * 100 >= 4.0: 
+        score += 5; reasons.append("+ 고배당 수익률")
+
+    # 5. 초성장 (30% 이상)
+    if (info.get("earningsGrowth", 0) or 0) * 100 >= 30: 
+        score += 8; reasons.append("+ 고성장 기업 프리미엄")
+
+    # [감점 항목] - 동일 적용
+    # 6. 부채
+    if (info.get("debtToEquity", 0) or 0) > 150: score -= 10; reasons.append("- 부채비율 과다")
+    # 7. 적자
+    if (info.get("operatingMargins", 0) or 0) < 0: score -= 12; reasons.append("- 영업이익 적자")
+    # 8. 과열
+    if target and cur and cur > target: score -= 8; reasons.append("- 목표가 상회 과열")
+    # 9. 유통 물량 부담
+    if info.get("sharesOutstanding", 0) > 1000000000: score -= 5; reasons.append("- 물량 부담")
+    # 10. 가치함정
     try:
         hist = yf.Ticker(ticker).history(period="6mo")
-        if len(hist) >= 2:
-            change = (hist['Close'].iloc[-1] - hist['Close'].iloc[0]) / hist['Close'].iloc[0]
-            if change <= -0.15: score -= 8; reasons.append("- 가치함정 주의 (6개월간 지속 하락세)")
-            elif change >= 0.20: score += 7; reasons.append("+ 시장 선호 수급 유입")
+        if len(hist) >= 2 and (hist['Close'].iloc[-1] < hist['Close'].iloc[0] * 0.85):
+            score -= 7; reasons.append("- 가치함정 주의")
+    except: pass
+    
+    # 11. 시장 선호 (6개월 모멘텀)
+    try:
+        if len(hist) >= 2 and (hist['Close'].iloc[-1] > hist['Close'].iloc[0] * 1.2):
+            score += 5; reasons.append("+ 시장 선호 수급")
     except: pass
 
     score = max(0, min(100, int(score))) 
     color = get_score_color(score)
     
-    if score >= 75: brief = "탁월한 안전마진이 확보되어 중장기적으로 매우 매력적인 저평가 구간입니다."
-    elif score >= 45: brief = "현재 시장에서 기업의 기초 체력과 성장성에 알맞은 정상적인 대우를 받고 있습니다."
-    else: brief = "단기 고평가 버블이나 치명적인 재무 리스크가 중첩되어 철저한 관리가 필요한 구간입니다."
-
-    return score, color, reasons, brief
-    # 8. 미국 주식 프리미엄 가산점 
-    if not is_kr:  
-        if target:
-            score += 5; reasons.append("+ 월가 가치 프리미엄 가산 (컨센서스 확보)")
-        else:
-            score += 3; reasons.append("+ 미국 증시 밸류에이션 기본 가산점")
-
-    # 점수 캡핑 처리
-    score = max(0, min(100, int(score))) 
-    color = get_score_color(score)
-    
-    # 9. 등급별 요약 진단
-    if score >= 75: brief = "탁월한 안전마진이 확보되어 중장기적으로 매우 매력적인 저평가 구간입니다."
-    elif score >= 45: brief = "현재 시장에서 기업의 기초 체력과 성장성에 알맞은 정상적인 대우를 받고 있습니다."
-    else: brief = "단기 고평가 버블이나 치명적인 재무 리스크가 중첩되어 철저한 관리가 필요한 구간입니다."
+    # 요약 진단
+    if score >= 75: brief = "탁월한 안전마진이 확보된 매력적인 구간입니다."
+    elif score >= 45: brief = "기초 체력과 성장성이 정상 반영되고 있습니다."
+    else: brief = "재무 리스크나 고평가 우려로 신중한 접근이 필요합니다."
 
     return score, color, reasons, brief
 
@@ -487,6 +564,25 @@ async def calendar_page(request: Request):
         "earning_items": None,
     },
 )
+# 📅 캘린더 데이터 저장 파일 경로
+CALENDAR_FILE = "/data/calendar_data.json"
+
+@app.get("/api/calendar/data")
+def get_calendar_data():
+    if not os.path.exists(CALENDAR_FILE):
+        return []
+    with open(CALENDAR_FILE, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except:
+            return []
+
+@app.post("/api/calendar/update")
+async def update_calendar_data(request: Request):
+    data = await request.json()
+    with open(CALENDAR_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    return {"success": True}
 
 # ⚙️ 기타 라우터 모음
 @app.get("/api/autocomplete")
@@ -616,3 +712,9 @@ def admin_clear_talk(ticker: str, password: str, index: int = 0):
         save_community_to_file()
         return {"success": True, "message": f"[{removed['text']}] 댓글을 정상 소거했습니다."}
     return {"error": "삭제할 대상 댓글이 존재하지 않습니다."}
+
+@app.get("/api/calendar/data")
+def get_calendar_data():
+    if not os.path.exists(CALENDAR_FILE): return {"dividend": [], "earning": []}
+    with open(CALENDAR_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
