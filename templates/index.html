@@ -166,7 +166,7 @@
     let currentMainTicker = "";
     let scoreChartInstance = null;
 
-    // 1. 자동완성 로직 (기존 유지)
+    // 1. 자동완성 로직 (메인 고유 기능 유지)
     const tickerInput = document.getElementById("ticker"), autoBox = document.getElementById("autocompleteBox");
     let timeout = null;
     tickerInput.addEventListener("input", function(e) {
@@ -195,10 +195,11 @@
     document.addEventListener("click", e => { if(e.target !== tickerInput) autoBox.style.display = "none"; });
 
     function copyUrl() { 
+        if(!currentMainTicker) return;
         navigator.clipboard.writeText(window.location.origin + "/?ticker=" + encodeURIComponent(currentMainTicker)).then(() => alert("진단 링크가 복사되었습니다.")); 
     }
 
-    // 2. 검색 처리 및 팝업 렌더링 (Ajax)
+    // 📡 2. 실제 백엔드 점수 데이터 호출 (Ajax)
     async function handleSearch(e) {
         e.preventDefault();
         const ticker = document.getElementById("ticker").value.trim();
@@ -207,23 +208,20 @@
         currentMainTicker = ticker;
         document.getElementById("loadingBox").style.display = "block";
         document.getElementById("resultModal").style.display = "none";
+        document.getElementById("communitySection").style.display = "none";
 
         try {
-            // 🚨 실제 백엔드 연동 시 아래 fetch 구문의 주석을 풀고 사용하세요.
-            // const response = await fetch(`/api/diagnose/${ticker}`);
-            // const data = await response.json();
-            
-            // 테스트용 더미 데이터 생성기 (디자인 확인용)
-            const data = generateMockData(ticker); 
+            // 실제 서버 API 데이터 요청
+            const response = await fetch(`/api/diagnose/${ticker}`);
+            const data = await response.json();
             
             if (data.error) {
                 document.getElementById("modalContent").innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">${data.error}</div>`;
-                document.getElementById("communitySection").style.display = "none";
             } else {
                 await renderModalData(data);
             }
         } catch (error) {
-            document.getElementById("modalContent").innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">데이터를 가져오는 중 오류가 발생했습니다.</div>`;
+            document.getElementById("modalContent").innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">서버에서 데이터를 가져오는 중 오류가 발생했습니다.</div>`;
         } finally {
             document.getElementById("loadingBox").style.display = "none";
             document.getElementById("resultModal").style.display = "flex";
@@ -231,20 +229,23 @@
     }
 
     function closeModal(e) {
-        if (e.target.id === 'resultModal') { document.getElementById('resultModal').style.display = 'none'; }
+        if (!e || e.target.id === 'resultModal' || e.target.closest('.close-btn')) { 
+            document.getElementById('resultModal').style.display = 'none'; 
+        }
     }
 
     // 3. 모달 데이터 UI 구성 함수
     async function renderModalData(data) {
         const content = document.getElementById("modalContent");
         
-        // [업데이트 2-2] 어제 대비 점수 증감 표시
+        // 어제 대비 점수 증감
         let scoreChangeHtml = "";
-        if(data.score_change > 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#ef4444; margin-top:6px; background:#fef2f2; padding:4px 10px; border-radius:20px;">어제 대비 🔺${data.score_change}점</div>`;
-        else if(data.score_change < 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#3b82f6; margin-top:6px; background:#eff6ff; padding:4px 10px; border-radius:20px;">어제 대비 🔻${Math.abs(data.score_change)}점</div>`;
+        const change = data.score_change || 0;
+        if(change > 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#ef4444; margin-top:6px; background:#fef2f2; padding:4px 10px; border-radius:20px;">어제 대비 🔺${change}점</div>`;
+        else if(change < 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#3b82f6; margin-top:6px; background:#eff6ff; padding:4px 10px; border-radius:20px;">어제 대비 🔻${Math.abs(change)}점</div>`;
         else scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#94a3b8; margin-top:6px; background:#f8fafc; padding:4px 10px; border-radius:20px;">어제와 동일 ➖</div>`;
 
-        // [업데이트 3, 3-2] 이슈 큐레이션
+        // 이슈 큐레이션
         let curationHtml = "";
         if(data.curation_reason) {
             curationHtml = `
@@ -260,24 +261,27 @@
                 </div>`;
         }
 
-        // [업데이트 4] 가상 백테스트 수익률
+        // 백테스트
+        const backtestReturn = data.backtest_return || 0;
         const backtestHtml = `
             <div class="feature-box backtest-box">
                 <div>
                     <div style="font-weight: 800; font-size: 0.9rem; color: #059669;">⏱️ 최근 3년 가상 수익률</div>
                     <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">(싸비싸 80점 매수 / 50점 이하 매도 기준)</div>
                 </div>
-                <div style="font-weight: 900; font-size: 1.25rem; color: ${data.backtest_return >= 0 ? '#ef4444' : '#3b82f6'};">
-                    ${data.backtest_return >= 0 ? '+' : ''}${data.backtest_return}%
+                <div style="font-weight: 900; font-size: 1.25rem; color: ${backtestReturn >= 0 ? '#ef4444' : '#3b82f6'};">
+                    ${backtestReturn >= 0 ? '+' : ''}${backtestReturn}%
                 </div>
             </div>`;
 
         // 가치 평가 사유
         let reasonsHtml = '';
-        data.reasons.forEach(reason => {
-            const isPlus = reason.includes('+');
-            reasonsHtml += `<div style="padding:12px 0; border-bottom:1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items: center;"><span style="font-weight: 600; color: #334155; font-size:0.85rem;">${reason}</span><span style="color:${isPlus ? '#3b82f6':'#ef4444'}; font-weight:800; font-size:1.1rem;">${isPlus ? '+':'-'}</span></div>`;
-        });
+        if(data.reasons) {
+            data.reasons.forEach(reason => {
+                const isPlus = reason.includes('+');
+                reasonsHtml += `<div style="padding:12px 0; border-bottom:1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items: center;"><span style="font-weight: 600; color: #334155; font-size:0.85rem;">${reason}</span><span style="color:${isPlus ? '#3b82f6':'#ef4444'}; font-weight:800; font-size:1.1rem;">${isPlus ? '+':'-'}</span></div>`;
+            });
+        }
 
         content.innerHTML = `
             <div style="text-align: left;">
@@ -292,13 +296,13 @@
                 </div>
 
                 <div style="font-size:0.9rem; color:#64748b; margin-bottom:25px; font-weight: 600; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                    현재 거래가: <span style="color: var(--text-main); font-weight: 700;">${data.current_price}</span>
+                    현재 거래가: <span style="color: var(--text-main); font-weight: 700;">${data.current_price || '-'}</span>
                 </div>
                 
                 <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 35px;">
-                    <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(${data.color} ${data.score}%, #e2e8f0 0deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.05);">
+                    <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(${data.color || '#e2e8f0'} ${data.score || 0}%, #e2e8f0 0deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.05);">
                         <div style="width: 130px; height: 130px; border-radius: 50%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);">
-                            <span style="font-size: 3rem; font-weight: 900; color: ${data.color}; line-height: 1;">${data.score}</span>
+                            <span style="font-size: 3rem; font-weight: 900; color: ${data.color || '#1e293b'}; line-height: 1;">${data.score || 0}</span>
                             <span style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; margin-top: 4px;">가치 점수</span>
                         </div>
                     </div>
@@ -308,7 +312,6 @@
                 ${curationHtml}
                 ${backtestHtml}
 
-                <!-- [업데이트 2] 접을 수 있는 그래프 영역 -->
                 <div style="background: #f1f5f9; border-radius: 12px; padding: 14px 16px; margin-bottom: 25px; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--blue); display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;" onclick="toggleGraph()">
                     <span>📊 과거 6개월 점수 히스토리 보기</span><span id="graphArrow">▼</span>
                 </div>
@@ -317,36 +320,35 @@
                 </div>
 
                 <div style="background:#f8fafc; padding:20px; border-radius:16px; margin-bottom:20px; font-size:0.95rem; line-height:1.6;">
-                    <b style="color:var(--blue);">요약 진단:</b> <span style="font-weight: 600; color: var(--text-main);">${data.brief}</span>
+                    <b style="color:var(--blue);">요약 진단:</b> <span style="font-weight: 600; color: var(--text-main);">${data.brief || '내용 없음'}</span>
                 </div>
 
                 <div style="font-size:0.9rem; margin-bottom: 15px;">${reasonsHtml}</div>
             </div>
         `;
 
-        // 애니메이션을 위해 캔버스 생성 직후 차트 렌더링을 약간 지연시킵니다.
-        setTimeout(() => drawChart(data.history_dates, data.history_scores), 50);
+        if(data.history_dates && data.history_scores) {
+            setTimeout(() => drawChart(data.history_dates, data.history_scores), 50);
+        }
 
         await refreshMainCommunity();
         document.getElementById("communitySection").style.display = "block";
     }
 
-    // 그래프 토글 (아코디언)
     function toggleGraph() {
         const wrap = document.getElementById("graphWrapper");
         const arrow = document.getElementById("graphArrow");
         if(wrap.style.display === "none") {
-            wrap.style.display = "block"; 
-            arrow.innerText = "▲";
+            wrap.style.display = "block"; arrow.innerText = "▲";
         } else {
-            wrap.style.display = "none"; 
-            arrow.innerText = "▼";
+            wrap.style.display = "none"; arrow.innerText = "▼";
         }
     }
 
-    // Chart.js 렌더링 함수
     function drawChart(labels, dataPoints) {
-        const ctx = document.getElementById('scoreHistoryChart').getContext('2d');
+        const canvas = document.getElementById('scoreHistoryChart');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
         if(scoreChartInstance) scoreChartInstance.destroy();
         
         scoreChartInstance = new Chart(ctx, {
@@ -363,8 +365,8 @@
         });
     }
 
-    // [업데이트 6] 날짜 변환 로직 (방금전, 분전, 시간전, YYYY.MM.DD)
     function timeAgo(dateString) {
+        if(!dateString) return "";
         const past = new Date(dateString);
         const now = new Date();
         const diffMs = now - past;
@@ -382,113 +384,111 @@
         return `${y}.${m}.${d}`;
     }
 
-    // 커뮤니티 데이터 리프레시
+    // 📡 4. 실제 백엔드 커뮤니티 데이터 호출
     async function refreshMainCommunity() {
         if (!currentMainTicker) return;
         try {
-            // 실제 구현부
-            // const res = await fetch(`/api/community/${currentMainTicker}`);
-            // const data = await res.json();
+            const res = await fetch(`/api/community/${currentMainTicker}`);
+            const data = await res.json();
             
-            // 더미 데이터 (시연용)
-            const data = {
-                votes: { up: 120, down: 45 },
-                talks: [
-                    { nickname: "익명1", text: "어제 샀는데 왜 이러죠?", time: new Date(Date.now() - 30 * 1000).toISOString() }, // 30초 전
-                    { nickname: "가치투자자", text: "80점 넘었습니다. 분할매수 들어갑니다.", time: new Date(Date.now() - 45 * 60 * 1000).toISOString() }, // 45분 전
-                    { nickname: "주린이", text: "점수 너무 낮네요 조심하세요.", time: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString() } // 25시간 전
-                ]
-            };
-            
-            const up = data.votes.up || 0;
-            const down = data.votes.down || 0;
+            const up = data.votes ? data.votes.up : 0;
+            const down = data.votes ? data.votes.down : 0;
             const total = up + down;
             const bar = document.getElementById('mainVoteBar');
             
-            if (total === 0) {
-                bar.innerHTML = `<div style="width: 100%; background: #cbd5e1; color: #475569; font-size: 11px;">첫 투표를 행사해 주세요!</div>`;
-            } else {
-                const upPercent = Math.round((up / total) * 100);
-                const downPercent = 100 - upPercent;
-                bar.innerHTML = `
-                    <div style="width: ${upPercent}%; background: #ef4444;">상승 ${upPercent}%</div>
-                    <div style="width: ${downPercent}%; background: #3b82f6;">하락 ${downPercent}%</div>
-                `;
+            if (bar) {
+                if (total === 0) {
+                    bar.innerHTML = `<div style="width: 100%; background: #cbd5e1; color: #475569; font-size: 11px;">첫 투표를 행사해 주세요!</div>`;
+                } else {
+                    const upPercent = Math.round((up / total) * 100);
+                    const downPercent = 100 - upPercent;
+                    bar.innerHTML = `
+                        <div style="width: ${upPercent}%; background: #ef4444;">상승 ${upPercent}%</div>
+                        <div style="width: ${downPercent}%; background: #3b82f6;">하락 ${downPercent}%</div>
+                    `;
+                }
             }
 
             const timeline = document.getElementById('mainTalkTimeline');
-            if (!data.talks || data.talks.length === 0) {
-                timeline.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 0;">작성된 주주방 대화가 없습니다. 첫 글을 남겨보세요!</div>`;
-            } else {
-                let talksHtml = '';
-                data.talks.forEach(talk => {
-                    const formattedTime = timeAgo(talk.time);
-                    talksHtml += `
-                        <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="font-weight: 800; color: #475569;">👤 ${talk.nickname}</span>
-                                <span style="color: #94a3b8; font-size: 0.72rem;">${formattedTime}</span>
+            if (timeline) {
+                if (!data.talks || data.talks.length === 0) {
+                    timeline.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 0;">작성된 주주방 대화가 없습니다. 첫 글을 남겨보세요!</div>`;
+                } else {
+                    let talksHtml = '';
+                    data.talks.forEach(talk => {
+                        const formattedTime = timeAgo(talk.time);
+                        talksHtml += `
+                            <div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-weight: 800; color: #475569;">👤 ${talk.nickname || '익명'}</span>
+                                    <span style="color: #94a3b8; font-size: 0.72rem;">${formattedTime}</span>
+                                </div>
+                                <span style="font-weight: 600; color: #1e293b; padding-left: 4px; word-break: break-all;">${talk.text}</span>
                             </div>
-                            <span style="font-weight: 600; color: #1e293b; padding-left: 4px; word-break: break-all;">${talk.text}</span>
-                        </div>
-                    `;
-                });
-                timeline.innerHTML = talksHtml;
+                        `;
+                    });
+                    timeline.innerHTML = talksHtml;
+                }
             }
-        } catch(e) {}
+        } catch(e) {
+            console.error("커뮤니티 데이터를 불러오지 못했습니다.", e);
+        }
     }
 
+    // 📡 5. 실제 백엔드 투표 기록 전송
     async function submitMainVote(type) {
         if (!currentMainTicker) return;
-        // 실제 API 연동
-        // const formData = new FormData(); formData.append('type', type);
-        // await fetch(`/api/community/${currentMainTicker}/vote`, { method: 'POST', body: formData });
-        alert(type === 'up' ? "상승 투표가 반영되었습니다." : "하락 투표가 반영되었습니다.");
-        await refreshMainCommunity();
+        
+        try {
+            const formData = new FormData();
+            formData.append('type', type);
+            const res = await fetch(`/api/community/${currentMainTicker}/vote`, {
+                method: 'POST',
+                body: formData
+            });
+            if(res.ok) {
+                await refreshMainCommunity();
+            } else {
+                alert("투표 처리 중 오류가 발생했습니다.");
+            }
+        } catch (e) {
+            alert("서버와의 통신에 실패했습니다.");
+        }
     }
 
+    // 📡 6. 실제 백엔드 댓글 전송
     let isTalkSending = false;
     async function submitMainTalk() {
         if (isTalkSending || !currentMainTicker) return;
         const input = document.getElementById('mainTalkInput');
+        if (!input) return;
+
         const text = input.value.trim();
         if (!text) return;
 
         isTalkSending = true; 
         
-        // 실제 API 연동
-        // const formData = new FormData(); formData.append('text', text);
-        // await fetch(`/api/community/${currentMainTicker}/talk`, { method: 'POST', body: formData });
-        
-        alert("댓글이 등록되었습니다. (시연용)");
-        input.value = "";
-        await refreshMainCommunity();
-        
-        setTimeout(() => { isTalkSending = false; }, 3000);
+        try {
+            const formData = new FormData();
+            formData.append('text', text);
+            const res = await fetch(`/api/community/${currentMainTicker}/talk`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            
+            if (data.success || res.ok) {
+                input.value = "";
+                await refreshMainCommunity();
+            } else if (data.error) {
+                alert(data.error); 
+            }
+        } catch (e) {
+            alert("댓글 등록에 실패했습니다.");
+        } finally {
+            setTimeout(() => { isTalkSending = false; }, 3000);
+        }
     }
-
-    // [시연용 더미 데이터 생성기] - 백엔드 연결 전 UI 확인용
-    function generateMockData(ticker) {
-        return {
-            ticker: ticker.toUpperCase(), 
-            name: ticker, 
-            current_price: "₩ 72,500",
-            score: 82, 
-            color: "#059669", 
-            score_change: 4, 
-            brief: "안전 마진이 충분히 확보된 매력적인 저평가 구간입니다.",
-            curation_reason: "경쟁사 실적 악화 대비 견조한 어닝 서프라이즈 공시가 반영되며 가치 점수가 상승했습니다.",
-            backtest_return: 142.5, 
-            history_dates: ["1월", "2월", "3월", "4월", "5월", "6월"], 
-            history_scores: [45, 52, 68, 65, 78, 82],
-            reasons: [
-                "영업이익률(OPM) 동종업계 상위 20% (+가산)", 
-                "자사주 매입 후 소각 이력 (+가산)", 
-                "최근 3개년 순현금 흐름(FCF) 흑자 (+가산)",
-                "유상증자 리스크 없음"
-            ]
-        };
-    }
-    </script>
+</script>
 </body>
 </html>

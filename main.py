@@ -621,3 +621,7 @@ def admin_clear_talk(ticker: str, password: str, index: int = 0):
         return {"success": True, "message": f"[{removed['text']}] 댓글을 정상 소거했습니다."}
         
     return {"error": "삭제할 대상 댓글이 존재하지 않습니다."}
+    @app.route('/calendar')
+def calendar():
+    # 추후 DB에서 데이터를 불러오면 여기서 risk_items, earning_items를 렌더링에 넘겨줍니다.
+    return render_template('calendar.html', risk_items=None, earning_items=None)
