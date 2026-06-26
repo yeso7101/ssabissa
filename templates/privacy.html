@@ -6,61 +6,31 @@
     <title>이용 약관 및 정책 - 싸비싸</title>
     
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-    
     <style>
-        :root {
-            --blue: #3b82f6;
-            --text-main: #1e293b;
-            --text-sub: #868e96;
-            --border: #dee2e6;
-            --bg-gray: #f0f7ff;
-            --red: #ef4444;
-        }
-        
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: var(--bg-gray); 
-            margin: 0; 
-            padding-top: 100px; 
-            padding-bottom: 40px;
-            box-sizing: border-box;
-        }
-        
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 0 16px; 
-            box-sizing: border-box;
-        }
+        :root { --blue: #3b82f6; --text-main: #1e293b; --text-sub: #868e96; --border: #e2e8f0; --bg-gray: #f8fafc; --red: #ef4444; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding-top: 90px; padding-bottom: 60px; box-sizing: border-box; color: var(--text-main); }
+        .container { max-width: 600px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 
-        /* 🖥️ 데스크탑 상단 내비게이션 (공통) */
-        .top-nav { 
-            position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            padding: 12px 24px; border-radius: 100px; box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000;
-        }
-        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
-        .top-nav .nav-links { display: flex; gap: 16px; align-items: center; }
-        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
-        .top-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-        .top-nav a.active { color: #1e293b !important; font-weight: 900; font-size: 0.95rem; text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.25), 0 0 45px rgba(59, 130, 246, 0.15); transition: all 0.3s ease-in-out; }
+        .top-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 500px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 100px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000; }
+        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 800; font-size: 0.95rem; letter-spacing: -0.5px; }
+        .top-nav .nav-links { display: flex; gap: 14px; align-items: center; }
+        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.8rem; font-weight: 600; transition: all 0.3s; }
+        .top-nav a:not(.nav-logo):hover { color: var(--blue); }
         
-        /* 🔍 본문 내 검색창 (공통) */
+        /* 🔍 검색창 (모달 띄우기 연동) */
         .page-search { position: relative; width: 100%; max-width: 400px; margin: 0 auto 20px auto; display: flex; align-items: center; }
-        .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1px solid var(--border); outline: none; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: border-color 0.2s; }
-        .page-search input:focus { border-color: var(--blue); }
-        .page-search button { position: absolute; right: 16px; background: none; border: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 1.1rem; font-weight: bold; }
+        .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1.5px solid #cbd5e1; outline: none; font-size: 0.95rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.3s; }
+        .page-search input:focus { border-color: var(--blue); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1); }
+        .page-search button { position: absolute; right: 16px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: transform 0.2s; }
+        .page-search button:hover { transform: scale(1.05); }
 
-        /* 📝 약관 페이지 전용 스타일 */
         .page-header { text-align: center; margin-bottom: 25px; padding: 10px 0; }
-        .page-header h1 { font-size: 1.6rem; color: var(--text-main); margin: 0 0 10px 0; font-weight: 900; letter-spacing: -0.5px; }
-        .page-header p { color: var(--text-sub); font-size: 0.95rem; margin: 0; font-weight: 600; }
+        .page-header h1 { font-size: 1.5rem; color: var(--text-main); margin: 0 0 10px 0; font-weight: 900; letter-spacing: -0.5px; }
+        .page-header p { color: #64748b; font-size: 0.9rem; margin: 0; font-weight: 600; }
 
-        .policy-card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-        .policy-card h2 { font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #f1f3f5; padding-bottom: 10px; }
-        .policy-card p, .policy-card ul { font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0; word-break: keep-all; }
+        .policy-card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+        .policy-card h2 { font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
+        .policy-card p, .policy-card ul { font-size: 0.9rem; color: #475569; line-height: 1.6; margin: 0; word-break: keep-all; }
         .policy-card ul { padding-left: 20px; margin-top: 10px; }
         .policy-card li { margin-bottom: 8px; }
         .policy-card li:last-child { margin-bottom: 0; }
@@ -68,31 +38,42 @@
         .highlight-red { color: var(--red); font-weight: 800; }
         .highlight-blue { color: var(--blue); font-weight: 800; }
 
-        .footer-text { text-align: center; margin-top: 35px; font-size: 0.8rem; color: #94a3b8; line-height: 1.5; font-weight: 500; }
+        /* ✅ 하단 면책조항 텍스트 */
+        .main-footer { text-align: center; margin-top: 30px; font-size: 0.75rem; color: #94a3b8; line-height: 1.6; font-weight: 400; padding-bottom: 20px; }
+
+        /* ✅ 모달 UI */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal-content { background: #fff; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); position: relative; max-height: 85vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 16px; right: 20px; cursor: pointer; font-size: 1.8rem; color: #94a3b8; background: none; border: none; padding: 0; line-height: 1; transition: color 0.2s; }
+        .modal-close:hover { color: var(--text-main); }
+        .m-score-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: white; margin: 10px auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .m-header { text-align: center; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
+        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; }
+        .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; }
+        .m-brief { font-size: 0.9rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; line-height: 1.4; }
+        .m-curation { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 16px; line-height: 1.5; border: 1px solid #e2e8f0; }
+        .m-reason-list { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; margin-bottom: 20px;}
+        .m-reason-item { padding: 8px 0; border-bottom: 1px dashed #f1f3f5; font-weight: 600; }
+        .m-btn-detail { display: block; width: 100%; text-align: center; background: var(--blue); color: white; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 800; transition: transform 0.2s; box-sizing: border-box; font-size: 0.9rem;}
+        .m-btn-detail:active { transform: scale(0.97); }
+        .loading-spinner { text-align: center; padding: 40px; font-weight: 700; color: var(--blue); font-size: 1rem; }
 
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
-            body { padding-top: 20px; margin-bottom: 90px; }
-            
-            /* 📱 모바일 하단 내비게이션 (공통) */
-            .mobile-sub-nav { 
-                position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 0 20px; height: 56px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12); justify-content: space-between; align-items: center; width: calc(100% - 40px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; 
-            }
-            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; letter-spacing: -0.5px; }
-            .mobile-sub-nav .nav-links { display: flex; gap: 8px; align-items: center; }
-            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
-            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-            .mobile-sub-nav a.active { color: #1a73e8 !important; background: transparent !important; font-weight: 900; text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25); }
-
-            .container { margin-top: 10px; margin-bottom: 40px; padding: 0 12px; }
-            .page-search { max-width: 100%; }
+            body { padding-top: 20px; margin-bottom: 80px; }
+            .mobile-sub-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 0 16px; height: 52px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08); justify-content: space-between; align-items: center; width: calc(100% - 32px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; }
+            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--text-main) !important; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.5px; }
+            .mobile-sub-nav .nav-links { display: flex; gap: 6px; align-items: center; }
+            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.75rem; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
+            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); }
+            .mobile-sub-nav a.active { color: var(--blue) !important; font-weight: 800; }
         }
     </style>
 </head>
 <body>
 
     <div class="top-nav">
-        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/" class="nav-logo">🔍 홈</a>
         <div class="nav-links">
             <a href="/calendar">캘린더</a>
             <a href="/ranking">랭킹</a>
@@ -103,8 +84,9 @@
     </div>
 
     <div class="container">
-        <form action="/" method="GET" class="page-search">
-            <input type="text" id="ticker" name="ticker" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
+        <!-- ✅ 검색창 제출 시 모달 연동 -->
+        <form class="page-search" onsubmit="handleSearch(event)">
+            <input type="text" id="searchInput" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
             <button type="submit">🔍</button>
         </form>
 
@@ -114,42 +96,56 @@
         </div>
 
         <div class="policy-card">
-            <h2>⚠️ 1. 투자 면책 조항 (가장 중요)</h2>
+            <h2>⚠️ 1. 투자 면책 조항</h2>
             <p>싸비싸(SSABISSA)에서 제공하는 모든 진단 점수, AI 큐레이션, 실적 캘린더 등의 데이터는 <span class="highlight-red">참고용 정보일 뿐이며, 특정 종목의 매수나 매도를 권유하는 것이 아닙니다.</span></p>
             <ul>
-                <li>제공되는 데이터는 Yahoo Finance 등의 외부 API를 기반으로 하며, 지연되거나 오류가 있을 수 있습니다.</li>
+                <li>제공되는 데이터는 외부 API를 기반으로 하며, 지연되거나 오류가 있을 수 있습니다.</li>
                 <li>본 서비스의 분석 결과를 바탕으로 한 투자 결정의 최종 책임은 <span class="highlight-red">전적으로 투자자 본인</span>에게 귀속됩니다.</li>
                 <li>싸비싸는 어떠한 경우에도 사용자의 투자 손실에 대해 법적 책임을 지지 않습니다.</li>
             </ul>
         </div>
 
+        <!-- ✅ 애드센스 정책 -->
         <div class="policy-card">
-            <h2>🔒 2. 개인정보 및 데이터 처리</h2>
-            <p>본 서비스는 회원가입 없이 익명으로 이용할 수 있으며, 민감한 개인정보를 수집하지 않습니다. 단, 서비스 품질 향상을 위해 다음의 데이터를 수집합니다.</p>
+            <h2>📢 2. Google 애드센스 및 광고 게재</h2>
+            <p>싸비싸는 서비스 유지를 위해 웹사이트 내에 타사 광고(Google 애드센스 등)를 게재할 수 있습니다.</p>
             <ul>
-                <li><span class="highlight-blue">종목 검색 기록:</span> 인기 랭킹(TOP 50) 데이터 산출을 위해 검색된 종목의 티커 코드와 검색 횟수를 익명화하여 카운트합니다.</li>
-                <li><span class="highlight-blue">커뮤니티 활동:</span> 주주 토론방에 작성하신 댓글 및 투표 데이터는 서버에 저장되며, 댓글은 30일이 경과하면 자동으로 영구 삭제됩니다.</li>
+                <li><span class="highlight-blue">DART 쿠키 사용:</span> Google을 포함한 제3자 공급업체는 쿠키를 사용하여 사용자가 당사 웹사이트 또는 다른 웹사이트를 이전에 방문한 기록을 기반으로 맞춤형 광고를 게재합니다.</li>
+                <li>사용자는 <a href="https://myadcenter.google.com/" target="_blank" style="color:var(--blue); font-weight:bold;">광고 설정(Ad Settings)</a>을 방문하여 맞춤광고 용도로 사용되는 DART 쿠키의 사용을 옵트아웃(거부)할 수 있습니다.</li>
             </ul>
         </div>
 
         <div class="policy-card">
-            <h2>🛑 3. 커뮤니티 이용 규칙</h2>
-            <p>건강한 투자 문화 조성을 위해, 주주 토론방 내에서 다음과 같은 행위가 적발될 경우 사전 경고 없이 내용이 삭제되거나 이용이 제한될 수 있습니다.</p>
+            <h2>🔒 3. 개인정보 보호 및 커뮤니티 정책</h2>
+            <p>본 서비스는 회원가입 없이 익명으로 이용할 수 있으며, 민감한 개인정보를 수집하지 않습니다. 단, 건강한 환경을 위해 다음 사항을 준수해야 합니다.</p>
             <ul>
-                <li>카카오톡 오픈채팅, 텔레그램 등 <span class="highlight-red">불법 리딩방 및 유료 정보방 가입 유도</span></li>
-                <li>"무조건 급등", "수익 보장" 등 허위 사실 유포 및 시세 조종 의도 게시물</li>
-                <li>타인에 대한 욕설, 비방, 차별, 혐오 조장 등 불건전한 표현</li>
+                <li>종목 검색 기록과 랭킹 데이터는 익명화되어 집계됩니다.</li>
+                <li>오픈채팅, 텔레그램 등 불법 리딩방 및 유료 정보방 가입 유도 시 경고 없이 게시물이 차단됩니다.</li>
+                <li>타인에 대한 욕설, 비방 등 불건전한 표현 작성 시 IP 차단 조치가 취해질 수 있습니다.</li>
             </ul>
         </div>
 
-        <div class="footer-text">
-            본 약관은 2026년 6월 27일부터 시행됩니다.<br>
-            © 2026 SSABISSA. All rights reserved.
+        <!-- ✅ 하단 면책조항 -->
+        <div class="main-footer">
+            본 약관은 2026년 6월 27일부터 시행됩니다.<br><br>
+            © 2026 SSABISSA. All rights reserved.<br>
+            본 서비스의 진단 점수 및 큐레이션은 투자 참고용이며,<br>
+            실제 투자 결과에 대한 법적 책임을 지지 않습니다.
+        </div>
+    </div>
+
+    <!-- ✅ 팝업 모달 HTML 영역 -->
+    <div id="diagnoseModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalBody">
+                <div class="loading-spinner">데이터를 불러오는 중입니다... ⏳</div>
+            </div>
         </div>
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/" class="nav-logo">🔍 홈</a>
         <div class="nav-links">
             <a href="/calendar">캘린더</a>
             <a href="/ranking">랭킹</a>
@@ -159,5 +155,60 @@
         </div>
     </div>
 
+   <!-- ✅ 검색창 모달 연동 스크립트 -->
+   <script>
+    function handleSearch(e) {
+        e.preventDefault(); 
+        const query = document.getElementById('searchInput').value.trim();
+        if(!query) return;
+        openModal(query);
+    }
+
+    function openModal(ticker) {
+        const modal = document.getElementById('diagnoseModal');
+        const body = document.getElementById('modalBody');
+        modal.style.display = 'flex';
+        body.innerHTML = '<div class="loading-spinner">진단 중입니다... ⏳</div>';
+
+        fetch(`/api/diagnose/${ticker}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    body.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--red); font-weight:800;">${data.error}</div>`;
+                    return;
+                }
+                
+                let reasonsHtml = '';
+                if (data.reasons && data.reasons.length > 0) {
+                    data.reasons.forEach(r => {
+                        let color = 'var(--text-main)';
+                        if(r.startsWith('+')) color = 'var(--red)';
+                        if(r.startsWith('-')) color = 'var(--blue)';
+                        reasonsHtml += `<li class="m-reason-item" style="color:${color}">${r}</li>`;
+                    });
+                } else {
+                    reasonsHtml = `<li class="m-reason-item" style="color: #94a3b8; text-align:center;">특이 평가 항목이 없습니다.</li>`;
+                }
+
+                body.innerHTML = `
+                    <div class="m-header">
+                        <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
+                        <div class="m-price">${data.current_price}</div>
+                    </div>
+                    <div class="m-score-circle" style="background-color: ${data.color};">${data.score}</div>
+                    <div class="m-brief">${data.brief}</div>
+                    <div class="m-curation">🤖 ${data.curation_reason}</div>
+                    <ul class="m-reason-list">${reasonsHtml}</ul>
+                    <a href="/?ticker=${data.ticker}" class="m-btn-detail">📊 전체 차트 및 주주 커뮤니티 보기</a>
+                `;
+            })
+            .catch(err => {
+                body.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--red); font-weight:800;">통신 오류가 발생했습니다.</div>`;
+            });
+    }
+
+    function closeModal() { document.getElementById('diagnoseModal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('diagnoseModal')) closeModal(); }
+   </script>
 </body>
 </html>

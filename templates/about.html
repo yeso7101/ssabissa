@@ -6,88 +6,71 @@
     <title>서비스 소개 - 싸비싸</title>
     
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-    
     <style>
-        :root {
-            --blue: #3b82f6;
-            --text-main: #1e293b;
-            --text-sub: #868e96;
-            --border: #dee2e6;
-            --bg-gray: #f0f7ff;
-        }
-        
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: var(--bg-gray); 
-            margin: 0; 
-            padding-top: 100px; 
-            padding-bottom: 40px;
-            box-sizing: border-box;
-        }
-        
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 0 16px; 
-            box-sizing: border-box;
-        }
+        :root { --blue: #3b82f6; --text-main: #1e293b; --text-sub: #868e96; --border: #e2e8f0; --bg-gray: #f8fafc; --red: #ef4444; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding-top: 90px; padding-bottom: 60px; box-sizing: border-box; color: var(--text-main); }
+        .container { max-width: 600px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 
-        /* 🖥️ 데스크탑 상단 내비게이션 (공통) */
-        .top-nav { 
-            position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            padding: 12px 24px; border-radius: 100px; box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000;
-        }
-        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
-        .top-nav .nav-links { display: flex; gap: 16px; align-items: center; }
-        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
-        .top-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-        .top-nav a.active { color: #1e293b !important; font-weight: 900; font-size: 0.95rem; text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.25), 0 0 45px rgba(59, 130, 246, 0.15); transition: all 0.3s ease-in-out; }
+        .top-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 500px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 100px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000; }
+        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 800; font-size: 0.95rem; letter-spacing: -0.5px; }
+        .top-nav .nav-links { display: flex; gap: 14px; align-items: center; }
+        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.8rem; font-weight: 600; transition: all 0.3s; }
+        .top-nav a:not(.nav-logo):hover { color: var(--blue); }
         
-        /* 🔍 본문 내 검색창 (공통) */
+        /* 🔍 검색창 (모달 띄우기 연동) */
         .page-search { position: relative; width: 100%; max-width: 400px; margin: 0 auto 20px auto; display: flex; align-items: center; }
-        .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1px solid var(--border); outline: none; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: border-color 0.2s; }
-        .page-search input:focus { border-color: var(--blue); }
-        .page-search button { position: absolute; right: 16px; background: none; border: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 1.1rem; font-weight: bold; }
+        .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1.5px solid #cbd5e1; outline: none; font-size: 0.95rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.3s; }
+        .page-search input:focus { border-color: var(--blue); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1); }
+        .page-search button { position: absolute; right: 16px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: transform 0.2s; }
+        .page-search button:hover { transform: scale(1.05); }
 
-        /* ✨ 소개 페이지 전용 스타일 */
-        .about-hero { text-align: center; padding: 35px 20px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid var(--border); }
-        .about-hero h1 { color: var(--blue); margin-top: 0; margin-bottom: 12px; font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; }
-        .about-hero p { color: var(--text-sub); font-size: 0.95rem; line-height: 1.6; word-break: keep-all; margin: 0; font-weight: 600; }
+        /* ✨ 소개 페이지 전용 카드 스타일 (가독성 최적화) */
+        .about-hero { text-align: center; padding: 35px 20px; background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid var(--border); }
+        .about-hero h1 { color: var(--blue); margin-top: 0; margin-bottom: 12px; font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px; }
+        .about-hero p { color: #475569; font-size: 0.9rem; line-height: 1.6; word-break: keep-all; margin: 0; font-weight: 600; }
         
-        .about-card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-        .about-card h2 { font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-top: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .about-card p { font-size: 0.95rem; color: #475569; line-height: 1.7; margin: 0; word-break: keep-all; }
-        
-        .highlight { color: var(--blue); font-weight: 800; }
+        .about-card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+        .about-card h2 { font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
+        .about-card p { font-size: 0.9rem; color: #475569; line-height: 1.7; margin: 0 0 12px 0; word-break: keep-all; font-weight: 500; }
+        .about-card p:last-child { margin-bottom: 0; }
+        .highlight { color: var(--blue); font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px;}
 
-        .footer-text { text-align: center; margin-top: 35px; font-size: 0.8rem; color: #94a3b8; line-height: 1.5; font-weight: 500; }
+        /* ✅ 하단 면책조항 텍스트 */
+        .main-footer { text-align: center; margin-top: 30px; font-size: 0.75rem; color: #94a3b8; line-height: 1.6; font-weight: 400; padding-bottom: 20px; }
+
+        /* ✅ 모달 UI */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal-content { background: #fff; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); position: relative; max-height: 85vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 16px; right: 20px; cursor: pointer; font-size: 1.8rem; color: #94a3b8; background: none; border: none; padding: 0; line-height: 1; transition: color 0.2s; }
+        .modal-close:hover { color: var(--text-main); }
+        .m-score-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: white; margin: 10px auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .m-header { text-align: center; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
+        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; }
+        .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; }
+        .m-brief { font-size: 0.9rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; line-height: 1.4; }
+        .m-curation { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 16px; line-height: 1.5; border: 1px solid #e2e8f0; }
+        .m-reason-list { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; margin-bottom: 20px;}
+        .m-reason-item { padding: 8px 0; border-bottom: 1px dashed #f1f3f5; font-weight: 600; }
+        .m-btn-detail { display: block; width: 100%; text-align: center; background: var(--blue); color: white; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 800; transition: transform 0.2s; box-sizing: border-box; font-size: 0.9rem;}
+        .m-btn-detail:active { transform: scale(0.97); }
+        .loading-spinner { text-align: center; padding: 40px; font-weight: 700; color: var(--blue); font-size: 1rem; }
 
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
-            body { padding-top: 20px; margin-bottom: 90px; }
-            
-            /* 📱 모바일 하단 내비게이션 (공통) */
-            .mobile-sub-nav { 
-                position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 0 20px; height: 56px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12); justify-content: space-between; align-items: center; width: calc(100% - 40px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; 
-            }
-            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; letter-spacing: -0.5px; }
-            .mobile-sub-nav .nav-links { display: flex; gap: 8px; align-items: center; }
-            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
-            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-            .mobile-sub-nav a.active { color: #1a73e8 !important; background: transparent !important; font-weight: 900; text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25); }
-
-            .container { margin-top: 10px; margin-bottom: 40px; padding: 0 12px; }
-            .page-search { max-width: 100%; }
+            body { padding-top: 20px; margin-bottom: 80px; }
+            .mobile-sub-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 0 16px; height: 52px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08); justify-content: space-between; align-items: center; width: calc(100% - 32px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; }
+            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--text-main) !important; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.5px; }
+            .mobile-sub-nav .nav-links { display: flex; gap: 6px; align-items: center; }
+            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.75rem; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
+            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); }
+            .mobile-sub-nav a.active { color: var(--blue) !important; font-weight: 800; }
         }
     </style>
 </head>
 <body>
 
     <div class="top-nav">
-        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/" class="nav-logo">🔍 홈</a>
         <div class="nav-links">
             <a href="/calendar">캘린더</a>
             <a href="/ranking">랭킹</a>
@@ -98,38 +81,60 @@
     </div>
 
     <div class="container">
-        <form action="/" method="GET" class="page-search">
-            <input type="text" id="ticker" name="ticker" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
+        <!-- ✅ 검색창 제출 시 모달 연동 -->
+        <form class="page-search" onsubmit="handleSearch(event)">
+            <input type="text" id="searchInput" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
             <button type="submit">🔍</button>
         </form>
 
         <div class="about-hero">
             <h1>싸비싸 (SSABISSA)</h1>
-            <p>복잡하고 불안한 주식 시장 속,<br>데이터와 알고리즘으로 투명한 가치투자 지표를 제공합니다.</p>
+            <p>직감에 의존하는 투자는 이제 그만.<br>데이터와 알고리즘이 제시하는 투명한 가치투자 지표.</p>
         </div>
 
         <div class="about-card">
-            <h2>🎯 싸비싸란 무엇인가요?</h2>
-            <p>싸비싸는 개인 투자자들이 감정이나 뜬소문에 휘둘리지 않고, <span class="highlight">철저히 재무 데이터에 기반한 객관적인 의사결정</span>을 내릴 수 있도록 돕기 위해 탄생했습니다. 한국과 미국의 주요 1,200여 개 우량주를 실시간으로 추적하여 숨겨진 가치를 찾아냅니다.</p>
+            <h2>🎯 프로젝트의 시작: 왜 '싸비싸'인가요?</h2>
+            <p>매일 쏟아지는 수백 개의 경제 기사, 유튜버들의 추천주, 그리고 출처를 알 수 없는 리딩방의 정보들 속에서 개인 투자자들은 피로감을 느낍니다.</p>
+            <p>싸비싸는 <span class="highlight">"객관적인 재무 데이터로 기업의 본질 가치를 100점 만점으로 직관화할 수 없을까?"</span>라는 질문에서 출발했습니다. 우리는 투자자들이 감정이나 노이즈에 휩쓸리지 않고 스스로 안전마진을 확인할 수 있는 무료 나침반이 되기를 원합니다.</p>
         </div>
 
         <div class="about-card">
-            <h2>⚙️ 어떻게 진단하나요?</h2>
-            <p>기업의 가치를 판단하기 위해 <span class="highlight">11가지 핵심 지표</span>(PER, PBR, 성장률, 배당, 부채비율, 유상증자 이력 등)를 알고리즘으로 정밀 분석하여 100점 만점의 점수로 환산합니다. 안전 마진이 확보된 종목은 가산점을, 가치 함정이나 고평가 리스크가 있는 종목은 감점을 부여합니다.</p>
+            <h2>⚙️ 싸비싸의 11대 핵심 진단 엔진</h2>
+            <p>싸비싸의 알고리즘은 단기적인 테마나 차트의 기교를 배제합니다. 오직 기업의 재무제표와 펀더멘탈에 집중합니다.</p>
+            <p>기본 점수 50점에서 시작하여 <span class="highlight">PER, PBR, 순현금흐름, 자기자본이익률(ROE), 유상증자 이력, 영업이익률</span> 등 11가지 까다로운 기준을 적용합니다. 튼튼한 우량주에는 가점을, 주주 가치를 훼손하거나 부채가 많은 기업에는 가차 없이 감점을 부여하여 냉정한 평가 결과를 도출합니다.</p>
         </div>
 
         <div class="about-card">
-            <h2>🤝 건강한 투자 커뮤니티</h2>
-            <p>단순한 수치 분석을 넘어, 실투자자들의 생생한 인사이트를 담을 수 있는 투표와 댓글 시스템을 제공합니다. 스팸 봇과 불건전한 리딩방 유도 글을 자체 엔진으로 자동 필터링하여 <span class="highlight">깨끗하고 건강한 투자 토론 문화</span>를 만들어갑니다.</p>
+            <h2>🤝 집단 지성: 클린 주주 커뮤니티</h2>
+            <p>아무리 좋은 데이터도 현장의 생생한 분위기를 100% 담을 수는 없습니다. 이를 보완하기 위해 각 종목별로 투표와 토론 공간을 마련했습니다.</p>
+            <p>싸비싸의 커뮤니티는 <span class="highlight">스팸 및 리딩방 유도 키워드를 자체 필터링 엔진으로 1차 차단</span>하며, 30일이 지난 오래된 데이터는 자동으로 소거하여 항상 쾌적하고 최신의 정보만이 교류되는 청정 구역을 유지합니다.</p>
+        </div>
+
+        <div class="about-card">
+            <h2>🚀 앞으로의 비전</h2>
+            <p>현재 한국 및 미국 증시의 주요 대장주 1,200여 개를 지원하고 있으며, 향후 진단 알고리즘을 ETF 및 신흥국 시장으로 확장할 계획입니다. 모든 개인 투자자가 잃지 않는 투자를 하는 그날까지 싸비싸는 계속 진화합니다.</p>
         </div>
         
-        <div class="footer-text">
-            © 2026 SSABISSA. All rights reserved.<br>본 서비스의 진단 점수 및 큐레이션은 투자 참고용이며,<br>실제 투자 결과에 대한 법적 책임을 지지 않습니다.
+        <!-- ✅ 하단 면책조항 -->
+        <div class="main-footer">
+            © 2026 SSABISSA. All rights reserved.<br>
+            본 서비스의 진단 점수 및 큐레이션은 투자 참고용이며,<br>
+            실제 투자 결과에 대한 법적 책임을 지지 않습니다.
+        </div>
+    </div>
+
+    <!-- ✅ 팝업 모달 HTML 영역 -->
+    <div id="diagnoseModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalBody">
+                <div class="loading-spinner">데이터를 불러오는 중입니다... ⏳</div>
+            </div>
         </div>
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/" class="nav-logo">🔍 홈</a>
         <div class="nav-links">
             <a href="/calendar">캘린더</a>
             <a href="/ranking">랭킹</a>
@@ -139,5 +144,60 @@
         </div>
     </div>
 
+   <!-- ✅ 검색창 모달 연동 스크립트 -->
+   <script>
+    function handleSearch(e) {
+        e.preventDefault(); 
+        const query = document.getElementById('searchInput').value.trim();
+        if(!query) return;
+        openModal(query);
+    }
+
+    function openModal(ticker) {
+        const modal = document.getElementById('diagnoseModal');
+        const body = document.getElementById('modalBody');
+        modal.style.display = 'flex';
+        body.innerHTML = '<div class="loading-spinner">진단 중입니다... ⏳</div>';
+
+        fetch(`/api/diagnose/${ticker}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    body.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--red); font-weight:800;">${data.error}</div>`;
+                    return;
+                }
+                
+                let reasonsHtml = '';
+                if (data.reasons && data.reasons.length > 0) {
+                    data.reasons.forEach(r => {
+                        let color = 'var(--text-main)';
+                        if(r.startsWith('+')) color = 'var(--red)';
+                        if(r.startsWith('-')) color = 'var(--blue)';
+                        reasonsHtml += `<li class="m-reason-item" style="color:${color}">${r}</li>`;
+                    });
+                } else {
+                    reasonsHtml = `<li class="m-reason-item" style="color: #94a3b8; text-align:center;">특이 평가 항목이 없습니다.</li>`;
+                }
+
+                body.innerHTML = `
+                    <div class="m-header">
+                        <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
+                        <div class="m-price">${data.current_price}</div>
+                    </div>
+                    <div class="m-score-circle" style="background-color: ${data.color};">${data.score}</div>
+                    <div class="m-brief">${data.brief}</div>
+                    <div class="m-curation">🤖 ${data.curation_reason}</div>
+                    <ul class="m-reason-list">${reasonsHtml}</ul>
+                    <a href="/?ticker=${data.ticker}" class="m-btn-detail">📊 전체 차트 및 주주 커뮤니티 보기</a>
+                `;
+            })
+            .catch(err => {
+                body.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--red); font-weight:800;">통신 오류가 발생했습니다.</div>`;
+            });
+    }
+
+    function closeModal() { document.getElementById('diagnoseModal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('diagnoseModal')) closeModal(); }
+   </script>
 </body>
 </html>

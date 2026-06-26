@@ -8,125 +8,81 @@
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     
     <style>
-        :root {
-            --blue: #3b82f6;
-            --text-main: #1e293b;
-            --text-sub: #868e96;
-            --border: #dee2e6;
-            --bg-gray: #f0f7ff;
-        }
+        :root { --blue: #3b82f6; --text-main: #1e293b; --text-sub: #868e96; --border: #e2e8f0; --bg-gray: #f8fafc; --red: #ef4444; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding-top: 90px; padding-bottom: 60px; box-sizing: border-box; color: var(--text-main); }
+        .container { max-width: 600px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
+        .top-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 500px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 100px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000; }
+        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 800; font-size: 0.95rem; letter-spacing: -0.5px; }
+        .top-nav .nav-links { display: flex; gap: 14px; align-items: center; }
+        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.8rem; font-weight: 600; transition: all 0.3s; }
+        .top-nav a:not(.nav-logo):hover { color: var(--blue); }
         
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background-color: var(--bg-gray); 
-            margin: 0; 
-            padding-top: 100px; 
-            padding-bottom: 40px;
-            box-sizing: border-box;
-        }
-        
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 0 16px; 
-            box-sizing: border-box;
-        }
-
-        /* 🖥️ 데스크탑 상단 내비게이션 */
-        .top-nav { 
-            position: fixed; 
-            top: 24px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 500px;
-            display: flex; 
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.55); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px);
-            padding: 12px 24px;
-            border-radius: 100px; 
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-sizing: border-box;
-            z-index: 1000;
-        }
-        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
-        .top-nav .nav-links { display: flex; gap: 16px; align-items: center; }
-        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
-        .top-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-
-        /* 🎨 [데스크탑 active] 현재 페이지 시각적 강조 */
-        .top-nav a.active {
-            color: #1e293b !important;          
-            font-weight: 900;
-            font-size: 0.95rem;
-            text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.25), 0 0 45px rgba(59, 130, 246, 0.15);
-            transition: all 0.3s ease-in-out;
-        }
-        
-        /* 🔍 본문 내 검색창 */
+        /* 🔍 검색창 (액션 없이 모달 연동) */
         .page-search { position: relative; width: 100%; max-width: 400px; margin: 0 auto 10px auto; display: flex; align-items: center; }
-        .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1px solid var(--border); outline: none; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: border-color 0.2s; }
-        .page-search input:focus { border-color: var(--blue); }
-        .page-search button { position: absolute; right: 16px; background: none; border: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 1.1rem; font-weight: bold; }
+        .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1.5px solid #cbd5e1; outline: none; font-size: 0.95rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.3s; }
+        .page-search input:focus { border-color: var(--blue); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1); }
+        .page-search button { position: absolute; right: 16px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: transform 0.2s; }
+        .page-search button:hover { transform: scale(1.05); }
 
-        /* 📂 서류함(카테고리 탭) 디자인 */
         .tab-container { display: flex; margin-bottom: -1px; position: relative; z-index: 10; margin-top: 20px; }
-        .tab-button { flex: 1; padding: 14px; text-align: center; font-weight: 800; font-size: 14px; background-color: #e9ecef; color: #495057; border: 1px solid var(--border); border-bottom: none; border-top-left-radius: 12px; border-top-right-radius: 12px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; position: relative; z-index: 100; }
-        .tab-button.active { background-color: #ffffff; color: var(--blue); border-color: var(--border) var(--border) #ffffff; }
+        .tab-button { flex: 1; padding: 12px; text-align: center; font-weight: 700; font-size: 0.9rem; background-color: #f1f5f9; color: #64748b; border: 1px solid var(--border); border-bottom: none; border-top-left-radius: 12px; border-top-right-radius: 12px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+        .tab-button.active { background-color: #ffffff; color: var(--blue); border-color: var(--border) var(--border) #ffffff; font-weight: 800; }
         
-        /* 📝 랭킹 보드 박스 */
-        .ranking-board { background: #ffffff; border: 1px solid var(--border); border-radius: 0 0 16px 16px; padding: 10px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); margin-bottom: 25px; }
-        .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px; border-bottom: 1px solid #f1f3f5; cursor: pointer; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
-        .rank-item:hover { background-color: #f8fafc; }
+        .ranking-board { background: #ffffff; border: 1px solid var(--border); border-radius: 0 0 16px 16px; padding: 10px 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
+        .rank-item:hover { background-color: #f8fafc; border-radius: 8px;}
         .rank-item:last-child { border-bottom: none; }
         .rank-left { display: flex; align-items: center; gap: 14px; overflow: hidden; white-space: nowrap; }
-        .rank-number { font-weight: 900; color: #adb5bd; width: 24px; text-align: center; font-size: 1.05rem; }
-        .rank-1 { color: #f1c40f; font-size: 1.25rem; } 
-        .rank-2 { color: #a8b2bd; font-size: 1.15rem; } 
-        .rank-3 { color: #cd7f32; font-size: 1.1rem; }
+        .rank-number { font-weight: 900; color: #cbd5e1; width: 24px; text-align: center; font-size: 1rem; }
+        .rank-1 { color: #f1c40f; font-size: 1.15rem; } .rank-2 { color: #94a3b8; font-size: 1.1rem; } .rank-3 { color: #cd7f32; font-size: 1.05rem; }
         .stock-info { display: flex; align-items: center; gap: 6px; }
-        .stock-name { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
-        .stock-ticker { font-size: 0.8rem; color: var(--text-sub); font-weight: 600; }
+        .stock-name { font-weight: 700; color: var(--text-main); font-size: 0.9rem; }
+        .stock-ticker { font-size: 0.75rem; color: var(--text-sub); font-weight: 500; }
         .rank-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .view-count { font-size: 0.8rem; font-weight: 700; color: var(--blue); background: #e8f0fe; padding: 4px 10px; border-radius: 20px; }
-        .score-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; color: white; font-weight: 800; min-width: 35px; text-align: center; }
+        .view-count { font-size: 0.75rem; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 20px; }
+        .score-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; color: white; font-weight: 700; min-width: 35px; text-align: center; }
 
-        /* 💡 아코디언 가이드 전용 UI */
-        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; font-size: 0.95rem; font-weight: 800; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); margin-top: 25px; border: 1px solid #edf2f7; text-align: left; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; text-align: left; }
-        .accordion-content.open { max-height: 2200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); margin-top: -10px; border: 1px solid #edf2f7; border-top: none; }
-        .guide-item { margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; }
-        .guide-item:last-child { margin-bottom: 0; border-bottom: none; }
-        .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: var(--blue); background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); margin-top: 20px; border: 1px solid var(--border); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 20px; background-color: #ffffff; border-radius: 0 0 16px 16px; border: 1px solid transparent; border-top: none;}
+        .accordion-content.open { max-height: 2200px; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03); margin-top: -10px; border-color: var(--border); }
+        .guide-item { margin-bottom: 12px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; }
+        .guide-item:last-child { border-bottom: none; }
+        .guide-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
         .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
+
+        /* ✅ 모달 UI */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .modal-content { background: #fff; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); position: relative; max-height: 85vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 16px; right: 20px; cursor: pointer; font-size: 1.8rem; color: #94a3b8; background: none; border: none; padding: 0; line-height: 1; transition: color 0.2s; }
+        .modal-close:hover { color: var(--text-main); }
+        .m-score-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: white; margin: 10px auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .m-header { text-align: center; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
+        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; }
+        .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; }
+        .m-brief { font-size: 0.9rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; line-height: 1.4; }
+        .m-curation { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 16px; line-height: 1.5; border: 1px solid #e2e8f0; }
+        .m-reason-list { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; margin-bottom: 20px;}
+        .m-reason-item { padding: 8px 0; border-bottom: 1px dashed #f1f3f5; font-weight: 600; }
+        .m-btn-detail { display: block; width: 100%; text-align: center; background: var(--blue); color: white; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 800; transition: transform 0.2s; box-sizing: border-box; font-size: 0.9rem;}
+        .m-btn-detail:active { transform: scale(0.97); }
+        .loading-spinner { text-align: center; padding: 40px; font-weight: 700; color: var(--blue); font-size: 1rem; }
 
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
-            body { padding-top: 20px; margin-bottom: 90px; }
-            
-            /* 📱 모바일 하단 내비게이션 */
-            .mobile-sub-nav { 
-                position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 0 20px; height: 56px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12); justify-content: space-between; align-items: center; width: calc(100% - 40px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; 
-            }
-            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; letter-spacing: -0.5px; }
-            .mobile-sub-nav .nav-links { display: flex; gap: 8px; align-items: center; }
-            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
-            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-            .mobile-sub-nav a.active { color: #1a73e8 !important; background: transparent !important; font-weight: 900; text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25); }
-
-            .container { margin-top: 10px; margin-bottom: 40px; padding: 0 12px; }
-            .page-search { max-width: 100%; }
+            body { padding-top: 20px; margin-bottom: 80px; }
+            .mobile-sub-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 0 16px; height: 52px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08); justify-content: space-between; align-items: center; width: calc(100% - 32px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; }
+            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--text-main) !important; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.5px; }
+            .mobile-sub-nav .nav-links { display: flex; gap: 6px; align-items: center; }
+            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.75rem; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
+            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); }
+            .mobile-sub-nav a.active { color: var(--blue) !important; font-weight: 800; }
         }
     </style>
 </head>
 <body>
 
     <div class="top-nav">
-        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/" class="nav-logo">🔍 홈</a>
         <div class="nav-links">
             <a href="/calendar">캘린더</a>
             <a href="/ranking" class="active">랭킹</a>
@@ -137,8 +93,8 @@
     </div>
 
     <div class="container">
-        <form action="/" method="GET" class="page-search">
-            <input type="text" id="ticker" name="ticker" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
+        <form class="page-search" onsubmit="handleSearch(event)">
+            <input type="text" id="searchInput" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
             <button type="submit">🔍</button>
         </form>
 
@@ -149,7 +105,7 @@
 
         <div id="kr-board" class="ranking-board">
             {% for item in kr_rankings %}
-            <div class="rank-item" onclick="window.location.href='/?ticker={{item.ticker}}'">
+            <div class="rank-item" onclick="openModal('{{item.ticker}}')">
                 <div class="rank-left">
                     <span class="rank-number {% if item.rank <= 3 %}rank-{{item.rank}}{% endif %}">{{item.rank}}</span>
                     <div class="stock-info">
@@ -164,13 +120,13 @@
             </div>
             {% endfor %}
             {% if not kr_rankings %}
-            <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.9rem;">검색 데이터가 충분히 쌓이지 않았습니다.</div>
+            <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem;">검색 데이터가 충분히 쌓이지 않았습니다.</div>
             {% endif %}
         </div>
 
         <div id="us-board" class="ranking-board" style="display: none;">
             {% for item in us_rankings %}
-            <div class="rank-item" onclick="window.location.href='/?ticker={{item.ticker}}'">
+            <div class="rank-item" onclick="openModal('{{item.ticker}}')">
                 <div class="rank-left">
                     <span class="rank-number {% if item.rank <= 3 %}rank-{{item.rank}}{% endif %}">{{item.rank}}</span>
                     <div class="stock-info">
@@ -185,31 +141,40 @@
             </div>
             {% endfor %}
             {% if not us_rankings %}
-            <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.9rem;">검색 데이터가 충분히 쌓이지 않았습니다.</div>
+            <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem;">검색 데이터가 충분히 쌓이지 않았습니다.</div>
             {% endif %}
         </div>
 
         <div class="accordion-header" onclick="toggleAccordion()">
-            <span>💡 11대 핵심 종합 평가 기준표 열어보기</span>
+            <span>💡 11대 핵심 종합 평가 기준표</span>
             <span id="accArrow">▼</span>
         </div>
         <div class="accordion-content" id="accContent">
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">1. 선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 성장성 대비 저렴한 상태입니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">2. PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 저평가 구간입니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">3. 역사적 배당수익률 밴드 상단</span></div><div class="guide-desc">과거 평균 배당률 대비 현재 배당수익률이 극대화되어 강한 하방 경직성을 확보했습니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">4. 최근 3개년 순현금 흐름(FCF) 흑자</span></div><div class="guide-desc">영업활동을 통해 실제로 벌어들인 현금이 유출보다 많아 펀더멘탈이 견고합니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">5. ROE(자기자본이익률) 10% 이상 유지</span></div><div class="guide-desc">주주가 맡긴 자본을 활용하여 매년 안정적으로 이익을 창출해 내는 효율적 기업입니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6; font-weight: bold;">6. 영업이익률(OPM) 동종업계 상위 20%</span></div><div class="guide-desc">경쟁사 대비 높은 마진율을 통해 가격 결정권과 독점적 시장 지위를 구축했습니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">7. 주주가치 희석 유상증자 이력 (-감점)</span></div><div class="guide-desc">기존 주주의 지분 가치를 무참히 분쇄하는 대규모 발행 물량은 강한 감점 요인입니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">8. 전환사채(CB) 및 신주인수권부사채 과다 (-감점)</span></div><div class="guide-desc">잠재적 오버행 리스크가 상존하여 가치 점수가 희석됩니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444; font-weight: bold;">9. 역성장 및 3개년 연속 매출 감소 (-감점)</span></div><div class="guide-desc">시장의 외면을 받으며 본업의 체급이 줄어드는 기업은 저평가 덫으로 간주합니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#22c55e; font-weight: bold;">10. 자사주 매입 후 소각 이력 (+가산)</span></div><div class="guide-desc">단순 매입을 넘어 유통 주식수를 영구 격리하여 주당 가치를 끌어올리는 주주환원입니다.</div></div>
-            <div class="guide-item"><div class="guide-title"><span style="color:#22c55e; font-weight: bold;">11. 최대주주 및 특수관계인 지분 확대 (+가산)</span></div><div class="guide-desc">내부 사정을 가장 잘 아는 지배주주의 장내 매수는 책임 경영과 강한 반등 신호입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">1. 선행 PER (Forward PER) 저평가</span></div><div class="guide-desc">12개월 선행 기대 순이익 대비 현재 주가가 낮아 성장성 대비 저렴한 상태입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">2. PBR (주가순자산비율) 0.6 미만</span></div><div class="guide-desc">회사가 보유한 청산 가치보다 주가가 낮게 거래되는 절대적 저평가 구간입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">3. 역사적 배당수익률 상단</span></div><div class="guide-desc">과거 평균 배당률 대비 현재 배당수익률이 극대화되어 강한 하방 경직성을 확보했습니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">4. 최근 3개년 순현금 흐름(FCF) 흑자</span></div><div class="guide-desc">영업활동을 통해 실제로 벌어들인 현금이 유출보다 많아 펀더멘탈이 견고합니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">5. ROE(자기자본이익률) 10% 이상 유지</span></div><div class="guide-desc">주주가 맡긴 자본을 활용하여 매년 안정적으로 이익을 창출해 내는 효율적 기업입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#3b82f6;">6. 영업이익률(OPM) 상위 20%</span></div><div class="guide-desc">경쟁사 대비 높은 마진율을 통해 가격 결정권과 독점적 시장 지위를 구축했습니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">7. 주주가치 희석 유상증자 이력 (-감점)</span></div><div class="guide-desc">기존 주주의 지분 가치를 희석하는 대규모 발행 물량은 강한 감점 요인입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">8. 전환사채(CB) 등 사채 과다 (-감점)</span></div><div class="guide-desc">잠재적 오버행 리스크가 상존하여 가치 점수가 희석됩니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#ef4444;">9. 역성장 및 3개년 연속 매출 감소 (-감점)</span></div><div class="guide-desc">시장의 외면을 받으며 본업의 체급이 줄어드는 기업은 저평가 덫으로 간주합니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#22c55e;">10. 자사주 매입 후 소각 이력 (+가산)</span></div><div class="guide-desc">유통 주식수를 영구 격리하여 주당 가치를 끌어올리는 주주환원입니다.</div></div>
+            <div class="guide-item"><div class="guide-title"><span style="color:#22c55e;">11. 최대주주 지분 확대 (+가산)</span></div><div class="guide-desc">지배주주의 장내 매수는 책임 경영과 강한 반등 신호입니다.</div></div>
+        </div>
+    </div>
+
+    <div id="diagnoseModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalBody">
+                <div class="loading-spinner">데이터를 불러오는 중입니다... ⏳</div>
+            </div>
         </div>
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/" class="nav-logo">🔍 홈</a>
         <div class="nav-links">
             <a href="/calendar">캘린더</a>
             <a href="/ranking" class="active">랭킹</a>
@@ -220,13 +185,9 @@
     </div>
 
    <script>
-    // 탭 전환 (국내/미국 주식)
     function switchTab(market) {
-        const tabKr = document.getElementById('tab-kr');
-        const tabUs = document.getElementById('tab-us');
-        const krBoard = document.getElementById('kr-board');
-        const usBoard = document.getElementById('us-board');
-        if(!tabKr || !tabUs || !krBoard || !usBoard) return;
+        const tabKr = document.getElementById('tab-kr'); const tabUs = document.getElementById('tab-us');
+        const krBoard = document.getElementById('kr-board'); const usBoard = document.getElementById('us-board');
         if (market === 'kr') {
             tabKr.classList.add('active'); tabUs.classList.remove('active');
             krBoard.style.display = 'block'; usBoard.style.display = 'none';
@@ -235,15 +196,66 @@
             krBoard.style.display = 'none'; usBoard.style.display = 'block';
         }
     }
-
-    // 아코디언 가이드 토글
     function toggleAccordion() {
         const content = document.getElementById("accContent");
-        if(content) {
-            content.classList.toggle("open");
-            document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
-        }
+        content.classList.toggle("open");
+        document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
     }
+
+    // ✅ 검색창 제출 시 모달 띄우기
+    function handleSearch(e) {
+        e.preventDefault(); 
+        const query = document.getElementById('searchInput').value.trim();
+        if(!query) return;
+        openModal(query);
+    }
+
+    // ✅ 모달 렌더링 함수
+    function openModal(ticker) {
+        const modal = document.getElementById('diagnoseModal');
+        const body = document.getElementById('modalBody');
+        modal.style.display = 'flex';
+        body.innerHTML = '<div class="loading-spinner">진단 중입니다... ⏳</div>';
+
+        fetch(`/api/diagnose/${ticker}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    body.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--red); font-weight:800;">${data.error}</div>`;
+                    return;
+                }
+                
+                let reasonsHtml = '';
+                if (data.reasons && data.reasons.length > 0) {
+                    data.reasons.forEach(r => {
+                        let color = 'var(--text-main)';
+                        if(r.startsWith('+')) color = 'var(--red)';
+                        if(r.startsWith('-')) color = 'var(--blue)';
+                        reasonsHtml += `<li class="m-reason-item" style="color:${color}">${r}</li>`;
+                    });
+                } else {
+                    reasonsHtml = `<li class="m-reason-item" style="color: #94a3b8; text-align:center;">특이 평가 항목이 없습니다.</li>`;
+                }
+
+                body.innerHTML = `
+                    <div class="m-header">
+                        <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
+                        <div class="m-price">${data.current_price}</div>
+                    </div>
+                    <div class="m-score-circle" style="background-color: ${data.color};">${data.score}</div>
+                    <div class="m-brief">${data.brief}</div>
+                    <div class="m-curation">🤖 ${data.curation_reason}</div>
+                    <ul class="m-reason-list">${reasonsHtml}</ul>
+                    <a href="/?ticker=${data.ticker}" class="m-btn-detail">📊 전체 차트 및 주주 커뮤니티 보기</a>
+                `;
+            })
+            .catch(err => {
+                body.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--red); font-weight:800;">통신 오류가 발생했습니다.</div>`;
+            });
+    }
+
+    function closeModal() { document.getElementById('diagnoseModal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('diagnoseModal')) closeModal(); }
    </script>
 </body>
 </html>
