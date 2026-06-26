@@ -6,7 +6,6 @@
     <title>싸비싸 - 실시간 기업 가치 스크리닝 계량 서비스</title>
     <meta name="description" content="복잡한 재무 지표 소음을 걷어내고, 유상증자 리스크 및 코리아 디스카운트 보정 알고리즘을 거쳐 도출된 정량적 가치 점수를 100점 만점으로 확인해 보세요.">
     
-    <!-- 📊 Chart.js CDN (과거 점수 히스토리 그래프용) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     
@@ -22,8 +21,6 @@
     .top-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
 
     .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; margin-top: 40px; }
-    
-    /* 💎 기존 메인 타이틀 롤백 */
     .title-text { display: inline-block; font-size: 2.8rem; font-weight: 900; color: #ffffff; margin: 0 0 25px 0; letter-spacing: -1px; text-shadow: 0 8px 20px rgba(59, 130, 246, 0.65), 0 15px 40px rgba(59, 130, 246, 0.45); }
     
     .search-box { position: relative; width: 100%; margin: 0 auto; }
@@ -47,7 +44,7 @@
     .share-pill { display: inline-flex; align-items: center; gap: 6px; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer; }
     .share-pill:hover { background: #e2e8f0; color: var(--blue); }
 
-    /* 기능 추가 섹션 UI (이슈 큐레이션, 백테스트) */
+    /* 기능 추가 섹션 UI */
     .feature-box { padding: 16px; border-radius: 12px; margin-bottom: 15px; }
     .curation-box { background: #f8fafc; border-left: 4px solid var(--blue); }
     .backtest-box { background: #ecfdf5; display: flex; justify-content: space-between; align-items: center; }
@@ -76,11 +73,10 @@
         .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
         .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
     }
-</style>
+    </style>
 </head>
 <body>
 
-    <!-- 🖥️ 데스크탑 전용 네비게이션 -->
     <div class="top-nav">
         <a href="/" class="nav-logo">🔍 싸비싸</a>
         <div class="nav-links">
@@ -95,7 +91,6 @@
     <div class="main-wrapper">
         <div class="title-text">SSABISSA</div>
         
-        <!-- 🔄 페이지 이동 없는 Ajax 검색 폼 -->
         <form id="searchForm" class="search-box" onsubmit="handleSearch(event)">
             <input type="text" id="ticker" name="ticker" class="search-input" placeholder="종목명 또는 티커, 코드 (예: 삼성전자)" autocomplete="off" required>
             <button type="submit" class="search-icon">
@@ -110,43 +105,38 @@
         <div id="loadingBox" style="display: none; margin-top: 20px; color: var(--blue); font-size: 0.85rem; font-weight: 700;">기업 가치 연산 중...</div>
     </div>
 
-    <!-- 💡 통합 결과 모달창 (팝업) -->
     <div id="resultModal" onclick="closeModal(event)">
         <div class="modal-content-box" onclick="event.stopPropagation()">
             
             <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 51000; margin-bottom: -20px; pointer-events: none;">
-                <button onclick="document.getElementById('resultModal').style.display='none'" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
+                <button onclick="closeModal(event)" class="close-btn" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
             </div>
 
-            <div id="modalContent">
-                <!-- 자바스크립트를 통해 결과가 여기에 렌더링됩니다 -->
-            </div>
+            <div id="modalContent"></div>
 
-            <!-- 커뮤니티 및 투표 영역 -->
             <div id="communitySection" style="display: none; border-top: 2px solid #edf2f7; padding-top: 25px; margin-top: 20px;">
                 <h3 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 800; color: #1a202c;">🔥 실시간 주가 투표방</h3>
                 
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <button onclick="submitMainVote('up')" style="flex: 1; padding: 12px; background: #fee2e2; border: none; border-radius: 10px; color: #dc2626; font-weight: bold; cursor: pointer; font-size: 0.85rem;">📈 상승 투표</button>
-                    <button onclick="submitMainVote('down')" style="flex: 1; padding: 12px; background: #e0f2fe; border: none; border-radius: 10px; color: #0284c7; font-weight: bold; cursor: pointer; font-size: 0.85rem;">📉 하락 투표</button>
+                    <button onclick="submitVote('up')" style="flex: 1; padding: 12px; background: #fee2e2; border: none; border-radius: 10px; color: #dc2626; font-weight: bold; cursor: pointer; font-size: 0.85rem;">📈 상승 투표</button>
+                    <button onclick="submitVote('down')" style="flex: 1; padding: 12px; background: #e0f2fe; border: none; border-radius: 10px; color: #0284c7; font-weight: bold; cursor: pointer; font-size: 0.85rem;">📉 하락 투표</button>
                 </div>
 
-                <div id="mainVoteBar" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; font-size: 10px; color: white; font-weight: bold; text-align: center; line-height: 16px; margin-bottom: 25px;"></div>
+                <div id="voteProgressBar" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; font-size: 10px; color: white; font-weight: bold; text-align: center; line-height: 16px; margin-bottom: 25px;"></div>
 
                 <h3 style="margin: 0 0 12px 0; font-size: 1rem; font-weight: 800; color: #1a202c;">💬 실시간 익명 주주 응원방</h3>
                 
                 <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                    <input type="text" id="mainTalkInput" placeholder="주주방에 힘이 되는 한 줄을 남겨주세요." style="flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.85rem; outline: none; font-weight: 600;">
-                    <button onclick="submitMainTalk()" style="padding: 10px 16px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;">등록</button>
+                    <input type="text" id="talkInput" placeholder="주주방에 힘이 되는 한 줄을 남겨주세요." style="flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.85rem; outline: none; font-weight: 600;">
+                    <button onclick="submitTalk()" style="padding: 10px 16px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;">등록</button>
                 </div>
 
-                <div id="mainTalkTimeline"></div>
+                <div id="talkTimeline"></div>
             </div>
             
         </div>
     </div>
 
-    <!-- 📱 모바일 전용 네비게이션 -->
     <div class="mobile-sub-nav" style="display: none;">
         <a href="/" class="nav-logo">🔍 싸비싸</a>
         <div class="nav-links">
@@ -162,43 +152,26 @@
         <p style="margin-top: 6px; font-size: 0.68rem; color: #94a3b8; font-weight: 600;"><b>⚠️ 책임면책고지:</b> 본 엔진이 제공하는 가치 점수는 계량 지표 연산 결과물일 뿐 매수·매도 추천이 아니며, 모든 금융 투자 판단에 따른 최종 손실 책임은 전적으로 투자자 본인에게 있습니다.</p>
     </footer>
 
- <script>
+    <script>
     let currentActiveTicker = ""; 
     let isTalkSending = false; 
     let scoreChartInstance = null;
-    let chartDataCache = null; // 차트 데이터를 임시 저장할 변수 (버그 5 해결용)
+    let chartDataCache = null; 
 
-    // 💡 1. 아코디언 및 랭킹 탭 전환 (버그 2 해결)
-    function toggleAccordion() {
-        const content = document.getElementById("accContent");
-        if(content) {
-            content.classList.toggle("open");
-            document.getElementById("accArrow").innerText = content.classList.contains("open") ? "▲" : "▼";
+    // ✅ [수정됨] URL 접속 시 자동 검색 (공유 링크 버그 픽스)
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryTicker = urlParams.get('ticker') || urlParams.get('q');
+        if (queryTicker) {
+            const input = document.getElementById("ticker");
+            if (input) {
+                input.value = queryTicker;
+                handleSearch(); // URL에 종목명이 있으면 즉시 자동 렌더링
+            }
         }
-    }
+    });
 
-    function switchTab(market) {
-        const tabKr = document.getElementById('tab-kr');
-        const tabUs = document.getElementById('tab-us');
-        const krBoard = document.getElementById('kr-board');
-        const usBoard = document.getElementById('us-board');
-        if(!tabKr || !tabUs || !krBoard || !usBoard) return;
-        
-        if (market === 'kr') {
-            tabKr.classList.add('active'); tabUs.classList.remove('active');
-            krBoard.style.display = 'block'; usBoard.style.display = 'none';
-        } else {
-            tabKr.classList.remove('active'); tabUs.classList.add('active');
-            krBoard.style.display = 'none'; usBoard.style.display = 'block';
-        }
-    }
-
-    function copyUrl() { 
-        if(!currentActiveTicker) return;
-        navigator.clipboard.writeText(window.location.origin + "/?ticker=" + encodeURIComponent(currentActiveTicker)).then(() => alert("진단 링크가 복사되었습니다.")); 
-    }
-
-    // 💡 2. 자동완성 기능 (메인 페이지 전용)
+    // 1. 자동완성 기능
     const tickerInput = document.getElementById("ticker");
     const autoBox = document.getElementById("autocompleteBox");
     let timeout = null;
@@ -217,7 +190,7 @@
                         row.onclick = () => { 
                             tickerInput.value = item.ticker; 
                             autoBox.style.display = "none"; 
-                            handleSearch(); // 버그 1 해결 (검색 이벤트 직접 호출)
+                            handleSearch(); 
                         };
                         autoBox.appendChild(row);
                     });
@@ -228,50 +201,44 @@
         document.addEventListener("click", e => { if(e.target !== tickerInput) autoBox.style.display = "none"; });
     }
 
-    // 💡 3. 실제 백엔드 연동 및 검색 처리
-    async function handleSearch(e) {
-        if(e) e.preventDefault();
-        
-        // 검색창이 여러 개일 수 있으므로 통합 대응
-        let ticker = "";
-        const mainInput = document.getElementById("ticker");
-        if(mainInput) ticker = mainInput.value.trim();
-        else {
-            // 서브페이지 검색창 대응
-            const formInput = document.querySelector(".page-search input");
-            if(formInput) ticker = formInput.value.trim();
-        }
-        
-        if(!ticker) return;
-        diagnoseStock(ticker);
+    function copyUrl() { 
+        if(!currentActiveTicker) return;
+        navigator.clipboard.writeText(window.location.origin + "/?ticker=" + encodeURIComponent(currentActiveTicker)).then(() => alert("진단 링크가 복사되었습니다.")); 
     }
 
-    async function diagnoseStock(ticker) {
+    // 📡 2. 실제 백엔드 연동 및 검색 처리
+    async function handleSearch(e) {
+        if(e) e.preventDefault(); // ✅ 엔터키로 인한 폼 자동 제출(새로고침) 방지
+        const input = document.getElementById("ticker");
+        if(!input) return;
+        
+        const ticker = input.value.trim();
+        if(!ticker) return;
+
         currentActiveTicker = ticker;
-        const modal = document.getElementById('resultModal');
-        const content = document.getElementById('modalContent');
-        const commSection = document.getElementById('communitySection');
         const loadingBox = document.getElementById("loadingBox");
-        
+        const modal = document.getElementById("resultModal");
+        const commSection = document.getElementById("communitySection");
+        const content = document.getElementById("modalContent");
+
         if(loadingBox) loadingBox.style.display = "block";
-        if(commSection) commSection.style.display = "none"; 
-        
-        content.innerHTML = `<div style="text-align: center; padding: 40px 0; font-weight: bold; color: var(--blue); font-size: 1.1rem;">🔍 싸비싸 실시간 진단 엔진 가동 중...</div>`;
-        modal.style.display = 'flex';
-        
+        if(modal) modal.style.display = "none";
+        if(commSection) commSection.style.display = "none";
+
         try {
             const response = await fetch(`/api/diagnose/${ticker}`);
             const data = await response.json();
             
             if (data.error) {
                 content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">${data.error}</div>`;
-                return;
+            } else {
+                await renderModalData(data);
             }
-            await renderModalData(data);
-        } catch (err) {
-            content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">서버에서 데이터를 가져오는 중 에러가 발생했습니다.</div>`;
+        } catch (error) {
+            content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">서버 통신 중 에러가 발생했습니다.</div>`;
         } finally {
             if(loadingBox) loadingBox.style.display = "none";
+            if(modal) modal.style.display = "flex";
         }
     }
 
@@ -280,7 +247,6 @@
             const modal = document.getElementById('resultModal');
             if(modal) modal.style.display = 'none'; 
             
-            // 모달 닫을 때 그래프 접기 초기화
             const wrap = document.getElementById("graphWrapper");
             const arrow = document.getElementById("graphArrow");
             if(wrap) wrap.style.display = "none";
@@ -291,12 +257,14 @@
     async function renderModalData(data) {
         const content = document.getElementById("modalContent");
         
+        // 어제 대비 점수 증감 
         let scoreChangeHtml = "";
         const change = data.score_change || 0;
         if(change > 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#ef4444; margin-top:6px; background:#fef2f2; padding:4px 10px; border-radius:20px;">어제 대비 🔺${change}점</div>`;
         else if(change < 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#3b82f6; margin-top:6px; background:#eff6ff; padding:4px 10px; border-radius:20px;">어제 대비 🔻${Math.abs(change)}점</div>`;
         else scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#94a3b8; margin-top:6px; background:#f8fafc; padding:4px 10px; border-radius:20px;">어제와 동일 ➖</div>`;
 
+        // 이슈 큐레이션
         let curationHtml = "";
         if(data.curation_reason) {
             curationHtml = `<div class="feature-box curation-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #f8fafc; border-left: 4px solid var(--blue);"><div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main);">🤖 왜 점수가 변했을까?</div><div style="font-size: 0.85rem; color: #475569;">${data.curation_reason}</div></div>`;
@@ -304,9 +272,11 @@
             curationHtml = `<div class="feature-box curation-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #f8fafc; border-left: 4px solid var(--blue);"><div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main);">🤖 이슈 큐레이션</div><div style="font-size: 0.85rem; color: #475569;">현재 점수에 뚜렷한 영향을 미친 뉴스나 공시를 찾지 못했습니다.</div></div>`;
         }
 
+        // 백테스트 수익률 (0% 매칭 문제 방어)
         const backtestReturn = data.backtest_return !== undefined ? data.backtest_return : 0;
-        const backtestHtml = `<div class="feature-box backtest-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #ecfdf5; display: flex; justify-content: space-between; align-items: center;"><div><div style="font-weight: 800; font-size: 0.9rem; color: #059669;">⏱️ 최근 3년 가상 수익률</div><div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">(싸비싸 80점 매수 / 50점 이하 매도 기준)</div></div><div style="font-weight: 900; font-size: 1.25rem; color: ${backtestReturn >= 0 ? '#ef4444' : '#3b82f6'};">${backtestReturn >= 0 ? '+' : ''}${backtestReturn}%</div></div>`;
+        const backtestHtml = `<div class="feature-box backtest-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #ecfdf5; display: flex; justify-content: space-between; align-items: center;"><div><div style="font-weight: 800; font-size: 0.9rem; color: #059669;">⏱️ 최근 3년 가상 수익률</div><div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">(싸비싸 80점 매수 / 50점 이하 매도 기준)</div></div><div style="font-weight: 900; font-size: 1.25rem; color: ${backtestReturn >= 0 ? '#ef4444' : '#3b82f6'};">${backtestReturn > 0 ? '+' : ''}${backtestReturn}%</div></div>`;
 
+        // 가치 평가 사유
         let reasonsHtml = '';
         if(data.reasons && data.reasons.length > 0) {
             data.reasons.forEach(reason => {
@@ -352,15 +322,15 @@
             </div>
         `;
 
-        // 💡 버그 5 해결: 차트 데이터를 렌더링하지 않고 저장만 해둠 (display:none 상태에서 그리면 깨짐 방지)
+        // 차트 데이터 캐싱
         chartDataCache = { labels: data.history_dates, dataPoints: data.history_scores };
 
+        // 커뮤니티 데이터 로드
         await refreshCommunityData();
         const commSection = document.getElementById("communitySection");
         if(commSection) commSection.style.display = "block";
     }
 
-    // 💡 버그 5 해결: 사용자가 '▼ 그래프 보기'를 눌러 창이 열릴 때 차트를 그리도록 수정
     function toggleGraph() {
         const wrap = document.getElementById("graphWrapper");
         const arrow = document.getElementById("graphArrow");
@@ -376,12 +346,17 @@
         }
     }
 
+    // ✅ [수정됨] 차트 증발 버그 픽스 (기존 인스턴스 찌꺼기 완벽 제거)
     function drawChart(labels, dataPoints) {
         const canvas = document.getElementById('scoreHistoryChart');
         if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if(scoreChartInstance) scoreChartInstance.destroy();
         
+        if(scoreChartInstance) {
+            try { scoreChartInstance.destroy(); } catch(e) {}
+            scoreChartInstance = null;
+        }
+
+        const ctx = canvas.getContext('2d');
         scoreChartInstance = new Chart(ctx, {
             type: 'line',
             data: { labels: labels, datasets: [{ label: '가치 점수', data: dataPoints, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }] },
@@ -389,12 +364,12 @@
         });
     }
 
-    // 💡 버그 4 해결: 데이터가 비정상일 때 NaN을 막는 방어코드 추가
+    // ✅ [수정됨] 댓글 시간 NaN 출력 방지 (안전한 파싱)
     function timeAgo(dateString) {
         if(!dateString) return "방금 전";
         const past = new Date(dateString);
         
-        // 날짜 파싱이 안 되면 원본 데이터 그냥 출력 (NaN 방지)
+        // 파싱 실패 시 원본 텍스트 노출(최소한의 방어)
         if(isNaN(past.getTime())) return dateString; 
 
         const now = new Date();
@@ -413,17 +388,18 @@
         return `${y}.${m}.${d}`;
     }
 
-    // 커뮤니티(실제 유저 댓글) 로드
+    // 📡 3. 커뮤니티 실시간 데이터(투표/댓글) 연동
     async function refreshCommunityData() {
         if (!currentActiveTicker) return;
         try {
             const res = await fetch(`/api/community/${currentActiveTicker}`);
+            if(!res.ok) return;
             const data = await res.json();
             
             const up = data.votes ? data.votes.up : 0;
             const down = data.votes ? data.votes.down : 0;
             const total = up + down;
-            const progressBar = document.getElementById('voteProgressBar') || document.getElementById('mainVoteBar');
+            const progressBar = document.getElementById('voteProgressBar');
             
             if (progressBar) {
                 if (total === 0) {
@@ -435,7 +411,7 @@
                 }
             }
 
-            const timeline = document.getElementById('talkTimeline') || document.getElementById('mainTalkTimeline');
+            const timeline = document.getElementById('talkTimeline');
             if (timeline) {
                 if (!data.talks || data.talks.length === 0) {
                     timeline.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 0;">작성된 주주방 대화가 없습니다. 첫 글을 남겨보세요!</div>`;
@@ -461,12 +437,10 @@
             if(res.ok) await refreshCommunityData();
         } catch(e) { alert("통신 에러가 발생했습니다."); }
     }
-    const submitMainVote = submitVote; // 메인 호환성
 
-    let isTalkSending = false;
     async function submitTalk() {
         if (isTalkSending || !currentActiveTicker) return; 
-        const input = document.getElementById('talkInput') || document.getElementById('mainTalkInput');
+        const input = document.getElementById('talkInput');
         if(!input) return;
         
         const text = input.value.trim();
@@ -484,7 +458,6 @@
         
         setTimeout(() => { isTalkSending = false; }, 3000);
     }
-    const submitMainTalk = submitTalk; // 메인 호환성
-</script>
+    </script>
 </body>
 </html>

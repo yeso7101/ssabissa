@@ -34,7 +34,7 @@
             box-sizing: border-box;
         }
         
-        /* 🖥️ 데스크탑 상단 내비게이션 (글래스모피즘 캡슐 형태 - 메인과 동일) */
+        /* 🖥️ 데스크탑 상단 내비게이션 */
         .top-nav { 
             position: fixed; 
             top: 24px; 
@@ -86,7 +86,7 @@
             transition: all 0.3s ease-in-out;
         }
         
-        /* 🔍 본문 내 검색창 (네비게이션에서 이동) */
+        /* 🔍 본문 내 검색창 */
         .page-search { position: relative; width: 100%; max-width: 400px; margin: 0 auto 30px auto; display: flex; align-items: center; }
         .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1px solid var(--border); outline: none; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: border-color 0.2s; }
         .page-search input:focus { border-color: var(--blue); }
@@ -109,7 +109,7 @@
         .guide-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 4px; }
         .guide-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; }
 
-        /* 팝업 모달 UI (인덱스와 동일) */
+        /* 팝업 모달 UI */
         #resultModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50000; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); }
         .modal-content-box { background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none; }
         .modal-content-box::-webkit-scrollbar { display: none; }
@@ -132,7 +132,7 @@
             .top-nav { display: none !important; }
             body { padding-top: 20px; margin-bottom: 90px; }
             
-            /* 📱 모바일 하단 내비게이션 (여백형 플로팅 캡슐 형태 - 메인과 동일) */
+            /* 📱 모바일 하단 내비게이션 */
             .mobile-sub-nav { 
                 position: fixed; 
                 bottom: 24px; 
@@ -154,45 +154,19 @@
                 display: flex !important; 
                 z-index: 10000; 
             }
-            .mobile-sub-nav .nav-logo {
-                text-decoration: none; 
-                color: var(--blue); 
-                font-weight: 900; 
-                font-size: 15px; 
-                letter-spacing: -0.5px;
-            }
-            .mobile-sub-nav .nav-links {
-                display: flex; gap: 8px; align-items: center;
-            }
-            .mobile-sub-nav a:not(.nav-logo) {
-                text-decoration: none;
-                color: #64748b;
-                font-weight: 700;
-                font-size: 13px;
-                padding: 6px 8px;
-                transition: all 0.3s;
-                background: transparent !important;
-            }
-            .mobile-sub-nav a:not(.nav-logo):hover {
-                color: var(--blue);
-                text-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
-            }
+            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; letter-spacing: -0.5px; }
+            .mobile-sub-nav .nav-links { display: flex; gap: 8px; align-items: center; }
+            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
+            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
             
-            /* 📱 [모바일 active] 현재 페이지 시각적 강조 효과 유지 */
             .mobile-sub-nav a.active {
                 color: #1a73e8 !important;
                 background: transparent !important;
                 font-weight: 900;
-                text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 
-                             0 0 24px rgba(26, 115, 232, 0.25);
+                text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25);
             }
 
-            .container { 
-                margin-top: 10px; 
-                margin-bottom: 40px; 
-                padding: 0 12px; 
-            }
-            
+            .container { margin-top: 10px; margin-bottom: 40px; padding: 0 12px; }
             .floating-card { padding: 24px; border-radius: 20px; }
             .page-search { max-width: 100%; }
         }
@@ -272,7 +246,7 @@
         <div class="modal-content-box" onclick="event.stopPropagation()">
             
             <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 51000; margin-bottom: -20px; pointer-events: none;">
-                <button onclick="document.getElementById('resultModal').style.display='none'" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
+                <button onclick="closeModal(event)" class="close-btn" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
             </div>
 
             <div id="modalContent"></div>
@@ -315,9 +289,19 @@
     let currentActiveTicker = ""; 
     let isTalkSending = false; 
     let scoreChartInstance = null;
-    let chartDataCache = null; // 차트 데이터를 임시 저장할 변수 (버그 5 해결용)
+    let chartDataCache = null;
 
-    // 💡 1. 아코디언 및 랭킹 탭 전환 (버그 2 해결)
+    // ✅ 공유 링크 URL 자동 검색 연동 (버그 픽스)
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryTicker = urlParams.get('ticker') || urlParams.get('q');
+        if (queryTicker) {
+            const input = document.getElementById("ticker");
+            if (input) input.value = queryTicker;
+            diagnoseStock(queryTicker);
+        }
+    });
+
     function toggleAccordion() {
         const content = document.getElementById("accContent");
         if(content) {
@@ -326,70 +310,18 @@
         }
     }
 
-    function switchTab(market) {
-        const tabKr = document.getElementById('tab-kr');
-        const tabUs = document.getElementById('tab-us');
-        const krBoard = document.getElementById('kr-board');
-        const usBoard = document.getElementById('us-board');
-        if(!tabKr || !tabUs || !krBoard || !usBoard) return;
-        
-        if (market === 'kr') {
-            tabKr.classList.add('active'); tabUs.classList.remove('active');
-            krBoard.style.display = 'block'; usBoard.style.display = 'none';
-        } else {
-            tabKr.classList.remove('active'); tabUs.classList.add('active');
-            krBoard.style.display = 'none'; usBoard.style.display = 'block';
-        }
-    }
-
     function copyUrl() { 
         if(!currentActiveTicker) return;
         navigator.clipboard.writeText(window.location.origin + "/?ticker=" + encodeURIComponent(currentActiveTicker)).then(() => alert("진단 링크가 복사되었습니다.")); 
     }
 
-    // 💡 2. 자동완성 기능 (메인 페이지 전용)
-    const tickerInput = document.getElementById("ticker");
-    const autoBox = document.getElementById("autocompleteBox");
-    let timeout = null;
-    if(tickerInput && autoBox) {
-        tickerInput.addEventListener("input", function(e) {
-            clearTimeout(timeout);
-            const query = e.target.value.trim();
-            if (query.length < 2) { autoBox.style.display = "none"; return; }
-            timeout = setTimeout(() => {
-                fetch(`/api/autocomplete?q=${encodeURIComponent(query)}`).then(r => r.json()).then(data => {
-                    if (!data.length) { autoBox.style.display = "none"; return; }
-                    autoBox.innerHTML = "";
-                    data.forEach(item => {
-                        const row = document.createElement("div"); row.className = "auto-item";
-                        row.innerHTML = `<span style="color:var(--blue); font-size:0.85rem; margin-right:6px;">${item.ticker}</span> <span>${item.name}</span>`;
-                        row.onclick = () => { 
-                            tickerInput.value = item.ticker; 
-                            autoBox.style.display = "none"; 
-                            handleSearch(); // 버그 1 해결 (검색 이벤트 직접 호출)
-                        };
-                        autoBox.appendChild(row);
-                    });
-                    autoBox.style.display = "block";
-                });
-            }, 250);
-        });
-        document.addEventListener("click", e => { if(e.target !== tickerInput) autoBox.style.display = "none"; });
-    }
-
-    // 💡 3. 실제 백엔드 연동 및 검색 처리
+    // ✅ 폼 제출 이벤트 제어 로직 픽스
     async function handleSearch(e) {
         if(e) e.preventDefault();
         
-        // 검색창이 여러 개일 수 있으므로 통합 대응
         let ticker = "";
-        const mainInput = document.getElementById("ticker");
-        if(mainInput) ticker = mainInput.value.trim();
-        else {
-            // 서브페이지 검색창 대응
-            const formInput = document.querySelector(".page-search input");
-            if(formInput) ticker = formInput.value.trim();
-        }
+        const formInput = document.querySelector(".page-search input");
+        if(formInput) ticker = formInput.value.trim();
         
         if(!ticker) return;
         diagnoseStock(ticker);
@@ -424,12 +356,12 @@
         }
     }
 
+    // ✅ 그래프 증발 방지 및 창 초기화를 위한 함수 일원화
     function closeModal(e) {
         if (!e || e.target.id === 'resultModal' || e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') { 
             const modal = document.getElementById('resultModal');
             if(modal) modal.style.display = 'none'; 
             
-            // 모달 닫을 때 그래프 접기 초기화
             const wrap = document.getElementById("graphWrapper");
             const arrow = document.getElementById("graphArrow");
             if(wrap) wrap.style.display = "none";
@@ -449,12 +381,11 @@
         let curationHtml = "";
         if(data.curation_reason) {
             curationHtml = `<div class="feature-box curation-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #f8fafc; border-left: 4px solid var(--blue);"><div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main);">🤖 왜 점수가 변했을까?</div><div style="font-size: 0.85rem; color: #475569;">${data.curation_reason}</div></div>`;
-        } else {
-            curationHtml = `<div class="feature-box curation-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #f8fafc; border-left: 4px solid var(--blue);"><div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main);">🤖 이슈 큐레이션</div><div style="font-size: 0.85rem; color: #475569;">현재 점수에 뚜렷한 영향을 미친 뉴스나 공시를 찾지 못했습니다.</div></div>`;
         }
 
+        // ✅ +0% 표기 픽스 적용 완료
         const backtestReturn = data.backtest_return !== undefined ? data.backtest_return : 0;
-        const backtestHtml = `<div class="feature-box backtest-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #ecfdf5; display: flex; justify-content: space-between; align-items: center;"><div><div style="font-weight: 800; font-size: 0.9rem; color: #059669;">⏱️ 최근 3년 가상 수익률</div><div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">(싸비싸 80점 매수 / 50점 이하 매도 기준)</div></div><div style="font-weight: 900; font-size: 1.25rem; color: ${backtestReturn >= 0 ? '#ef4444' : '#3b82f6'};">${backtestReturn >= 0 ? '+' : ''}${backtestReturn}%</div></div>`;
+        const backtestHtml = `<div class="feature-box backtest-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #ecfdf5; display: flex; justify-content: space-between; align-items: center;"><div><div style="font-weight: 800; font-size: 0.9rem; color: #059669;">⏱️ 최근 3년 가상 수익률</div><div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">(싸비싸 80점 매수 / 50점 이하 매도 기준)</div></div><div style="font-weight: 900; font-size: 1.25rem; color: ${backtestReturn >= 0 ? '#ef4444' : '#3b82f6'};">${backtestReturn > 0 ? '+' : ''}${backtestReturn}%</div></div>`;
 
         let reasonsHtml = '';
         if(data.reasons && data.reasons.length > 0) {
@@ -501,7 +432,6 @@
             </div>
         `;
 
-        // 💡 버그 5 해결: 차트 데이터를 렌더링하지 않고 저장만 해둠 (display:none 상태에서 그리면 깨짐 방지)
         chartDataCache = { labels: data.history_dates, dataPoints: data.history_scores };
 
         await refreshCommunityData();
@@ -509,7 +439,6 @@
         if(commSection) commSection.style.display = "block";
     }
 
-    // 💡 버그 5 해결: 사용자가 '▼ 그래프 보기'를 눌러 창이 열릴 때 차트를 그리도록 수정
     function toggleGraph() {
         const wrap = document.getElementById("graphWrapper");
         const arrow = document.getElementById("graphArrow");
@@ -525,12 +454,17 @@
         }
     }
 
+    // ✅ 차트 증발 픽스 (인스턴스 완전 파기 로직)
     function drawChart(labels, dataPoints) {
         const canvas = document.getElementById('scoreHistoryChart');
         if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if(scoreChartInstance) scoreChartInstance.destroy();
         
+        if(scoreChartInstance) {
+            try { scoreChartInstance.destroy(); } catch(e) {}
+            scoreChartInstance = null;
+        }
+
+        const ctx = canvas.getContext('2d');
         scoreChartInstance = new Chart(ctx, {
             type: 'line',
             data: { labels: labels, datasets: [{ label: '가치 점수', data: dataPoints, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }] },
@@ -538,12 +472,11 @@
         });
     }
 
-    // 💡 버그 4 해결: 데이터가 비정상일 때 NaN을 막는 방어코드 추가
+    // ✅ 날짜 표기 파싱 실패 시 원본을 노출하여 방어
     function timeAgo(dateString) {
         if(!dateString) return "방금 전";
         const past = new Date(dateString);
         
-        // 날짜 파싱이 안 되면 원본 데이터 그냥 출력 (NaN 방지)
         if(isNaN(past.getTime())) return dateString; 
 
         const now = new Date();
@@ -562,17 +495,17 @@
         return `${y}.${m}.${d}`;
     }
 
-    // 커뮤니티(실제 유저 댓글) 로드
     async function refreshCommunityData() {
         if (!currentActiveTicker) return;
         try {
             const res = await fetch(`/api/community/${currentActiveTicker}`);
+            if(!res.ok) return;
             const data = await res.json();
             
             const up = data.votes ? data.votes.up : 0;
             const down = data.votes ? data.votes.down : 0;
             const total = up + down;
-            const progressBar = document.getElementById('voteProgressBar') || document.getElementById('mainVoteBar');
+            const progressBar = document.getElementById('voteProgressBar');
             
             if (progressBar) {
                 if (total === 0) {
@@ -584,7 +517,7 @@
                 }
             }
 
-            const timeline = document.getElementById('talkTimeline') || document.getElementById('mainTalkTimeline');
+            const timeline = document.getElementById('talkTimeline');
             if (timeline) {
                 if (!data.talks || data.talks.length === 0) {
                     timeline.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 0;">작성된 주주방 대화가 없습니다. 첫 글을 남겨보세요!</div>`;
@@ -610,12 +543,10 @@
             if(res.ok) await refreshCommunityData();
         } catch(e) { alert("통신 에러가 발생했습니다."); }
     }
-    const submitMainVote = submitVote; // 메인 호환성
 
-    let isTalkSending = false;
     async function submitTalk() {
         if (isTalkSending || !currentActiveTicker) return; 
-        const input = document.getElementById('talkInput') || document.getElementById('mainTalkInput');
+        const input = document.getElementById('talkInput');
         if(!input) return;
         
         const text = input.value.trim();
@@ -629,11 +560,10 @@
             
             if(data.success || res.ok) { input.value = ""; await refreshCommunityData(); } 
             else if(data.error) { alert(data.error); }
-        } catch(e) {}
+        } catch(e) { alert("통신 에러가 발생했습니다."); }
         
         setTimeout(() => { isTalkSending = false; }, 3000);
     }
-    const submitMainTalk = submitTalk; // 메인 호환성
 </script>
 </body>
 </html>
