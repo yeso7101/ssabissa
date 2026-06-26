@@ -357,7 +357,15 @@ async def home(request: Request):
         except Exception: 
             result = {"error": "올바른 종목명이나 티커코드를 확인해 주세요."}
             
-    return templates.TemplateResponse("index.html", {"request": request, "result": result, "ticker": search_target})
+    return templates.TemplateResponse(
+    request=request,
+    name="index.html",
+    context={
+        "request": request,
+        "result": result,
+        "ticker": search_target,
+    },
+)
 
 # 📊 랭킹 비동기 진단 API
 @app.get("/api/diagnose/{ticker}")
@@ -416,7 +424,15 @@ def ranking(request: Request):
             cache_data = TICKER_CACHE.get(t, {}) if isinstance(TICKER_CACHE, dict) else {}
             us_ranks.append({"rank": i + 1, "ticker": str(t), "name": cache_data.get("name", str(t)), "score": cache_data.get("score", 50), "color": cache_data.get("color", "#64748b"), "views": int(count)})
         
-        return templates.TemplateResponse("ranking.html", {"request": request, "kr_rankings": kr_ranks, "us_rankings": us_ranks})
+        return templates.TemplateResponse(
+    request=request,
+    name="ranking.html",
+    context={
+        "request": request,
+        "kr_rankings": kr_ranks,
+        "us_rankings": us_ranks,
+    },
+)
     except Exception as main_err:
         return HTMLResponse(content=f"<h2>🚨 랭킹 조립 예외 발생: {str(main_err)}</h2>", status_code=200)
 
@@ -426,7 +442,15 @@ async def calendar_page(request: Request):
     template_file = "calendar.html"
     if not os.path.exists("templates/calendar.html") and os.path.exists("templates/calender.html"):
         template_file = "calender.html" # 유저가 올린 calender.html 파일명 오타 지원
-    return templates.TemplateResponse(template_file, {"request": request, "risk_items": None, "earning_items": None})
+    return templates.TemplateResponse(
+    request=request,
+    name=template_file,
+    context={
+        "request": request,
+        "risk_items": None,
+        "earning_items": None,
+    },
+)
 
 # ⚙️ 기타 라우터 모음
 @app.get("/api/autocomplete")
@@ -439,13 +463,28 @@ def api_autocomplete(q: str = ""):
     except: return []
 
 @app.get("/strategy", response_class=HTMLResponse)
-def strategy_page(request: Request): return templates.TemplateResponse("strategy.html", {"request": request})
+def strategy_page(request: Request): 
+    return templates.TemplateResponse(
+    request=request,
+    name="strategy.html",
+    context={"request": request},
+)
 
 @app.get("/about", response_class=HTMLResponse)
-def about_page(request: Request): return templates.TemplateResponse("about.html", {"request": request})
+def about_page(request: Request): 
+    return templates.TemplateResponse(
+    request=request,
+    name="about.html",
+    context={"request": request},
+)
 
 @app.get("/privacy", response_class=HTMLResponse)
-def privacy_page(request: Request): return templates.TemplateResponse("privacy.html", {"request": request})
+def privacy_page(request: Request): 
+    return templates.TemplateResponse(
+    request=request,
+    name="privacy.html",
+    context={"request": request},
+)
 
 @app.get("/sitemap.xml")
 def get_sitemap():
