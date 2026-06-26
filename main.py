@@ -228,7 +228,7 @@ def resolve_ticker_by_name(query: str) -> str:
         return query.upper()
 
     return query
-    # ================================================================
+# ================================================================
 # ⚙️ 점수 변동성 대폭 상향 업데이트 버전
 # ================================================================
 def calculate_ssabissa_score(info, ticker):
@@ -414,23 +414,22 @@ def api_diagnose(ticker: str = None):
         stock_obj = yf.Ticker(ticker_upper)
         hist = stock_obj.history(period="1d")
 
-    if hist.empty:
-    return {
-        "error": f"{ticker_upper} 종목을 Yahoo Finance에서 찾을 수 없습니다."
-    }
-        info = stock_obj.info
-
-        if not info or "symbol" not in info:
-
-    try:
-        info = stock_obj.fast_info
-    except:
-        pass
+        if hist.empty:
+            return {"error": f"{ticker_upper} 종목을 Yahoo Finance에서 찾을 수 없습니다."}
         
-        if not info: return {"error": f"[{ticker_upper}] 야후 파이낸스에서 종목 정보를 찾을 수 없습니다."}
+        info = stock_obj.info
+        if not info or "symbol" not in info:
+            try:
+                info = stock_obj.fast_info
+            except:
+                pass
+        
+        if not info: 
+            return {"error": f"[{ticker_upper}] 야후 파이낸스에서 종목 정보를 찾을 수 없습니다."}
             
         cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
-        if not cur: return {"error": f"[{ticker_upper}] 현재 거래가 데이터를 받아오지 못했습니다."}
+        if not cur: 
+            return {"error": f"[{ticker_upper}] 현재 거래가 데이터를 받아오지 못했습니다."}
         
         score, color, reasons, brief = calculate_ssabissa_score(info, ticker_upper)
         name = info.get("longName") or info.get("shortName") or ticker_upper
@@ -439,8 +438,10 @@ def api_diagnose(ticker: str = None):
         
         TICKER_CACHE[ticker_upper] = {"name": name, "score": score, "color": color}
         
-        if ".KS" in ticker_upper or ".KQ" in ticker_upper: SEARCH_COUNT_KR[ticker_upper] += 1
-        else: SEARCH_COUNT_US[ticker_upper] += 1
+        if ".KS" in ticker_upper or ".KQ" in ticker_upper: 
+            SEARCH_COUNT_KR[ticker_upper] += 1
+        else: 
+            SEARCH_COUNT_US[ticker_upper] += 1
             
         save_ranking_to_file()
         
