@@ -179,31 +179,27 @@ def get_score_color(score):
 
 def resolve_ticker_by_name(query: str) -> str:
     query = query.strip()
-
     if not query:
         return ""
 
-    # 이미 Yahoo 티커 형식이면 그대로 사용
+    # 1. STOCK_MAP에서 직접 검색 (정확한 일치)
+    if query in STOCK_MAP:
+        return STOCK_MAP[query]
+
+    # 2. 이미 Yahoo 티커 형식이면 그대로 사용
     if query.upper().endswith((".KS", ".KQ")):
         return query.upper()
 
-    # 숫자 6자리(한국 종목코드)
+    # 3. 숫자 6자리(한국 종목코드)
     if query.isdigit() and len(query) == 6:
-
-        # stock_map.json 우선 사용
-        if query in STOCK_MAP:
-            return STOCK_MAP[query]
-
-        # 없으면 기본 KS
         return query + ".KS"
 
-    # Yahoo 검색
+    # 4. Yahoo 검색 (API 활용)
     try:
         url = (
             f"https://query2.finance.yahoo.com/v1/finance/search"
             f"?q={query}&lang=ko-KR&region=KR&quotesCount=5"
         )
-
         response = requests.get(
             url,
             headers={"User-Agent": "Mozilla/5.0"},
@@ -211,23 +207,14 @@ def resolve_ticker_by_name(query: str) -> str:
         ).json()
 
         for q in response.get("quotes", []):
-
-            if q.get("quoteType") not in ("EQUITY", "ETF"):
-                continue
-
-            symbol = q.get("symbol", "").upper()
-
-            if symbol:
-                return symbol
-
+            if q.get("quoteType") in ("EQUITY", "ETF"):
+                # 찾은 심볼 반환
+                return q.get("symbol", "").upper()
     except Exception as e:
         print("Yahoo Search Error:", e)
 
-    # 영문 티커
-    if query.replace(".", "").isalnum():
-        return query.upper()
-
-    return query
+    # 5. 위에서 모두 실패 시, 영문 티커일 가능성 고려하여 그대로 반환
+    return query.upper()
 # ================================================================
 # ⚙️ 점수 변동성 대폭 상향 업데이트 버전
 # ================================================================
@@ -415,7 +402,7 @@ def api_diagnose(ticker: str = None):
         hist = stock_obj.history(period="1d")
 
         if hist.empty:
-            return {"error": f"{ticker_upper} 종목을 Yahoo Finance에서 찾을 수 없습니다."}
+            return {"error": f"{ticker_upper} 종목명 또는 티커를 다시 확인해주세요."}
         
         info = stock_obj.info
         if not info or "symbol" not in info:
@@ -425,7 +412,7 @@ def api_diagnose(ticker: str = None):
                 pass
         
         if not info: 
-            return {"error": f"[{ticker_upper}] 야후 파이낸스에서 종목 정보를 찾을 수 없습니다."}
+            return {"error": f"[{ticker_upper}] 종목명 또는 티커를 다시 확인해주세요."}
             
         cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
         if not cur: 
