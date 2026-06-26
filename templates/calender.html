@@ -3,71 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>싸비싸 - 캘린더</title>
+    <title>일정 캘린더 - 싸비싸</title>
+    
+    <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    
     <style>
-        :root { --blue: #3b82f6; --text-main: #1e293b; --bg: #f0f4f8; }
-        body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; }
-        .main-container { max-width: 800px; margin: auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .page-title { text-align: center; font-weight: 900; margin-bottom: 25px; color: var(--text-main); }
+        :root {
+            --blue: #3b82f6;
+            --text-main: #1e293b;
+            --text-sub: #868e96;
+            --border: #dee2e6;
+            --bg-gray: #f0f7ff;
+        }
         
-        .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: transparent; font-weight: 800; color: #94a3b8; transition: 0.3s; border-radius: 8px; }
-        .tab-btn.active { background: #eff6ff; color: var(--blue); }
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            background-color: var(--bg-gray); 
+            margin: 0; 
+            padding-top: 100px; 
+            padding-bottom: 40px;
+            box-sizing: border-box;
+        }
         
-        .day-item { background: #f8fafc; padding: 16px; margin-bottom: 12px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; }
-        .day-item strong { margin-right: 15px; color: var(--blue); min-width: 90px; }
-        .event-title { font-weight: 600; }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 0 16px; 
+            box-sizing: border-box;
+        }
+
+        /* 🖥️ 데스크탑 상단 내비게이션 (랭킹 페이지와 통일) */
+        .top-nav { 
+            position: fixed; 
+            top: 24px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            display: flex; 
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.55); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            padding: 12px 24px;
+            border-radius: 100px; 
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
+        .top-nav .nav-links { display: flex; gap: 16px; align-items: center; }
+        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
+        .top-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
+        .top-nav a.active { color: #1e293b !important; font-weight: 900; font-size: 0.95rem; text-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.25), 0 0 45px rgba(59, 130, 246, 0.15); transition: all 0.3s ease-in-out; }
+        
+        /* 🔍 본문 내 검색창 (전체 페이지 검색 연동) */
+        .page-search { position: relative; width: 100%; max-width: 400px; margin: 0 auto 10px auto; display: flex; align-items: center; }
+        .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1px solid var(--border); outline: none; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: border-color 0.2s; }
+        .page-search input:focus { border-color: var(--blue); }
+        .page-search button { position: absolute; right: 16px; background: none; border: none; color: var(--blue); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-size: 1.1rem; font-weight: bold; }
+
+        /* 📂 서류함(카테고리 탭) 디자인 */
+        .tab-container { display: flex; margin-bottom: -1px; position: relative; z-index: 10; margin-top: 20px; }
+        .tab-button { flex: 1; padding: 14px; text-align: center; font-weight: 800; font-size: 14px; background-color: #e9ecef; color: #495057; border: 1px solid var(--border); border-bottom: none; border-top-left-radius: 12px; border-top-right-radius: 12px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; position: relative; z-index: 100; }
+        .tab-button.active { background-color: #ffffff; color: var(--blue); border-color: var(--border) var(--border) #ffffff; }
+        
+        /* 📝 캘린더 보드 박스 */
+        .ranking-board { background: #ffffff; border: 1px solid var(--border); border-radius: 0 0 16px 16px; padding: 10px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); margin-bottom: 25px; min-height: 250px; }
+        
+        .calendar-item { display: flex; align-items: center; padding: 16px 12px; border-bottom: 1px solid #f1f3f5; transition: background 0.2s; }
+        .calendar-item:hover { background-color: #f8fafc; }
+        .calendar-item:last-child { border-bottom: none; }
+        
+        .cal-date { font-weight: 900; color: var(--blue); font-size: 1.05rem; width: 65px; text-align: center; background: #e8f0fe; padding: 8px 6px; border-radius: 10px; flex-shrink: 0; }
+        .cal-title { font-weight: 700; color: var(--text-main); font-size: 1rem; margin-left: 18px; line-height: 1.4; word-break: keep-all; }
+        
+        .empty-state { text-align: center; padding: 50px 20px; color: #94a3b8; font-size: 0.95rem; font-weight: 600; line-height: 1.5; }
+        .loading-state { text-align: center; padding: 50px 20px; color: var(--blue); font-size: 0.95rem; font-weight: 700; }
+
+        @media (max-width: 768px) {
+            .top-nav { display: none !important; }
+            body { padding-top: 20px; margin-bottom: 90px; }
+            
+            /* 📱 모바일 하단 내비게이션 */
+            .mobile-sub-nav { 
+                position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 0 20px; height: 56px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12); justify-content: space-between; align-items: center; width: calc(100% - 40px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; 
+            }
+            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; letter-spacing: -0.5px; }
+            .mobile-sub-nav .nav-links { display: flex; gap: 8px; align-items: center; }
+            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
+            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
+            .mobile-sub-nav a.active { color: #1a73e8 !important; background: transparent !important; font-weight: 900; text-shadow: 0 0 12px rgba(26, 115, 232, 0.45), 0 0 24px rgba(26, 115, 232, 0.25); }
+
+            .container { margin-top: 10px; margin-bottom: 40px; padding: 0 12px; }
+            .page-search { max-width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <h2 class="page-title">📅 배당 & 어닝 캘린더</h2>
-    
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('dividend', this)">배당 캘린더</button>
-        <button class="tab-btn" onclick="showTab('earning', this)">어닝 캘린더</button>
-    </div>
-    
-    <div id="calendar-grid">
+    <div class="top-nav">
+        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <div class="nav-links">
+            <a href="/calendar" class="active">캘린더</a>
+            <a href="/ranking">랭킹</a>
+            <a href="/strategy">가이드</a>
+            <a href="/about">소개</a>
+            <a href="/privacy">약관</a>
         </div>
-</div>
+    </div>
 
-<script>
-    let cachedData = { dividend: [], earning: [] };
+    <div class="container">
+        <form action="/" method="GET" class="page-search">
+            <input type="text" id="ticker" name="ticker" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
+            <button type="submit">🔍</button>
+        </form>
 
-    // 1. 데이터 로드
-    async function fetchCalendarData() {
-        try {
-            const res = await fetch('/api/calendar/data', { cache: 'no-cache' });
-            cachedData = await res.json();
-            showTab('dividend', document.querySelector('.tab-btn'));
-        } catch (e) {
-            console.error("데이터 로드 실패:", e);
+        <div class="tab-container">
+            <div id="tab-dividend" class="tab-button active" onclick="switchTab('dividend')">💰 배당락 일정</div>
+            <div id="tab-earning" class="tab-button" onclick="switchTab('earning')">📊 실적발표 일정</div>
+        </div>
+
+        <div id="dividend-board" class="ranking-board">
+            <div class="loading-state">데이터를 불러오는 중입니다...</div>
+        </div>
+
+        <div id="earning-board" class="ranking-board" style="display: none;">
+            <div class="loading-state">데이터를 불러오는 중입니다...</div>
+        </div>
+
+    </div>
+
+    <div class="mobile-sub-nav" style="display: none;">
+        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <div class="nav-links">
+            <a href="/calendar" class="active">캘린더</a>
+            <a href="/ranking">랭킹</a>
+            <a href="/strategy">가이드</a>
+            <a href="/about">소개</a>
+            <a href="/privacy">약관</a>
+        </div>
+    </div>
+
+   <script>
+    // 탭 전환 스크립트
+    function switchTab(type) {
+        const tabDiv = document.getElementById('tab-dividend');
+        const tabEarn = document.getElementById('tab-earning');
+        const divBoard = document.getElementById('dividend-board');
+        const earnBoard = document.getElementById('earning-board');
+        
+        if (type === 'dividend') {
+            tabDiv.classList.add('active'); tabEarn.classList.remove('active');
+            divBoard.style.display = 'block'; earnBoard.style.display = 'none';
+        } else {
+            tabDiv.classList.remove('active'); tabEarn.classList.add('active');
+            divBoard.style.display = 'none'; earnBoard.style.display = 'block';
         }
     }
 
-    // 2. 탭 전환 및 렌더링
-    function showTab(type, btn) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    // 날짜 포맷 변환 (예: 2024-11-24 -> 11/24)
+    function formatDate(dateStr) {
+        const parts = dateStr.split('-');
+        if(parts.length === 3) {
+            return parseInt(parts[1], 10) + '/' + parseInt(parts[2], 10);
+        }
+        return dateStr;
+    }
+
+    // 캘린더 리스트 렌더링 함수
+    function renderList(boardId, items, typeName) {
+        const board = document.getElementById(boardId);
+        board.innerHTML = '';
         
-        const grid = document.getElementById('calendar-grid');
-        if (!cachedData[type] || cachedData[type].length === 0) {
-            grid.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8;">등록된 일정이 없습니다.</div>`;
+        if (!items || items.length === 0) {
+            board.innerHTML = `<div class="empty-state">현재 다가오는 ${typeName} 일정이<br>파악되지 않았습니다.</div>`;
             return;
         }
 
-        grid.innerHTML = cachedData[type].map(item => `
-            <div class="day-item">
-                <strong>${item.date}</strong>
-                <span class="event-title">${item.title}</span>
-            </div>
-        `).join('');
+        items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'calendar-item';
+            
+            const displayDate = formatDate(item.date);
+            
+            row.innerHTML = `
+                <div class="cal-date">${displayDate}</div>
+                <div class="cal-title">${item.title}</div>
+            `;
+            board.appendChild(row);
+        });
     }
 
-    window.onload = fetchCalendarData;
-</script>
+    // API를 통해 실시간 데이터 로드
+    async function loadCalendarData() {
+        try {
+            const response = await fetch('/api/calendar/data');
+            const data = await response.json();
+            
+            renderList('dividend-board', data.dividend, '배당락');
+            renderList('earning-board', data.earning, '실적발표');
+        } catch (error) {
+            document.getElementById('dividend-board').innerHTML = '<div class="empty-state">데이터를 불러오는데 실패했습니다.</div>';
+            document.getElementById('earning-board').innerHTML = '<div class="empty-state">데이터를 불러오는데 실패했습니다.</div>';
+        }
+    }
 
+    // 페이지 로딩 시 데이터 호출
+    document.addEventListener('DOMContentLoaded', loadCalendarData);
+   </script>
 </body>
 </html>

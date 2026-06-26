@@ -3,76 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>싸비싸 - 실시간 기업 가치 스크리닝 계량 서비스</title>
-    <meta name="description" content="복잡한 재무 지표 소음을 걷어내고, 유상증자 리스크 및 코리아 디스카운트 보정 알고리즘을 거쳐 도출된 정량적 가치 점수를 100점 만점으로 확인해 보세요.">
+    <title>싸비싸 - 데이터 기반 주식 가치 진단</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-    :root { --blue: #3b82f6; --bg: #f0f7ff; --text-main: #1e293b; --card-bg: #ffffff; --border: #dee2e6; }
-    body { background: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
-    
-    /* 🖥️ 데스크탑 상단 내비게이션 */
-    .top-nav { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px 24px; border-radius: 100px; box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000; }
-    .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
-    .top-nav .nav-links { display: flex; gap: 16px; }
-    .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
-    .top-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-
-    .main-wrapper { text-align: center; width: 100%; max-width: 500px; padding: 20px; box-sizing: border-box; margin-top: 40px; }
-    .title-text { display: inline-block; font-size: 2.8rem; font-weight: 900; color: #ffffff; margin: 0 0 25px 0; letter-spacing: -1px; text-shadow: 0 8px 20px rgba(59, 130, 246, 0.65), 0 15px 40px rgba(59, 130, 246, 0.45); }
-    
-    .search-box { position: relative; width: 100%; margin: 0 auto; }
-    .search-input { width: 100%; box-sizing: border-box; padding: 18px 56px 18px 26px; font-size: 0.95rem; border: none; border-radius: 40px; outline: none; background: #ffffff; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); font-family: inherit; font-weight: 600; color: var(--text-main); }
-    .search-input::placeholder { color: #cbd5e1; font-weight: 500; }
-    
-    .search-icon { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; color: #abc4e8; transition: color 0.2s; }
-    .search-icon:hover { color: var(--blue); }
-    
-    .sub-text { font-size: 0.75rem; color: #abc4e8; margin-top: 14px; font-weight: 600; }
-
-    .autocomplete-list { position: absolute; top: 65px; left: 0; right: 0; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); z-index: 99; overflow: hidden; display: none; text-align: left; border: none; }
-    .auto-item { padding: 16px 24px; cursor: pointer; font-size: 0.9rem; font-weight: 700; border-bottom: 1px dashed #e2e8f0;}
-    .auto-item:hover { background-color: var(--bg); color: var(--blue); }
-    
-    /* 팝업 모달 UI */
-    #resultModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50000; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); }
-    .modal-content-box { background: #ffffff; border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 28px 24px 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; box-sizing: border-box; -ms-overflow-style: none; scrollbar-width: none; }
-    .modal-content-box::-webkit-scrollbar { display: none; }
-    
-    .share-pill { display: inline-flex; align-items: center; gap: 6px; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer; }
-    .share-pill:hover { background: #e2e8f0; color: var(--blue); }
-
-    /* 기능 추가 섹션 UI */
-    .feature-box { padding: 16px; border-radius: 12px; margin-bottom: 15px; }
-    .curation-box { background: #f8fafc; border-left: 4px solid var(--blue); }
-    .backtest-box { background: #ecfdf5; display: flex; justify-content: space-between; align-items: center; }
-
-    /* 💬 실시간 주주방 타임라인 */
-    #mainTalkTimeline { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #edf2f7; scrollbar-width: thin; }
-    #mainTalkTimeline::-webkit-scrollbar { width: 6px; }
-    #mainTalkTimeline::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-    #mainTalkTimeline::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-    footer { text-align: center; font-size: 0.72rem; color: #94a3b8; margin-top: 50px; line-height: 1.6; font-weight: 600; width: 100%; max-width: 500px; padding: 0 20px; box-sizing: border-box; word-break: keep-all; }
-
-    @media (max-width: 768px) {
-        .top-nav { display: none !important; } 
-        body { padding-top: 20px; margin-bottom: 90px; justify-content: center; min-height: calc(100vh - 90px); }
-        .main-wrapper { margin-top: 10px; margin-bottom: 20px; padding: 12px; }
-        .title-text { font-size: 2.3rem; margin-top: 10px; }
-        .search-input { padding: 16px 50px 16px 20px; font-size: 0.9rem; }
-        
-        /* 📱 모바일 하단 내비게이션 */
-        .mobile-sub-nav { 
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 0 20px; height: 56px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12); justify-content: space-between; align-items: center; width: calc(100% - 40px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; 
+        :root {
+            --blue: #3b82f6;
+            --text-main: #1e293b;
+            --text-sub: #868e96;
+            --border: #dee2e6;
+            --bg-gray: #f0f7ff;
+            --red: #ef4444;
+            --green: #22c55e;
         }
-        .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; letter-spacing: -0.5px; }
-        .mobile-sub-nav .nav-links { display: flex; gap: 8px; align-items: center; }
-        .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
-        .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
-    }
+        
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            background-color: var(--bg-gray); 
+            margin: 0; 
+            padding-top: 100px; 
+            padding-bottom: 60px;
+            box-sizing: border-box;
+        }
+        
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 0 16px; 
+            box-sizing: border-box;
+        }
+
+        /* 🖥️ 공통 데스크탑 상단 내비게이션 */
+        .top-nav { 
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 12px 24px; border-radius: 100px; box-shadow: 0 8px 32px rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000;
+        }
+        .top-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 1rem; letter-spacing: -0.5px; }
+        .top-nav .nav-links { display: flex; gap: 16px; align-items: center; }
+        .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
+        .top-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
+
+        /* 🔍 메인 검색창 디자인 */
+        .main-search-wrapper { margin-bottom: 30px; }
+        .page-search { position: relative; width: 100%; display: flex; align-items: center; }
+        .page-search input { width: 100%; padding: 16px 50px 16px 24px; border-radius: 30px; border: 2px solid var(--blue); outline: none; font-size: 1rem; box-sizing: border-box; font-weight: 700; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1); transition: all 0.3s; }
+        .page-search input:focus { box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); }
+        .page-search button { position: absolute; right: 18px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: transform 0.2s; }
+        .page-search button:hover { transform: scale(1.05); }
+
+        /* ✨ 대시보드 카드 공통 속성 */
+        .card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+        .card-title { font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin-top: 0; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+        /* 📊 진단 결과 요약 (스코어) */
+        .score-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
+        .stock-name-title { margin: 0; font-size: 1.4rem; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px; }
+        .stock-ticker { font-size: 0.9rem; color: var(--text-sub); font-weight: 600; }
+        .stock-price { font-size: 1.1rem; font-weight: 800; color: var(--blue); }
+        
+        .score-display { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px 0; }
+        .score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 900; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 12px; }
+        .score-change { font-size: 0.9rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: #f8fafc; }
+        .change-up { color: var(--red); }
+        .change-down { color: var(--blue); }
+        .score-brief { text-align: center; font-size: 1rem; font-weight: 700; color: var(--text-main); word-break: keep-all; line-height: 1.5; }
+
+        /* 💡 큐레이션 및 수익률 */
+        .curation-box { background: #f8fafc; border-radius: 12px; padding: 16px; font-size: 0.95rem; font-weight: 600; color: #334155; line-height: 1.6; border: 1px solid #e2e8f0; }
+        .return-badge { display: inline-block; background: #eef2ff; color: #4f46e5; font-weight: 800; padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 12px; }
+
+        /* 📝 분석 사유 리스트 */
+        .reason-list { list-style: none; padding: 0; margin: 0; }
+        .reason-item { padding: 10px 0; border-bottom: 1px dashed #f1f3f5; font-size: 0.95rem; font-weight: 600; }
+        .reason-item:last-child { border-bottom: none; }
+        .reason-plus { color: var(--red); }
+        .reason-minus { color: var(--blue); }
+
+        /* 💬 커뮤니티 투표 및 댓글 */
+        .vote-container { display: flex; gap: 12px; margin-bottom: 20px; }
+        .vote-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-up { background-color: #fee2e2; color: var(--red); }
+        .btn-down { background-color: #dbeafe; color: var(--blue); }
+        .vote-btn:active { transform: scale(0.97); }
+
+        .talk-input-box { display: flex; gap: 8px; margin-bottom: 20px; }
+        .talk-input-box input { flex: 1; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 0.9rem; outline: none; font-weight: 600; }
+        .talk-input-box button { background: var(--text-main); color: white; border: none; border-radius: 12px; padding: 0 16px; font-weight: 700; cursor: pointer; }
+        
+        .talk-list { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; padding-right: 4px; }
+        .talk-item { background: #f8fafc; padding: 12px; border-radius: 12px; font-size: 0.9rem; }
+        .talk-nick { font-weight: 800; color: var(--blue); margin-bottom: 4px; font-size: 0.8rem; }
+        .talk-text { color: var(--text-main); font-weight: 500; line-height: 1.4; word-break: break-all; }
+        .talk-time { font-size: 0.75rem; color: var(--text-sub); text-align: right; margin-top: 4px; }
+
+        /* 상태 메시지 */
+        .state-msg { text-align: center; padding: 40px 20px; background: white; border-radius: 20px; border: 1px solid var(--border); color: #64748b; font-weight: 600; line-height: 1.6; }
+
+        @media (max-width: 768px) {
+            .top-nav { display: none !important; }
+            body { padding-top: 20px; margin-bottom: 90px; }
+            
+            /* 📱 공통 모바일 하단 내비게이션 */
+            .mobile-sub-nav { 
+                position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 0 20px; height: 56px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12); justify-content: space-between; align-items: center; width: calc(100% - 40px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 10000; 
+            }
+            .mobile-sub-nav .nav-logo { text-decoration: none; color: var(--blue); font-weight: 900; font-size: 15px; letter-spacing: -0.5px; }
+            .mobile-sub-nav .nav-links { display: flex; gap: 8px; align-items: center; }
+            .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
+            .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); text-shadow: 0 0 12px rgba(59, 130, 246, 0.3); }
+        }
     </style>
 </head>
 <body>
@@ -88,57 +132,242 @@
         </div>
     </div>
 
-    <div class="main-wrapper">
-        <div class="title-text">SSABISSA</div>
-        
-        <form id="searchForm" class="search-box" onsubmit="handleSearch(event)">
-            <input type="text" id="ticker" name="ticker" class="search-input" placeholder="종목명 또는 티커, 코드 (예: 삼성전자)" autocomplete="off" required>
-            <button type="submit" class="search-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-            </button>
-            <div id="autocompleteBox" class="autocomplete-list"></div>
-        </form>
-        <div class="sub-text">당신의 주식가치를 스캔하세요</div>
-
-        <div id="loadingBox" style="display: none; margin-top: 20px; color: var(--blue); font-size: 0.85rem; font-weight: 700;">기업 가치 연산 중...</div>
-    </div>
-
-    <div id="resultModal" onclick="closeModal(event)">
-        <div class="modal-content-box" onclick="event.stopPropagation()">
-            
-            <div style="position: sticky; top: -10px; left: 0; width: 100%; display: flex; justify-content: flex-end; z-index: 51000; margin-bottom: -20px; pointer-events: none;">
-                <button onclick="closeModal(event)" class="close-btn" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 50%; width: 36px; height: 36px; font-size: 16px; color: #718096; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); pointer-events: auto; transition: all 0.2s; margin-top: -10px; margin-right: -10px;">✕</button>
-            </div>
-
-            <div id="modalContent"></div>
-
-            <div id="communitySection" style="display: none; border-top: 2px solid #edf2f7; padding-top: 25px; margin-top: 20px;">
-                <h3 style="margin: 0 0 15px 0; font-size: 1rem; font-weight: 800; color: #1a202c;">🔥 실시간 주가 투표방</h3>
-                
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <button onclick="submitVote('up')" style="flex: 1; padding: 12px; background: #fee2e2; border: none; border-radius: 10px; color: #dc2626; font-weight: bold; cursor: pointer; font-size: 0.85rem;">📈 상승 투표</button>
-                    <button onclick="submitVote('down')" style="flex: 1; padding: 12px; background: #e0f2fe; border: none; border-radius: 10px; color: #0284c7; font-weight: bold; cursor: pointer; font-size: 0.85rem;">📉 하락 투표</button>
-                </div>
-
-                <div id="voteProgressBar" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 10px; overflow: hidden; display: flex; font-size: 10px; color: white; font-weight: bold; text-align: center; line-height: 16px; margin-bottom: 25px;"></div>
-
-                <h3 style="margin: 0 0 12px 0; font-size: 1rem; font-weight: 800; color: #1a202c;">💬 실시간 익명 주주 응원방</h3>
-                
-                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                    <input type="text" id="talkInput" placeholder="주주방에 힘이 되는 한 줄을 남겨주세요." style="flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.85rem; outline: none; font-weight: 600;">
-                    <button onclick="submitTalk()" style="padding: 10px 16px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;">등록</button>
-                </div>
-
-                <div id="talkTimeline"></div>
-            </div>
-            
+    <div class="container">
+        <div class="main-search-wrapper">
+            <form action="/" method="GET" class="page-search">
+                <input type="text" id="ticker" name="ticker" placeholder="종목명 또는 티커 (예: 삼성전자, AAPL)" required autocomplete="off" value="{{ ticker if ticker else '' }}">
+                <button type="submit">🔍</button>
+            </form>
         </div>
+
+        {% if result %}
+            {% if result.error %}
+                <div class="state-msg">
+                    <span style="font-size:2rem;">⚠️</span><br>
+                    {{ result.error }}
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="score-header">
+                        <div>
+                            <h1 class="stock-name-title">{{ result.name }}</h1>
+                            <div class="stock-ticker">{{ result.ticker }}</div>
+                        </div>
+                        <div class="stock-price">{{ result.current_price }}</div>
+                    </div>
+                    
+                    <div class="score-display">
+                        <div class="score-circle" style="background-color: {{ result.color }};">
+                            {{ result.score }}
+                        </div>
+                        
+                        <div class="score-change">
+                            어제 대비 
+                            {% if result.score_change > 0 %}
+                                <span class="change-up">▲ {{ result.score_change }}</span>
+                            {% elif result.score_change < 0 %}
+                                <span class="change-down">▼ {{ result.score_change * -1 }}</span>
+                            {% else %}
+                                <span>-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="score-brief">{{ result.brief }}</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🤖 AI 이슈 큐레이션 & 트렌드</div>
+                    <div class="curation-box mb-3">
+                        {{ result.curation_reason }}
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <span class="return-badge">
+                            가상 누적 수익률: 
+                            {% if result.backtest_return > 0 %}+{% endif %}{{ result.backtest_return }}%
+                        </span>
+                        <div style="position: relative; height:200px; width:100%;">
+                            <canvas id="historyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔬 상세 분석 리포트</div>
+                    <ul class="reason-list">
+                        {% for reason in result.reasons %}
+                            {% if reason.startswith('+') %}
+                                <li class="reason-item reason-plus">{{ reason }}</li>
+                            {% elif reason.startswith('-') %}
+                                <li class="reason-item reason-minus">{{ reason }}</li>
+                            {% else %}
+                                <li class="reason-item">{{ reason }}</li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if not result.reasons %}
+                            <li class="reason-item" style="color: #94a3b8; text-align:center;">특이 평가 항목이 없습니다.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💬 주주 토론방</div>
+                    <div class="vote-container">
+                        <button class="vote-btn btn-up" onclick="submitVote('up')">🔥 매수 <span id="voteUpCount">0</span></button>
+                        <button class="vote-btn btn-down" onclick="submitVote('down')">❄️ 관망 <span id="voteDownCount">0</span></button>
+                    </div>
+                    
+                    <form id="talkForm" class="talk-input-box" onsubmit="submitTalk(event)">
+                        <input type="text" id="talkInput" placeholder="욕설 및 리딩방 유도 적발 시 차단됩니다" required maxlength="100">
+                        <button type="submit">등록</button>
+                    </form>
+                    
+                    <div class="talk-list" id="talkList">
+                        </div>
+                </div>
+
+                <script>
+                    const CURRENT_TICKER = "{{ result.ticker }}";
+
+                    // 1. Chart.js 히스토리 그래프 렌더링
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const ctx = document.getElementById('historyChart').getContext('2d');
+                        // Jinja2 배열 데이터를 안전하게 JS 배열로 가져옵니다.
+                        const dates = {{ result.history_dates | safe }};
+                        const scores = {{ result.history_scores | safe }};
+                        
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: dates,
+                                datasets: [{
+                                    label: '가치 평가 점수',
+                                    data: scores,
+                                    borderColor: '{{ result.color }}',
+                                    backgroundColor: '{{ result.color }}',
+                                    borderWidth: 3,
+                                    tension: 0.3, // 부드러운 곡선
+                                    pointBackgroundColor: 'white',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false }
+                                },
+                                scales: {
+                                    y: {
+                                        min: 0,
+                                        max: 100,
+                                        grid: { color: '#f1f3f5' }
+                                    },
+                                    x: {
+                                        grid: { display: false }
+                                    }
+                                }
+                            }
+                        });
+
+                        // 커뮤니티 데이터 초기 로드
+                        loadCommunityData();
+                    });
+
+                    // 2. 커뮤니티 API 연동 (불러오기, 투표, 댓글)
+                    async function loadCommunityData() {
+                        try {
+                            const res = await fetch(`/api/community/${CURRENT_TICKER}`);
+                            const data = await res.json();
+                            updateCommunityUI(data.votes, data.talks);
+                        } catch(e) { console.error('커뮤니티 로드 실패', e); }
+                    }
+
+                    async function submitVote(type) {
+                        try {
+                            const formData = new URLSearchParams();
+                            formData.append('type', type);
+                            const res = await fetch(`/api/community/${CURRENT_TICKER}/vote`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: formData
+                            });
+                            const data = await res.json();
+                            if(data.success) {
+                                document.getElementById('voteUpCount').innerText = data.votes.up;
+                                document.getElementById('voteDownCount').innerText = data.votes.down;
+                            }
+                        } catch(e) { alert('투표 처리 중 오류가 발생했습니다.'); }
+                    }
+
+                    async function submitTalk(e) {
+                        e.preventDefault();
+                        const input = document.getElementById('talkInput');
+                        const text = input.value.trim();
+                        if(!text) return;
+
+                        try {
+                            const formData = new URLSearchParams();
+                            formData.append('text', text);
+                            const res = await fetch(`/api/community/${CURRENT_TICKER}/talk`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: formData
+                            });
+                            const data = await res.json();
+                            if(data.error) {
+                                alert(data.error);
+                            } else if(data.success) {
+                                input.value = '';
+                                updateCommunityUI(null, data.talks);
+                            }
+                        } catch(e) { alert('등록 중 오류가 발생했습니다.'); }
+                    }
+
+                    function updateCommunityUI(votes, talks) {
+                        if(votes) {
+                            document.getElementById('voteUpCount').innerText = votes.up;
+                            document.getElementById('voteDownCount').innerText = votes.down;
+                        }
+                        if(talks) {
+                            const list = document.getElementById('talkList');
+                            list.innerHTML = '';
+                            if(talks.length === 0) {
+                                list.innerHTML = '<div style="text-align:center; padding: 20px; color: #94a3b8; font-size: 0.9rem;">아직 등록된 의견이 없습니다. 첫 번째 의견을 남겨보세요!</div>';
+                                return;
+                            }
+                            talks.forEach(t => {
+                                const dateObj = new Date(t.time);
+                                const timeStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                
+                                const el = document.createElement('div');
+                                el.className = 'talk-item';
+                                el.innerHTML = `
+                                    <div class="talk-nick">${t.nickname}</div>
+                                    <div class="talk-text">${t.text}</div>
+                                    <div class="talk-time">${timeStr}</div>
+                                `;
+                                list.appendChild(el);
+                            });
+                        }
+                    }
+                </script>
+            {% endif %}
+        {% else %}
+            <div class="state-msg" style="margin-top: 40px; border:none; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+                <div style="font-size: 2.5rem; margin-bottom: 16px;">📈</div>
+                <h2 style="color: var(--text-main); margin-top:0; font-weight:800;">어떤 종목을 진단해 드릴까요?</h2>
+                <p style="font-size:0.95rem;">상단의 검색창에 종목명이나 티커 코드를 입력하시면<br>11가지 지표에 기반한 데이터 진단이 즉시 시작됩니다.</p>
+                <div style="margin-top: 20px; display:flex; gap:10px; justify-content:center;">
+                    <a href="/ranking" style="background:#eef2ff; color:var(--blue); padding:10px 20px; border-radius:20px; text-decoration:none; font-weight:700; font-size:0.9rem;">🔥 인기 랭킹 보기</a>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" class="nav-logo">🔍 싸비싸</a>
+        <a href="/" class="nav-logo" style="color:var(--text-main) !important;">🔍 홈</a>
         <div class="nav-links">
             <a href="/calendar">캘린더</a>
             <a href="/ranking">랭킹</a>
@@ -147,317 +376,5 @@
         </div>
     </div>
 
-    <footer>
-        <p>© 2026 싸비싸(SsaBiSsa). ALL RIGHTS RESERVED.</p>
-        <p style="margin-top: 6px; font-size: 0.68rem; color: #94a3b8; font-weight: 600;"><b>⚠️ 책임면책고지:</b> 본 엔진이 제공하는 가치 점수는 계량 지표 연산 결과물일 뿐 매수·매도 추천이 아니며, 모든 금융 투자 판단에 따른 최종 손실 책임은 전적으로 투자자 본인에게 있습니다.</p>
-    </footer>
-
-    <script>
-    let currentActiveTicker = ""; 
-    let isTalkSending = false; 
-    let scoreChartInstance = null;
-    let chartDataCache = null; 
-
-    // ✅ [수정됨] URL 접속 시 자동 검색 (공유 링크 버그 픽스)
-    window.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const queryTicker = urlParams.get('ticker') || urlParams.get('q');
-        if (queryTicker) {
-            const input = document.getElementById("ticker");
-            if (input) {
-                input.value = queryTicker;
-                handleSearch(); // URL에 종목명이 있으면 즉시 자동 렌더링
-            }
-        }
-    });
-
-    // 1. 자동완성 기능
-    const tickerInput = document.getElementById("ticker");
-    const autoBox = document.getElementById("autocompleteBox");
-    let timeout = null;
-    if(tickerInput && autoBox) {
-        tickerInput.addEventListener("input", function(e) {
-            clearTimeout(timeout);
-            const query = e.target.value.trim();
-            if (query.length < 2) { autoBox.style.display = "none"; return; }
-            timeout = setTimeout(() => {
-                fetch(`/api/autocomplete?q=${encodeURIComponent(query)}`).then(r => r.json()).then(data => {
-                    if (!data.length) { autoBox.style.display = "none"; return; }
-                    autoBox.innerHTML = "";
-                    data.forEach(item => {
-                        const row = document.createElement("div"); row.className = "auto-item";
-                        row.innerHTML = `<span style="color:var(--blue); font-size:0.85rem; margin-right:6px;">${item.ticker}</span> <span>${item.name}</span>`;
-                        row.onclick = () => { 
-                            tickerInput.value = item.ticker; 
-                            autoBox.style.display = "none"; 
-                            handleSearch(); 
-                        };
-                        autoBox.appendChild(row);
-                    });
-                    autoBox.style.display = "block";
-                });
-            }, 250);
-        });
-        document.addEventListener("click", e => { if(e.target !== tickerInput) autoBox.style.display = "none"; });
-    }
-
-    function copyUrl() { 
-        if(!currentActiveTicker) return;
-        navigator.clipboard.writeText(window.location.origin + "/?ticker=" + encodeURIComponent(currentActiveTicker)).then(() => alert("진단 링크가 복사되었습니다.")); 
-    }
-
-    // 📡 2. 실제 백엔드 연동 및 검색 처리
-    async function handleSearch(e) {
-        if(e) e.preventDefault(); // ✅ 엔터키로 인한 폼 자동 제출(새로고침) 방지
-        const input = document.getElementById("ticker");
-        if(!input) return;
-        
-        const ticker = input.value.trim();
-        if(!ticker) return;
-
-        currentActiveTicker = ticker;
-        const loadingBox = document.getElementById("loadingBox");
-        const modal = document.getElementById("resultModal");
-        const commSection = document.getElementById("communitySection");
-        const content = document.getElementById("modalContent");
-
-        if(loadingBox) loadingBox.style.display = "block";
-        if(modal) modal.style.display = "none";
-        if(commSection) commSection.style.display = "none";
-
-        try {
-            const response = await fetch(`/api/diagnose/${ticker}`);
-            const data = await response.json();
-            
-            if (data.error) {
-                content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">${data.error}</div>`;
-            } else {
-                await renderModalData(data);
-            }
-        } catch (error) {
-            content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 800; padding: 40px 0;">서버 통신 중 에러가 발생했습니다.</div>`;
-        } finally {
-            if(loadingBox) loadingBox.style.display = "none";
-            if(modal) modal.style.display = "flex";
-        }
-    }
-
-    function closeModal(e) {
-        if (!e || e.target.id === 'resultModal' || e.target.closest('.close-btn') || e.target.tagName === 'BUTTON') { 
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.style.display = 'none'; 
-            
-            const wrap = document.getElementById("graphWrapper");
-            const arrow = document.getElementById("graphArrow");
-            if(wrap) wrap.style.display = "none";
-            if(arrow) arrow.innerText = "▼";
-        }
-    }
-
-    async function renderModalData(data) {
-        const content = document.getElementById("modalContent");
-        
-        // 어제 대비 점수 증감 
-        let scoreChangeHtml = "";
-        const change = data.score_change || 0;
-        if(change > 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#ef4444; margin-top:6px; background:#fef2f2; padding:4px 10px; border-radius:20px;">어제 대비 🔺${change}점</div>`;
-        else if(change < 0) scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#3b82f6; margin-top:6px; background:#eff6ff; padding:4px 10px; border-radius:20px;">어제 대비 🔻${Math.abs(change)}점</div>`;
-        else scoreChangeHtml = `<div style="font-size:0.85rem; font-weight:800; color:#94a3b8; margin-top:6px; background:#f8fafc; padding:4px 10px; border-radius:20px;">어제와 동일 ➖</div>`;
-
-        // 이슈 큐레이션
-        let curationHtml = "";
-        if(data.curation_reason) {
-            curationHtml = `<div class="feature-box curation-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #f8fafc; border-left: 4px solid var(--blue);"><div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main);">🤖 왜 점수가 변했을까?</div><div style="font-size: 0.85rem; color: #475569;">${data.curation_reason}</div></div>`;
-        } else {
-            curationHtml = `<div class="feature-box curation-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #f8fafc; border-left: 4px solid var(--blue);"><div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-main);">🤖 이슈 큐레이션</div><div style="font-size: 0.85rem; color: #475569;">현재 점수에 뚜렷한 영향을 미친 뉴스나 공시를 찾지 못했습니다.</div></div>`;
-        }
-
-        // 백테스트 수익률 (0% 매칭 문제 방어)
-        const backtestReturn = data.backtest_return !== undefined ? data.backtest_return : 0;
-        const backtestHtml = `<div class="feature-box backtest-box" style="padding: 16px; border-radius: 12px; margin-bottom: 15px; background: #ecfdf5; display: flex; justify-content: space-between; align-items: center;"><div><div style="font-weight: 800; font-size: 0.9rem; color: #059669;">⏱️ 최근 3년 가상 수익률</div><div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">(싸비싸 80점 매수 / 50점 이하 매도 기준)</div></div><div style="font-weight: 900; font-size: 1.25rem; color: ${backtestReturn >= 0 ? '#ef4444' : '#3b82f6'};">${backtestReturn > 0 ? '+' : ''}${backtestReturn}%</div></div>`;
-
-        // 가치 평가 사유
-        let reasonsHtml = '';
-        if(data.reasons && data.reasons.length > 0) {
-            data.reasons.forEach(reason => {
-                const isPlus = reason.includes('+');
-                reasonsHtml += `<div style="padding:12px 0; border-bottom:1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items: center;"><span style="font-weight: 600; color: #334155; font-size:0.85rem;">${reason}</span><span style="color:${isPlus ? '#3b82f6':'#ef4444'}; font-weight:800; font-size:1.1rem;">${isPlus ? '+':'-'}</span></div>`;
-            });
-        }
-
-        content.innerHTML = `
-            <div style="text-align: left;">
-                <div style="display: block; margin-bottom: 25px; padding-right: 30px;">
-                    <h2 id="activeTickerHolder" data-ticker="${data.ticker}" style="margin: 0 0 6px 0; font-size: 1.35rem; font-weight: 900; color: var(--text-main); word-break: break-all;">${data.name} (${data.ticker})</h2>
-                    <button class="share-pill" onclick="copyUrl()" style="margin-top: 4px; display: inline-flex; align-items: center; float: right; background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 14px; font-size: 0.78rem; font-weight: 700; color: #64748b; cursor: pointer;">공유하기</button>
-                </div>
-
-                <div style="font-size:0.9rem; color:#64748b; margin-bottom:25px; font-weight: 600; border-top: 1px solid #f1f5f9; padding-top: 15px;">현재 거래가: <span style="color: var(--text-main); font-weight: 700;">${data.current_price || '데이터 없음'}</span></div>
-                
-                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 35px;">
-                    <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(${data.color || '#e2e8f0'} ${data.score || 0}%, #e2e8f0 0deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.05);">
-                        <div style="width: 130px; height: 130px; border-radius: 50%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);">
-                            <span style="font-size: 3rem; font-weight: 900; color: ${data.color || '#1e293b'}; line-height: 1;">${data.score || 0}</span>
-                            <span style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; margin-top: 4px;">가치 점수</span>
-                        </div>
-                    </div>
-                    ${scoreChangeHtml}
-                </div>
-
-                ${curationHtml}
-                ${backtestHtml}
-
-                <div style="background: #f1f5f9; border-radius: 12px; padding: 14px 16px; margin-bottom: 25px; cursor: pointer; font-weight: 800; font-size: 0.85rem; color: var(--blue); display: flex; justify-content: space-between; align-items: center;" onclick="toggleGraph()">
-                    <span>📊 과거 6개월 점수 히스토리 보기</span><span id="graphArrow">▼</span>
-                </div>
-                <div id="graphWrapper" style="display: none; padding: 10px; border: 1px solid #edf2f7; border-radius: 12px; margin-bottom: 25px;">
-                    <canvas id="scoreHistoryChart" height="150"></canvas>
-                </div>
-
-                <div style="background:#f8fafc; padding:20px; border-radius:16px; margin-bottom:20px; font-size:0.95rem; line-height:1.6;">
-                    <b style="color:var(--blue);">요약 진단:</b> <span style="font-weight: 600; color: var(--text-main);">${data.brief || '진단 요약이 없습니다.'}</span>
-                </div>
-
-                <div style="font-size:0.9rem; margin-bottom: 15px;">${reasonsHtml}</div>
-            </div>
-        `;
-
-        // 차트 데이터 캐싱
-        chartDataCache = { labels: data.history_dates, dataPoints: data.history_scores };
-
-        // 커뮤니티 데이터 로드
-        await refreshCommunityData();
-        const commSection = document.getElementById("communitySection");
-        if(commSection) commSection.style.display = "block";
-    }
-
-    function toggleGraph() {
-        const wrap = document.getElementById("graphWrapper");
-        const arrow = document.getElementById("graphArrow");
-        if(wrap.style.display === "none") {
-            wrap.style.display = "block"; 
-            arrow.innerText = "▲";
-            if(chartDataCache && chartDataCache.labels) {
-                drawChart(chartDataCache.labels, chartDataCache.dataPoints);
-            }
-        } else {
-            wrap.style.display = "none"; 
-            arrow.innerText = "▼";
-        }
-    }
-
-    // ✅ [수정됨] 차트 증발 버그 픽스 (기존 인스턴스 찌꺼기 완벽 제거)
-    function drawChart(labels, dataPoints) {
-        const canvas = document.getElementById('scoreHistoryChart');
-        if(!canvas) return;
-        
-        if(scoreChartInstance) {
-            try { scoreChartInstance.destroy(); } catch(e) {}
-            scoreChartInstance = null;
-        }
-
-        const ctx = canvas.getContext('2d');
-        scoreChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: { labels: labels, datasets: [{ label: '가치 점수', data: dataPoints, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }] },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
-        });
-    }
-
-    // ✅ [수정됨] 댓글 시간 NaN 출력 방지 (안전한 파싱)
-    function timeAgo(dateString) {
-        if(!dateString) return "방금 전";
-        const past = new Date(dateString);
-        
-        // 파싱 실패 시 원본 텍스트 노출(최소한의 방어)
-        if(isNaN(past.getTime())) return dateString; 
-
-        const now = new Date();
-        const diffMs = now - past;
-        const diffSec = Math.floor(diffMs / 1000);
-        const diffMin = Math.floor(diffSec / 60);
-        const diffHour = Math.floor(diffMin / 60);
-
-        if (diffSec < 60) return "방금 전";
-        if (diffMin < 60) return `${diffMin}분 전`;
-        if (diffHour < 24) return `${diffHour}시간 전`;
-        
-        const y = past.getFullYear();
-        const m = String(past.getMonth() + 1).padStart(2, '0');
-        const d = String(past.getDate()).padStart(2, '0');
-        return `${y}.${m}.${d}`;
-    }
-
-    // 📡 3. 커뮤니티 실시간 데이터(투표/댓글) 연동
-    async function refreshCommunityData() {
-        if (!currentActiveTicker) return;
-        try {
-            const res = await fetch(`/api/community/${currentActiveTicker}`);
-            if(!res.ok) return;
-            const data = await res.json();
-            
-            const up = data.votes ? data.votes.up : 0;
-            const down = data.votes ? data.votes.down : 0;
-            const total = up + down;
-            const progressBar = document.getElementById('voteProgressBar');
-            
-            if (progressBar) {
-                if (total === 0) {
-                    progressBar.innerHTML = `<div style="width: 100%; background: #cbd5e1; color: #475569; font-size: 11px;">첫 투표를 행사해 주세요!</div>`;
-                } else {
-                    const upPercent = Math.round((up / total) * 100);
-                    const downPercent = 100 - upPercent;
-                    progressBar.innerHTML = `<div style="width: ${upPercent}%; background: #ef4444;">상승 ${upPercent}%</div><div style="width: ${downPercent}%; background: #3b82f6;">하락 ${downPercent}%</div>`;
-                }
-            }
-
-            const timeline = document.getElementById('talkTimeline');
-            if (timeline) {
-                if (!data.talks || data.talks.length === 0) {
-                    timeline.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 0;">작성된 주주방 대화가 없습니다. 첫 글을 남겨보세요!</div>`;
-                } else {
-                    let talksHtml = '';
-                    data.talks.forEach(talk => {
-                        const formattedTime = timeAgo(talk.time);
-                        talksHtml += `<div style="display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;"><div style="display: flex; justify-content: space-between;"><span style="font-weight: 800; color: #475569;">👤 ${talk.nickname || '익명'}</span><span style="color: #94a3b8; font-size: 0.72rem;">${formattedTime}</span></div><span style="font-weight: 600; color: #1e293b; padding-left: 4px; word-break: break-all;">${talk.text}</span></div>`;
-                    });
-                    timeline.innerHTML = talksHtml;
-                }
-            }
-        } catch(e) {
-            console.error("커뮤니티 데이터를 불러오지 못했습니다.", e);
-        }
-    }
-
-    async function submitVote(type) {
-        if (!currentActiveTicker) return;
-        try {
-            const formData = new FormData(); formData.append('type', type);
-            const res = await fetch(`/api/community/${currentActiveTicker}/vote`, { method: 'POST', body: formData });
-            if(res.ok) await refreshCommunityData();
-        } catch(e) { alert("통신 에러가 발생했습니다."); }
-    }
-
-    async function submitTalk() {
-        if (isTalkSending || !currentActiveTicker) return; 
-        const input = document.getElementById('talkInput');
-        if(!input) return;
-        
-        const text = input.value.trim();
-        if(!text) return;
-
-        isTalkSending = true; 
-        try {
-            const formData = new FormData(); formData.append('text', text);
-            const res = await fetch(`/api/community/${currentActiveTicker}/talk`, { method: 'POST', body: formData });
-            const data = await res.json();
-            
-            if(data.success || res.ok) { input.value = ""; await refreshCommunityData(); } 
-            else if(data.error) { alert(data.error); }
-        } catch(e) {}
-        
-        setTimeout(() => { isTalkSending = false; }, 3000);
-    }
-    </script>
 </body>
 </html>
