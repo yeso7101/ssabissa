@@ -2,42 +2,72 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>싸비싸 캘린더</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>싸비싸 - 캘린더</title>
     <style>
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; }
-        .tab-btn.active { background: #333; color: white; }
-        .day { padding: 10px; border: 1px solid #ddd; margin-bottom: 5px; }
+        :root { --blue: #3b82f6; --text-main: #1e293b; --bg: #f0f4f8; }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; }
+        .main-container { max-width: 800px; margin: auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .page-title { text-align: center; font-weight: 900; margin-bottom: 25px; color: var(--text-main); }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: transparent; font-weight: 800; color: #94a3b8; transition: 0.3s; border-radius: 8px; }
+        .tab-btn.active { background: #eff6ff; color: var(--blue); }
+        
+        .day-item { background: #f8fafc; padding: 16px; margin-bottom: 12px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; }
+        .day-item strong { margin-right: 15px; color: var(--blue); min-width: 90px; }
+        .event-title { font-weight: 600; }
     </style>
 </head>
 <body>
+
+<div class="main-container">
+    <h2 class="page-title">📅 배당 & 어닝 캘린더</h2>
+    
     <div class="tabs">
         <button class="tab-btn active" onclick="showTab('dividend', this)">배당 캘린더</button>
         <button class="tab-btn" onclick="showTab('earning', this)">어닝 캘린더</button>
     </div>
-    <div id="calendar-grid"></div>
+    
+    <div id="calendar-grid">
+        </div>
+</div>
 
-    <script>
-        let cachedData = { dividend: [], earning: [] };
+<script>
+    let cachedData = { dividend: [], earning: [] };
 
-        async function fetchCalendarData() {
-            const res = await fetch('/api/calendar/data');
+    // 1. 데이터 로드
+    async function fetchCalendarData() {
+        try {
+            const res = await fetch('/api/calendar/data', { cache: 'no-cache' });
             cachedData = await res.json();
             showTab('dividend', document.querySelector('.tab-btn'));
+        } catch (e) {
+            console.error("데이터 로드 실패:", e);
+        }
+    }
+
+    // 2. 탭 전환 및 렌더링
+    function showTab(type, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const grid = document.getElementById('calendar-grid');
+        if (!cachedData[type] || cachedData[type].length === 0) {
+            grid.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8;">등록된 일정이 없습니다.</div>`;
+            return;
         }
 
-        function showTab(type, btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            cachedData[type].forEach(item => {
-                grid.innerHTML += `<div class="day"><strong>${item.date}</strong> - ${item.title}</div>`;
-            });
-        }
+        grid.innerHTML = cachedData[type].map(item => `
+            <div class="day-item">
+                <strong>${item.date}</strong>
+                <span class="event-title">${item.title}</span>
+            </div>
+        `).join('');
+    }
 
-        window.onload = fetchCalendarData;
-    </script>
+    window.onload = fetchCalendarData;
+</script>
+
 </body>
 </html>

@@ -11,6 +11,7 @@ import time
 import threading
 from datetime import datetime, timezone, timedelta, date
 import yfinance as yf
+import os, json, yfinance as yf, threading, time, datetime
 
 
 # ================================================================
@@ -31,7 +32,7 @@ try:
     CALENDAR_FILE = "/data/calendar_data.json"
 except:
     CALENDAR_FILE = "calendar_data.json"
-    
+
     # 캘린더 데이터 저장 경로 설정
 DATA_DIR = "/data"
 CALENDAR_FILE = os.path.join(DATA_DIR, "calendar_data.json")
@@ -569,21 +570,29 @@ CALENDAR_FILE = "/data/calendar_data.json"
 
 @app.get("/api/calendar/data")
 def get_calendar_data():
-    if not os.path.exists(CALENDAR_FILE):
-        return []
+    if not os.path.exists(CALENDAR_FILE): return {"dividend": [], "earning": []}
     with open(CALENDAR_FILE, "r", encoding="utf-8") as f:
-        try:
-            return json.load(f)
-        except:
-            return []
+        try: return json.load(f)
+        except: return {"dividend": [], "earning": []}
 
-@app.post("/api/calendar/update")
-async def update_calendar_data(request: Request):
-    data = await request.json()
+def update_market_calendar():
+    tickers = ["005930.KS", "000660.KS", "AAPL", "MSFT"]
+    data = {"dividend": [], "earning": []}
+    for t in tickers:
+        stock = yf.Ticker(t)
+        info = stock.info
+        name = info.get('shortName', t)
+        if info.get("exDividendDate"):
+            date_str = datetime.fromtimestamp(info["exDividendDate"]).strftime('%Y-%m-%d')
+            data["dividend"].append({"date": date_str, "title": f"{name} 배당"})
+        if info.get("nextEarningsDate"):
+            date_str = datetime.fromtimestamp(info["nextEarningsDate"]).strftime('%Y-%m-%d')
+            data["earning"].append({"date": date_str, "title": f"{name} 실적발표"})
     with open(CALENDAR_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-    return {"success": True}
 
+def start_calendar_automation():
+    threading.Thread(target=lambda: [update_market_calendar() or time.sleep(86400) for _ in iter(int, 1)], daemon=True).start()
 # ⚙️ 기타 라우터 모음
 @app.get("/api/autocomplete")
 def api_autocomplete(q: str = ""):
