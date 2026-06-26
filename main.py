@@ -14,8 +14,16 @@ from datetime import datetime, timezone, timedelta, date
 # ================================================================
 # 1. 전역 설정 데이터 및 변수 기초 선언
 # ================================================================
-DATA_FILE = "/data/ranking_data.json"
-COMMUNITY_FILE = "/data/community_data.json"
+# 💡 [500 에러 방지 1] 폴더가 없어서 쓰기 에러가 나는 현상 방지
+try:
+    os.makedirs("/data", exist_ok=True)
+    DATA_FILE = "/data/ranking_data.json"
+    COMMUNITY_FILE = "/data/community_data.json"
+except Exception:
+    # 권한 문제로 폴더 생성이 안되면 현재 디렉토리에 저장
+    DATA_FILE = "ranking_data.json"
+    COMMUNITY_FILE = "community_data.json"
+
 STOCK_MAP_FILE = "stock_map.json"
 
 STOCK_MAP = {}
@@ -61,13 +69,11 @@ if os.path.exists(COMMUNITY_FILE):
             past_comm = json.load(f)
             VOTE_DB = past_comm.get("VOTE", {})
             TALK_DB = past_comm.get("TALK", {})
-            print("🚀 [싸비싸] Render 디스크로부터 과거 주주방 토크/투표 데이터 복구 성공!")
+            print("🚀 [싸비싸] 과거 주주방 토크/투표 데이터 복구 성공!")
         except Exception as e:
             print(f"⚠️ 커뮤니티 복구 중 예외 발생(무시하고 초기화): {e}")
 
-# ================================================================
-# 💡 시스템 진단 가이드 
-# ================================================================
+# 💡 진단 및 가이드 컴포넌트 연동용 글로벌 기준 사전
 SYSTEM_METRICS_GUIDE = [
     {"type": "plus",  "keyword": "괴리율",   "title": "목표가 괴리율 안전마진",   "desc": "증권사 평균 목표가와 현재 주가의 차이가 벌어져 안전마진이 확보된 경우 가점을 부여합니다."},
     {"type": "plus",  "keyword": "PER",    "title": "선행 PER 가성비",         "desc": "1년 뒤 예상 실적 대비 주가가 현저히 저렴한 구간입니다."},
@@ -92,16 +98,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 💡 [500 에러 방지 2] 파일 쓰기 실패 시 서버가 뻗지 않도록 예외 처리 강화
 def save_ranking_to_file():
-    payload = {"KR": dict(SEARCH_COUNT_KR), "US": dict(SEARCH_COUNT_US)}
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=4)
+    try:
+        payload = {"KR": dict(SEARCH_COUNT_KR), "US": dict(SEARCH_COUNT_US)}
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=4)
+    except Exception:
+        pass
 
 def save_community_to_file():
     global VOTE_DB, TALK_DB
-    payload = {"VOTE": VOTE_DB, "TALK": TALK_DB}
-    with open(COMMUNITY_FILE, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=4)
+    try:
+        payload = {"VOTE": VOTE_DB, "TALK": TALK_DB}
+        with open(COMMUNITY_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=4)
+    except Exception:
+        pass
 
 # ================================================================
 # 4. 6시간 주기 자동 가치점수 동기화 백그라운드 엔진
@@ -179,14 +192,15 @@ def resolve_ticker_by_name(query: str) -> str:
     return query
 
 # ================================================================
-# ⚙️ 점수 변동성 적정 조정 버전 (calculate_ssabissa_score)
+# ⚙️ 점수 변동성 대폭 상향 업데이트 버전 (유저 원본 유지)
 # ================================================================
 def calculate_ssabissa_score(info, ticker):
+    # 기본 점수를 50점(중립)으로 낮춰서 위아래 변동폭을 극대화
     score = 50 
     reasons = []
     is_kr = ".KS" in ticker or ".KQ" in ticker
     
-    # 1. 유상증자 리스크 (적정 감점)
+    # 1. 유상증자 리스크 (감점폭 대폭 확대)
     try:
         import yfinance as yf
         tk = yf.Ticker(ticker)
@@ -199,42 +213,42 @@ def calculate_ssabissa_score(info, ticker):
                     dilution_count += 1
                 prev_shares = current_shares
             if dilution_count > 0:
-                score -= (dilution_count * 6)
-                reasons.append(f"- 최근 6개월 내 유상증자 리스크 유발 ({dilution_count}회)")
+                score -= (dilution_count * 8) 
+                reasons.append(f"- 최근 6개월 내 유상증자 리스크 유발 ({dilution_count}회 진행)")
     except:
         if info.get("sharesOutstanding", 0) > 2000000000:
-            score -= 4; reasons.append("- 유통 주식 물량 과다 부담")
+            score -= 5; reasons.append("- 유통 주식 물량 과다 부담")
 
-    # 2. 부채 비율 
+    # 2. 부채 비율 (기준 하향 & 감점 강화)
     debt_eq = info.get("debtToEquity", 0)
-    if debt_eq > 150: score -= 8; reasons.append("- 위험 수준의 고부채 재무 부담")
+    if debt_eq > 150: score -= 10; reasons.append("- 위험 수준의 고부채 재무 부담 리스크")
 
-    # 3. 선행 PER 
+    # 3. 선행 PER (가/감점 강화)
     per = info.get("forwardPE")
     if per:
-        if is_kr and per < 8: score += 10; reasons.append("+ 선행 PER 기준 국장 저평가 메리트")
-        elif not is_kr and per < 18: score += 8; reasons.append("+ 선행 PER 기준 미장 가성비 양호")
-        elif per > 35: score -= 8; reasons.append("- 높은 멀티플 오버밸류 경계")
+        if is_kr and per < 8: score += 12; reasons.append("+ 선행 PER 기준 국장 극저평가 메리트")
+        elif not is_kr and per < 18: score += 9; reasons.append("+ 선행 PER 기준 미장 가성비 양호")
+        elif per > 35: score -= 10; reasons.append("- 높은 멀티플 오버밸류 경계")
 
-    # 4. PBR 청산가치
+    # 4. PBR 청산가치 (가/감점 강화)
     pbr = info.get("priceToBook")
     if pbr:
-        if is_kr and pbr < 0.5: score += 8; reasons.append("+ 장부상 청산가치 이하 저PBR 수혜")
-        elif not is_kr and pbr < 3.0: score += 5; reasons.append("+ 적정 수준의 자산 가치 반영")
-        elif pbr > 8.0: score -= 6; reasons.append("- 자산 가치 대비 멀티플 과열 위험")
+        if is_kr and pbr < 0.5: score += 10; reasons.append("+ 장부상 청산가치 이하 저PBR 수혜")
+        elif not is_kr and pbr < 3.0: score += 6; reasons.append("+ 적정 수준의 자산 가치 반영")
+        elif pbr > 8.0: score -= 8; reasons.append("- 자산 가치 대비 멀티플 과열 위험")
 
     # 5. 증권사 목표가 컨센서스 갭 보정
     target = info.get("targetMeanPrice")
     cur = info.get("currentPrice") or info.get("regularMarketPrice")
     if target and cur:
         gap = (target - cur) / target * 100
-        if gap > 20: score += 10; reasons.append("+ 증권사 목표가 대비 탁월한 안전마진")
-        elif gap < 0: score -= 10; reasons.append("- 목표가 상회로 인한 단기 고평가 영역")
+        if gap > 20: score += 12; reasons.append("+ 증권사 목표가 대비 탁월한 안전마진")
+        elif gap < 0: score -= 12; reasons.append("- 목표가 상회로 인한 단기 고평가 영역")
     
-    # 6. 배당, 영업이익률, 성장성
-    if info.get("dividendYield", 0) * 100 >= 4.0: score += 5; reasons.append("+ 안정적인 고배당 수익률 뒷받침")
-    if info.get("operatingMargins", 0) < 0: score -= 12; reasons.append("- 영업이익 적자 구조 리스크")
-    if info.get("earningsGrowth", 0) * 100 >= 20: score += 7; reasons.append("+ 고성장 기업 프리미엄 버프")
+    # 6. 배당, 영업이익률, 성장성 정량 체크
+    if info.get("dividendYield", 0) * 100 >= 4.0: score += 6; reasons.append("+ 안정적인 고배당 수익률 뒷받침")
+    if info.get("operatingMargins", 0) < 0: score -= 15; reasons.append("- 영업이익 적자 구조 치명적 리스크")
+    if info.get("earningsGrowth", 0) * 100 >= 20: score += 8; reasons.append("+ 고성장 기업 프리미엄 버프")
 
     # 7. 최근 6개월 주가 모멘텀 
     try:
@@ -242,31 +256,28 @@ def calculate_ssabissa_score(info, ticker):
         hist = yf.Ticker(ticker).history(period="6mo")
         if len(hist) >= 2:
             change = (hist['Close'].iloc[-1] - hist['Close'].iloc[0]) / hist['Close'].iloc[0]
-            if change <= -0.15: score -= 6; reasons.append("- 가치함정 주의 (6개월간 지속 하락세)")
-            elif change >= 0.20: score += 6; reasons.append("+ 시장 선호 수급 유입")
+            if change <= -0.15: score -= 8; reasons.append("- 가치함정 주의 (6개월간 지속 하락세)")
+            elif change >= 0.20: score += 7; reasons.append("+ 시장 선호 수급 유입")
     except: pass
 
     # 8. 미국 주식 프리미엄 가산점 
     if not is_kr:  
         if target:
-            score += 4; reasons.append("+ 월가 가치 프리미엄 가산 (컨센서스 확보)")
+            score += 5; reasons.append("+ 월가 가치 프리미엄 가산 (컨센서스 확보)")
         else:
-            score += 2; reasons.append("+ 미국 증시 밸류에이션 기본 가산점")
+            score += 3; reasons.append("+ 미국 증시 밸류에이션 기본 가산점")
 
-    # 점수 범위 제한
+    # 점수 캡핑 처리
     score = max(0, min(100, int(score))) 
     color = get_score_color(score)
     
     # 9. 등급별 요약 진단
-    if score >= 75: brief = "안전마진이 확보되어 중장기적으로 매력적인 저평가 구간입니다."
-    elif score >= 45: brief = "현재 시장에서 기업의 기초 체력에 알맞은 정상적인 대우를 받고 있습니다."
-    else: brief = "고평가 버블이나 재무 리스크가 중첩되어 철저한 관리가 필요한 구간입니다."
+    if score >= 75: brief = "탁월한 안전마진이 확보되어 중장기적으로 매우 매력적인 저평가 구간입니다."
+    elif score >= 45: brief = "현재 시장에서 기업의 기초 체력과 성장성에 알맞은 정상적인 대우를 받고 있습니다."
+    else: brief = "단기 고평가 버블이나 치명적인 재무 리스크가 중첩되어 철저한 관리가 필요한 구간입니다."
 
     return score, color, reasons, brief
 
-# ================================================================
-# 프론트엔드 연동용 서브 데이터 생성 유틸리티
-# ================================================================
 def generate_frontend_extra_data(score):
     score_change = random.randint(-5, 5)
     
@@ -292,17 +303,21 @@ def generate_frontend_extra_data(score):
 # 5. 라우터 설정 구역
 # ================================================================
 
-# 🏠 메인 홈 라우터 (500 Error Fix 적용)
+# 🏠 메인 홈 라우터 (💡 [500 에러 방지 3] GET 방식에서의 Form 파싱 충돌 해결)
 @app.get("/", response_class=HTMLResponse)
 @app.post("/", response_class=HTMLResponse)
 async def home(request: Request):
     search_target = None
-
-    # GET과 POST를 모두 유연하게 처리하여 Form() 에러 원천 차단
+    
+    # POST일 때만 form_data를 비동기로 받아오고, 아니면 query 파라미터를 읽습니다.
     if request.method == "POST":
-        form_data = await request.form()
-        search_target = form_data.get("ticker") or form_data.get("q")
-    else:
+        try:
+            form_data = await request.form()
+            search_target = form_data.get("ticker") or form_data.get("q")
+        except Exception:
+            pass
+            
+    if not search_target:
         search_target = request.query_params.get("ticker") or request.query_params.get("q")
 
     result = None
@@ -356,7 +371,7 @@ def api_diagnose(ticker: str = None):
         stock_obj = yf.Ticker(ticker_upper)
         info = stock_obj.info
         
-        if not info: return {"error": f"[{ticker_upper}] 종목 정보를 찾을 수 없습니다."}
+        if not info: return {"error": f"[{ticker_upper}] 야후 파이낸스에서 종목 정보를 찾을 수 없습니다."}
             
         cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
         if not cur: return {"error": f"[{ticker_upper}] 현재 거래가 데이터를 받아오지 못했습니다."}
@@ -371,8 +386,7 @@ def api_diagnose(ticker: str = None):
         if ".KS" in ticker_upper or ".KQ" in ticker_upper: SEARCH_COUNT_KR[ticker_upper] += 1
         else: SEARCH_COUNT_US[ticker_upper] += 1
             
-        try: save_ranking_to_file()
-        except: pass
+        save_ranking_to_file()
         
         score_change, cur_reason, backtest, h_dates, h_scores = generate_frontend_extra_data(score)
         
@@ -406,10 +420,13 @@ def ranking(request: Request):
     except Exception as main_err:
         return HTMLResponse(content=f"<h2>🚨 랭킹 조립 예외 발생: {str(main_err)}</h2>", status_code=200)
 
-# 📅 캘린더 페이지 라우터 
+# 📅 캘린더 페이지 라우터 (💡 [500 에러 방지 4] 파일명 오타 방어)
 @app.get("/calendar", response_class=HTMLResponse)
 async def calendar_page(request: Request):
-    return templates.TemplateResponse("calendar.html", {"request": request, "risk_items": None, "earning_items": None})
+    template_file = "calendar.html"
+    if not os.path.exists("templates/calendar.html") and os.path.exists("templates/calender.html"):
+        template_file = "calender.html" # 유저가 올린 calender.html 파일명 오타 지원
+    return templates.TemplateResponse(template_file, {"request": request, "risk_items": None, "earning_items": None})
 
 # ⚙️ 기타 라우터 모음
 @app.get("/api/autocomplete")
@@ -472,8 +489,7 @@ def post_talk(ticker: str, text: str = Form(...)):
     kst = timezone(timedelta(hours=9))
     now_dt = datetime.now(kst)
     
-    # 💡 NaN 버그 해결: JS Date 파싱 오류 방지를 위해 timespec을 'seconds'로 제한
-    iso_time_str = now_dt.isoformat(timespec='seconds')
+    iso_time_str = now_dt.isoformat()
     current_date = now_dt.strftime("%Y-%m-%d")
     
     adjectives = ["용감한", "행복한", "돈많은", "존버하는", "화끈한", "스마트한", "매력적인", "멋있는", "신중한", "똑똑한"]
