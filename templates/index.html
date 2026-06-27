@@ -172,23 +172,40 @@
             padding-bottom: 14px; 
             margin-bottom: 14px; 
         }
+        .stock-info-left {
+            flex: 1;
+            min-width: 0; /* 긴 텍스트로 인해 영역이 늘어나는 것을 방지 */
+            margin-right: 15px; /* 가격과의 간격 확보 */
+        }
         .stock-name-title { 
             margin: 0; 
             font-size: 1.2rem; 
             font-weight: 800; 
             color: var(--text-main); 
             letter-spacing: -0.5px; 
+            /* 긴 종목명 말줄임표 처리 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
         }
         .stock-ticker { 
             font-size: 0.85rem; 
             color: var(--text-sub); 
             font-weight: 500; 
             margin-top: 2px; 
+            /* 긴 티커 말줄임표 처리 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .stock-price { 
             font-size: 1.05rem; 
             font-weight: 700; 
             color: var(--blue); 
+            /* 가격 영역은 텍스트가 줄바꿈되거나 줄어들지 않도록 고정 */
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .score-display { 
             display: flex; 
@@ -444,7 +461,16 @@
             padding-bottom: 16px; 
             margin-bottom: 16px; 
         }
-        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; }
+        .m-name { 
+            font-size: 1.2rem; 
+            font-weight: 900; 
+            color: var(--text-main); 
+            margin-bottom: 4px; 
+            /* 모달에서도 말줄임표 처리 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; }
         .m-brief { font-size: 0.9rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; }
         .m-curation { 
@@ -527,7 +553,7 @@
             {% else %}
                 <div class="card">
                     <div class="score-header">
-                        <div>
+                        <div class="stock-info-left">
                             <h1 class="stock-name-title">{{ result.name }}</h1>
                             <div class="stock-ticker">{{ result.ticker }}</div>
                         </div>
@@ -683,7 +709,7 @@
             <div class="card" style="margin-top: 20px;">
                 <div class="card-title" style="color: var(--blue);">🔥 싸비싸 오늘의 추천 종목</div>
                 <div class="score-header">
-                    <div>
+                    <div class="stock-info-left">
                         <h1 class="stock-name-title">{{ recommendation.name }}</h1>
                         <div class="stock-ticker">{{ recommendation.ticker }}</div>
                     </div>
