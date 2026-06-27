@@ -38,21 +38,6 @@ TICKER_CACHE = {}
 VOTE_DB = {}
 TALK_DB = {}
 
-# ✅ 기존 시스템 가이드 변수 복구
-SYSTEM_METRICS_GUIDE = [
-    {"type": "plus",  "keyword": "괴리율",   "title": "목표가 괴리율 안전마진",   "desc": "증권사 평균 목표가와 현재 주가의 차이가 벌어져 안전마진이 확보된 경우 가점을 부여합니다."},
-    {"type": "plus",  "keyword": "PER",    "title": "선행 PER 가성비",         "desc": "1년 뒤 예상 실적 대비 주가가 현저히 저렴한 구간입니다."},
-    {"type": "plus",  "keyword": "PBR",    "title": "자산 가치 대비 저평가",     "desc": "기업이 가진 순자산보다 주가가 싸게 거래되는 장부상 저평가 상태입니다."},
-    {"type": "plus",  "keyword": "배당",    "title": "우수한 배당 수익률",       "desc": "연 4% 이상의 배당으로 주가 하락 시 강력한 현금 흐름 방어선 역할을 합니다."},
-    {"type": "plus",  "keyword": "초성장",  "title": "초성장 기술주 버프",       "desc": "연 실적 성장률이 30%를 넘는 혁신 기업에 부여되는 프리미엄입니다."},
-    {"type": "plus",  "keyword": "선호",    "title": "시장 선호주 인정",         "desc": "최근 6개월간 우상향하며 자금이 지속 유입되는 대세 종목입니다."},
-    {"type": "minus", "keyword": "증자",    "title": "최근 유상증자 희석 리스크", "desc": "최근 6개월 내 유상증자 등 발행 주식 수가 증가하여 주주 가치가 희석된 횟수만큼 감점합니다."},
-    {"type": "minus", "keyword": "고부채",  "title": "부채비율 과다 부담",       "desc": "부채비율이 업종 평균 대비 과도하게 높아 재무적 리스크가 있는 경우 감점합니다."},
-    {"type": "minus", "keyword": "과열",    "title": "목표가 대비 현재가 과열",   "desc": "단기 과열 국면에 진입한 경우입니다."},
-    {"type": "minus", "keyword": "적자",    "title": "영업이익 적자 상태",       "desc": "사업을 할수록 돈을 잃고 있는 구조적 위험 단계입니다."},
-    {"type": "minus", "keyword": "가치함정", "title": "가치함정 주의보",         "desc": "최근 6개월간 주가가 하락하거나 정체되어 시장에서 소외된 종목입니다."}
-]
-
 # ================================================================
 # 2. 기반 파일(STOCK_MAP) 로드 및 기본 템플릿 세팅
 # ================================================================
@@ -62,6 +47,31 @@ if os.path.exists(STOCK_MAP_FILE):
 
 templates = Jinja2Templates(directory="templates")
 templates.env.cache = None
+
+# ================================================================
+# 🚀 신규: 배당률 오류 원천 차단 전용 함수
+# ================================================================
+def get_dividend_percent(info):
+    """
+    야후 파이낸스의 포맷 오류(소수점과 퍼센트 혼용)를 방지하기 위해
+    실제 배당금액(dividendRate)과 현재가(currentPrice)로 직접 계산합니다.
+    """
+    div_rate = info.get("dividendRate")
+    price = info.get("currentPrice") or info.get("regularMarketPrice")
+    
+    # 1순위: 확실한 현금 배당금 / 주가 절대 비율 계산
+    if div_rate and price and price > 0:
+        return (div_rate / price) * 100
+        
+    # 2순위: dividendRate가 없을 경우 dividendYield 활용
+    dy = info.get("dividendYield") or 0
+    if dy == 0:
+        return 0
+        
+    # 휴리스틱: 20% (0.2)가 넘는 배당률은 비정상적이므로, 야후가 이미 퍼센트 단위(예: 0.44%를 0.44로)로 보낸 것으로 간주합니다.
+    if dy > 0.2:
+        return dy
+    return dy * 100
 
 # ================================================================
 # 3. 데이터 복구 및 히스토리 관리 엔진
@@ -110,7 +120,6 @@ def update_and_get_history(ticker, current_score, info):
     if ticker not in history:
         history[ticker] = {"dates": [], "scores": [], "virtual_return": 0.0}
     
-    # 1. 히스토리 누적
     if not history[ticker]["dates"] or history[ticker]["dates"][-1] != today_str:
         history[ticker]["dates"].append(today_str)
         history[ticker]["scores"].append(current_score)
@@ -119,7 +128,6 @@ def update_and_get_history(ticker, current_score, info):
             history[ticker]["dates"].pop(0)
             history[ticker]["scores"].pop(0)
             
-        # 가상 수익률 계산
         if len(history[ticker]["scores"]) > 1:
             prev_score = history[ticker]["scores"][-2]
             diff = (current_score - prev_score) * 0.15 
@@ -139,7 +147,6 @@ def update_and_get_history(ticker, current_score, info):
     if len(scores) > 1:
         score_change = scores[-1] - scores[-2]
         
-    # 3. 이슈 큐레이션 세분화
     curations = []
     cur_price = info.get("currentPrice") or info.get("regularMarketPrice", 0)
     target = info.get("targetMeanPrice", 0)
@@ -153,15 +160,10 @@ def update_and_get_history(ticker, current_score, info):
     if cur_price and high_52 and cur_price >= high_52 * 0.95:
         curations.append("🔥 52주 신고가 부근입니다. 강력한 모멘텀 혹은 고점 리스크가 공존합니다.")
         
-    # ✅ 배당률 계산 및 큐레이션 로직 완벽 교정
-    div_yield_raw = info.get("dividendYield", 0) or 0
-    if div_yield_raw > 0:
-        # 소수점(0.05)으로 들어오든, 퍼센트(5.0)로 들어오든 무조건 퍼센트 단위로 통일
-        actual_div_percent = div_yield_raw * 100 if div_yield_raw < 1 else div_yield_raw
-        
-        # 4.0% 이상일 때만 고배당 큐레이션 출력
-        if actual_div_percent >= 4.0:
-            curations.append(f"💰 연 {round(actual_div_percent, 2)}% 수준의 고배당이 기대되어 하방 경직성이 튼튼합니다.")
+    # ✅ 개선된 배당률 함수 적용
+    actual_div_percent = get_dividend_percent(info)
+    if actual_div_percent >= 4.0:
+        curations.append(f"💰 연 {round(actual_div_percent, 2)}% 수준의 고배당이 기대되어 하방 경직성이 튼튼합니다.")
         
     if not curations:
         if current_score >= 60:
@@ -171,7 +173,6 @@ def update_and_get_history(ticker, current_score, info):
             
     curation_reason = " ".join(curations)
 
-    # 4. 프론트엔드용 그래프 데이터 추출
     display_dates = dates[-6:] if len(dates) >= 6 else dates
     display_scores = scores[-6:] if len(scores) >= 6 else scores
     formatted_dates = [d[5:].replace("-", "/") for d in display_dates]
@@ -239,7 +240,6 @@ def update_market_calendar():
     try:
         with open(CALENDAR_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        print("✅ 싸비싸 캘린더 엔진 업데이트 완료 (과거데이터 필터링 적용)")
     except Exception as e:
         print(f"⚠️ 캘린더 업데이트 실패: {e}")
 
@@ -271,7 +271,6 @@ def save_community_to_file():
     except Exception: pass
 
 def update_all_stock_scores_task():
-    print("🔄 [싸비싸 스케줄러] 6시간 주기 1,200대장 진짜 점수 동기화 엔진 가동...")
     for name, ticker in STOCK_MAP.items():
         try:
             ticker_upper = ticker.strip().upper()
@@ -302,15 +301,14 @@ def update_all_stock_scores_task():
     try:
         save_ranking_to_file()  
         clear_expired_talks()   
-        print("✅ [싸비싸 스케줄러] 1,200대장 동기화 및 한 달 유통기한 댓글 파기 완료!")
-    except Exception as e: print(f"⚠️ 스케줄러 백업 오류: {e}")
+    except Exception as e: pass
 
 def start_scheduler():
     def run_forever():
         time.sleep(5)
         while True:
             try: update_all_stock_scores_task()
-            except Exception as e: print(f"⚠️ 스케줄러 루프 에러: {e}")
+            except Exception as e: pass
             time.sleep(21600)
     threading.Thread(target=run_forever, daemon=True).start()
 
@@ -356,13 +354,11 @@ def calculate_ssabissa_score(info, ticker):
     pbr = info.get("priceToBook")
     if pbr and pbr < 0.8: score += 5; reasons.append("+ PBR 0.8배 미만 저평가")
 
-    # ✅ 배당률 계산 및 가점 로직 완벽 교정
-    div_yield_val = info.get("dividendYield", 0) or 0
-    if div_yield_val > 0:
-        actual_div_percent = div_yield_val * 100 if div_yield_val < 1 else div_yield_val
-        if actual_div_percent >= 4.0: 
-            score += 5
-            reasons.append("+ 고배당 수익률")
+    # ✅ 개선된 배당률 함수 적용
+    actual_div = get_dividend_percent(info)
+    if actual_div >= 4.0: 
+        score += 5
+        reasons.append(f"+ 고배당 수익률")
     
     if (info.get("earningsGrowth", 0) or 0) * 100 >= 30: score += 8; reasons.append("+ 고성장 기업 프리미엄")
 
