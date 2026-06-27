@@ -20,7 +20,7 @@ try:
     DATA_FILE = "/data/ranking_data.json"
     COMMUNITY_FILE = "/data/community_data.json"
     CALENDAR_FILE = "/data/calendar_data.json"
-    HISTORY_FILE = "/data/history_data.json" # ✅ 실시간 히스토리 누적용 파일 신설
+    HISTORY_FILE = "/data/history_data.json"
 except Exception:
     DATA_FILE = "ranking_data.json"
     COMMUNITY_FILE = "community_data.json"
@@ -38,21 +38,6 @@ TICKER_CACHE = {}
 VOTE_DB = {}
 TALK_DB = {}
 
-# ✅ 기존 시스템 가이드 변수 복구 (추후 프론트엔드 연동 대비용)
-SYSTEM_METRICS_GUIDE = [
-    {"type": "plus",  "keyword": "괴리율",   "title": "목표가 괴리율 안전마진",   "desc": "증권사 평균 목표가와 현재 주가의 차이가 벌어져 안전마진이 확보된 경우 가점을 부여합니다."},
-    {"type": "plus",  "keyword": "PER",    "title": "선행 PER 가성비",         "desc": "1년 뒤 예상 실적 대비 주가가 현저히 저렴한 구간입니다."},
-    {"type": "plus",  "keyword": "PBR",    "title": "자산 가치 대비 저평가",     "desc": "기업이 가진 순자산보다 주가가 싸게 거래되는 장부상 저평가 상태입니다."},
-    {"type": "plus",  "keyword": "배당",    "title": "우수한 배당 수익률",       "desc": "연 4% 이상의 배당으로 주가 하락 시 강력한 현금 흐름 방어선 역할을 합니다."},
-    {"type": "plus",  "keyword": "초성장",  "title": "초성장 기술주 버프",       "desc": "연 실적 성장률이 30%를 넘는 혁신 기업에 부여되는 프리미엄입니다."},
-    {"type": "plus",  "keyword": "선호",    "title": "시장 선호주 인정",         "desc": "최근 6개월간 우상향하며 자금이 지속 유입되는 대세 종목입니다."},
-    {"type": "minus", "keyword": "증자",    "title": "최근 유상증자 희석 리스크", "desc": "최근 6개월 내 유상증자 등 발행 주식 수가 증가하여 주주 가치가 희석된 횟수만큼 감점합니다."},
-    {"type": "minus", "keyword": "고부채",  "title": "부채비율 과다 부담",       "desc": "부채비율이 업종 평균 대비 과도하게 높아 재무적 리스크가 있는 경우 감점합니다."},
-    {"type": "minus", "keyword": "과열",    "title": "목표가 대비 현재가 과열",   "desc": "단기 과열 국면에 진입한 경우입니다."},
-    {"type": "minus", "keyword": "적자",    "title": "영업이익 적자 상태",       "desc": "사업을 할수록 돈을 잃고 있는 구조적 위험 단계입니다."},
-    {"type": "minus", "keyword": "가치함정", "title": "가치함정 주의보",         "desc": "최근 6개월간 주가가 하락하거나 정체되어 시장에서 소외된 종목입니다."}
-]
-
 # ================================================================
 # 2. 기반 파일(STOCK_MAP) 로드 및 기본 템플릿 세팅
 # ================================================================
@@ -64,7 +49,7 @@ templates = Jinja2Templates(directory="templates")
 templates.env.cache = None
 
 # ================================================================
-# 3. 데이터 복구 및 히스토리 관리 엔진 (✅ 전면 개편)
+# 3. 데이터 복구 및 히스토리 관리 엔진
 # ================================================================
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -110,7 +95,7 @@ def update_and_get_history(ticker, current_score, info):
     if ticker not in history:
         history[ticker] = {"dates": [], "scores": [], "virtual_return": 0.0}
     
-    # 1. 히스토리 누적 (오늘 날짜 기록이 없거나 갱신이 필요할 때)
+    # 1. 히스토리 누적
     if not history[ticker]["dates"] or history[ticker]["dates"][-1] != today_str:
         history[ticker]["dates"].append(today_str)
         history[ticker]["scores"].append(current_score)
@@ -128,7 +113,6 @@ def update_and_get_history(ticker, current_score, info):
             
         save_history(history)
     else:
-        # ✅ 이미 오늘 기록이 있다면 최신 점수로 갱신 (정확한 '어제 대비 점수' 계산을 위해)
         history[ticker]["scores"][-1] = current_score
         save_history(history)
     
@@ -145,7 +129,6 @@ def update_and_get_history(ticker, current_score, info):
     cur_price = info.get("currentPrice") or info.get("regularMarketPrice", 0)
     target = info.get("targetMeanPrice", 0)
     high_52 = info.get("fiftyTwoWeekHigh", 0)
-    div_yield = info.get("dividendYield", 0)
     
     if target and cur_price and target > cur_price * 1.1:
         curations.append("📈 증권사 평균 목표가 대비 현재가가 낮아 상승 여력이 포착됩니다.")
@@ -155,10 +138,11 @@ def update_and_get_history(ticker, current_score, info):
     if cur_price and high_52 and cur_price >= high_52 * 0.95:
         curations.append("🔥 52주 신고가 부근입니다. 강력한 모멘텀 혹은 고점 리스크가 공존합니다.")
         
-    # ✅ 배당률 버그 수정: yfinance 데이터가 0.05 형태인지 5.0 형태인지 판별하여 정규화
+    # ✅ 배당률 나누기 100 반영 완료
+    div_yield = info.get("dividendYield", 0) or 0
     if div_yield:
-        actual_div_yield = div_yield * 100 if div_yield < 1 else div_yield
-        if actual_div_yield >= 4.0:
+        actual_div_yield = div_yield / 100
+        if actual_div_yield >= 4.0 or div_yield >= 0.04:
             curations.append(f"💰 연 {round(actual_div_yield, 2)}% 수준의 고배당이 기대되어 하방 경직성이 튼튼합니다.")
         
     if not curations:
@@ -191,7 +175,7 @@ app.add_middleware(
 )
 
 # ================================================================
-# 4. 캘린더 엔진 (과거 데이터 제외, 다수 종목 수집)
+# 4. 캘린더 엔진
 # ================================================================
 def update_market_calendar():
     sample_tickers = [
@@ -354,10 +338,11 @@ def calculate_ssabissa_score(info, ticker):
     pbr = info.get("priceToBook")
     if pbr and pbr < 0.8: score += 5; reasons.append("+ PBR 0.8배 미만 저평가")
 
-    # ✅ 배당률 100배 버그 로직 수정 적용
+    # ✅ 배당률 나누기 100 반영 완료
     div_yield_val = info.get("dividendYield", 0) or 0
-    actual_div = div_yield_val * 100 if div_yield_val < 1 else div_yield_val
-    if actual_div >= 4.0: score += 5; reasons.append("+ 고배당 수익률")
+    actual_div = div_yield_val / 100
+    if actual_div >= 4.0 or div_yield_val >= 0.04: 
+        score += 5; reasons.append("+ 고배당 수익률")
     
     if (info.get("earningsGrowth", 0) or 0) * 100 >= 30: score += 8; reasons.append("+ 고성장 기업 프리미엄")
 
