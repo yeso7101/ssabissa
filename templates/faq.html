@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>증시 캘린더 - 싸비싸</title>
+    <title>자주 묻는 질문(FAQ) - 싸비싸</title>
     
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    
     <style>
         :root { --blue: #3b82f6; --text-main: #1e293b; --text-sub: #868e96; --border: #e2e8f0; --bg-gray: #f8fafc; --red: #ef4444; }
         body { font-family: 'Pretendard', sans-serif; background-color: var(--bg-gray); margin: 0; padding-top: 90px; padding-bottom: 60px; box-sizing: border-box; color: var(--text-main); }
         .container { max-width: 600px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 
-        /* ✅ 상단 네비게이션 플로팅 그림자 및 로고 텍스트 회색 적용 */
+        /* 🖥️ 데스크탑 상단 네비게이션 플로팅 그림자 및 로고 텍스트 회색 적용 */
         .top-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 500px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
         .top-nav .nav-logo { text-decoration: none; color: #64748b; font-weight: 800; font-size: 0.95rem; letter-spacing: -0.5px; display: flex; align-items: center; }
         .top-nav .nav-logo:hover { color: #475569; }
@@ -19,7 +20,7 @@
         .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.8rem; font-weight: 600; transition: all 0.3s; }
         .top-nav a:not(.nav-logo):hover { color: var(--blue); }
         .top-nav a.active { color: var(--blue); font-weight: 800; }
-
+        
         /* ✅ 드롭다운 (햄버거 메뉴) 공통 스타일 */
         .dropdown { position: relative; display: flex; align-items: center; }
         .dropbtn { background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: stroke 0.2s; }
@@ -28,7 +29,7 @@
         .dropdown-content.show { display: flex; }
         .dropdown-content a { padding: 12px 16px; text-decoration: none; display: block; text-align: center; color: #475569 !important; font-size: 0.85rem !important; font-weight: 700 !important; }
         .dropdown-content a:hover { background-color: #f1f5f9; color: var(--blue) !important; }
-        
+
         /* 🔍 검색창 (투명 배경 및 SVG 아이콘 호버 효과) */
         .page-search { position: relative; width: 100%; max-width: 400px; margin: 0 auto 20px auto; display: flex; align-items: center; }
         .page-search input { width: 100%; padding: 14px 45px 14px 20px; border-radius: 30px; border: 1.5px solid #cbd5e1; outline: none; font-size: 0.95rem; box-sizing: border-box; font-weight: 600; transition: all 0.3s; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
@@ -36,21 +37,20 @@
         .page-search button { position: absolute; right: 12px; background: transparent; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; }
         .page-search button:hover { transform: scale(1.1); }
 
-        /* 📅 캘린더 전용 스타일 */
-        .calendar-hero { text-align: center; padding: 25px 20px; background: white; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
-        .calendar-hero h1 { color: var(--blue); margin-top: 0; margin-bottom: 10px; font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px; }
-        .calendar-hero p { color: #475569; font-size: 0.9rem; line-height: 1.5; word-break: keep-all; margin: 0; font-weight: 600; }
+        /* ✨ FAQ 전용 스타일 */
+        .faq-hero { text-align: center; padding: 25px 20px; background: white; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
+        .faq-hero h1 { color: var(--blue); margin-top: 0; margin-bottom: 10px; font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px; }
+        .faq-hero p { color: #475569; font-size: 0.9rem; line-height: 1.5; word-break: keep-all; margin: 0; font-weight: 600; }
 
-        .tab-container { display: flex; margin-bottom: -1px; position: relative; z-index: 10; margin-top: 10px; }
-        .tab-button { flex: 1; padding: 12px; text-align: center; font-weight: 700; font-size: 0.9rem; background-color: #f1f5f9; color: #64748b; border: 1px solid var(--border); border-bottom: none; border-top-left-radius: 12px; border-top-right-radius: 12px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
-        .tab-button.active { background-color: #ffffff; color: var(--blue); border-color: var(--border) var(--border) #ffffff; font-weight: 800; }
-        
-        .calendar-board { background: #ffffff; border: 1px solid var(--border); border-radius: 0 0 16px 16px; padding: 10px 16px; margin-bottom: 25px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); min-height: 250px; }
-        .event-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 12px; border-bottom: 1px dashed #f1f5f9; transition: background 0.2s; border-radius: 8px;}
-        .event-item:hover { background-color: #f8fafc; }
-        .event-item:last-child { border-bottom: none; }
-        .event-date { font-weight: 900; color: var(--blue); width: 95px; flex-shrink: 0; font-size: 0.95rem; }
-        .event-title { font-weight: 600; color: var(--text-main); font-size: 0.9rem; flex-grow: 1; text-align: right; word-break: keep-all; }
+        .faq-item { background: white; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); overflow: hidden; }
+        .faq-question { padding: 18px 20px; font-weight: 700; font-size: 0.95rem; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: white; transition: background 0.2s; -webkit-tap-highlight-color: transparent;}
+        .faq-question:hover { background: #f8fafc; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; background: #f8fafc; font-size: 0.9rem; color: #475569; line-height: 1.6; font-weight: 500; border-top: 1px solid transparent; }
+        .faq-answer.open { max-height: 800px; padding: 18px 20px; border-top-color: var(--border); }
+        .faq-icon { font-size: 0.8rem; color: #94a3b8; transition: transform 0.3s; font-weight: 900;}
+        .faq-icon.open { transform: rotate(180deg); color: var(--blue); }
+        .q-mark { color: var(--blue); font-weight: 900; margin-right: 8px; font-size: 1.1rem; }
+        .highlight { color: var(--blue); font-weight: 700; }
 
         /* ✅ 하단 면책조항 텍스트 */
         .main-footer { text-align: center; margin-top: 30px; font-size: 0.75rem; color: #94a3b8; line-height: 1.6; font-weight: 400; padding-bottom: 20px; }
@@ -61,11 +61,9 @@
         .modal-close { position: absolute; top: 16px; right: 20px; cursor: pointer; font-size: 1.8rem; color: #94a3b8; background: none; border: none; padding: 0; line-height: 1; transition: color 0.2s; }
         .modal-close:hover { color: var(--text-main); }
         .m-score-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: white; margin: 10px auto 20px auto; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
-        
         .score-change { font-size: 0.85rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: #f1f5f9; color: #475569; display: inline-block; }
         .change-up { color: var(--red); font-weight: 700; }
         .change-down { color: var(--blue); font-weight: 700; }
-
         .m-header { text-align: center; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
         .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; }
         .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; }
@@ -77,7 +75,7 @@
         .m-btn-detail:active { transform: scale(0.97); }
         .loading-spinner { text-align: center; padding: 40px; font-weight: 700; color: var(--blue); font-size: 1rem; }
 
-        /* ✅ 모바일 하단 네비게이션 가독성 및 회색 아이콘 통일 */
+        /* 📱 모바일 하단 네비게이션 */
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
             body { padding-top: 20px; margin-bottom: 80px; }
@@ -94,7 +92,6 @@
 <body>
 
     <div class="top-nav">
-        <!-- ✅ 홈 글씨 및 아이콘 회색 SVG 변경 -->
         <a href="/" class="nav-logo">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -103,10 +100,9 @@
             홈
         </a>
         <div class="nav-links">
-            <a href="/calendar" class="active">캘린더</a>
+            <a href="/calendar">캘린더</a>
             <a href="/ranking">랭킹</a>
             <a href="/strategy">가이드</a>
-            <!-- ✅ 데스크탑 햄버거 메뉴 -->
             <div class="dropdown">
                 <button class="dropbtn" onclick="toggleDesktopMenu(event)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -116,7 +112,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="desktopMenu">
-                    <a href="/faq">FAQ</a>
+                    <a href="/faq" style="color: var(--blue) !important;">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>
@@ -125,7 +121,6 @@
     </div>
 
     <div class="container">
-        <!-- ✅ 검색창 돋보기 이모지 대신 깔끔한 회색 SVG 픽토그램 적용 -->
         <form class="page-search" onsubmit="handleSearch(event)">
             <input type="text" id="searchInput" placeholder="종목명 또는 티커 검색..." required autocomplete="off">
             <button type="submit">
@@ -136,29 +131,74 @@
             </button>
         </form>
 
-        <div class="calendar-hero">
-            <h1>🗓️ 증시 캘린더</h1>
-            <p>시장을 움직이는 핵심 우량주들의<br>배당락일 및 실적 발표 일정을 미리 확인하세요.</p>
+        <div class="faq-hero">
+            <h1>자주 묻는 질문 (FAQ)</h1>
+            <p>싸비싸 서비스 이용과 관련된 궁금증을 해결해 드립니다.</p>
         </div>
 
-        <div class="tab-container">
-            <div id="tab-div" class="tab-button active" onclick="switchCalTab('dividend')">💰 배당 일정</div>
-            <div id="tab-earn" class="tab-button" onclick="switchCalTab('earning')">📈 실적 발표</div>
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div><span class="q-mark">Q</span> 싸비싸의 진단 점수는 어떻게 계산되나요?</div>
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                싸비싸의 인공지능 엔진은 기업의 단기적 테마나 차트 기교를 배제합니다.<br><br>
+                야후 파이낸스의 실시간 재무 데이터를 바탕으로 <span class="highlight">PER, PBR, ROE, 순현금흐름, 배당률, 영업이익률 등 11가지 핵심 펀더멘탈 지표</span>를 분석하여 100점 만점의 직관적인 가치 점수로 환산합니다. 우량 기업에는 가점을, 부채가 많거나 유상증자가 잦은 기업에는 감점을 부여합니다.
+            </div>
         </div>
 
-        <div id="calendar-board" class="calendar-board">
-            <div class="loading-spinner" style="padding-top: 80px;">일정을 불러오는 중입니다... ⏳</div>
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div><span class="q-mark">Q</span> 국내 주식과 미국 주식 모두 검색 가능한가요?</div>
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                네, 그렇습니다.<br><br>
+                현재 <span class="highlight">한국 증시(KOSPI, KOSDAQ) 및 미국 증시(NASDAQ, NYSE)의 주요 대형주, 우량주 약 1,200여 개</span>를 지원하고 있습니다. 한글 종목명(예: 삼성전자, 애플) 또는 티커 코드(예: 005930, AAPL)로 편리하게 검색하실 수 있습니다.
+            </div>
         </div>
-        
-        <!-- ✅ 하단 면책조항 -->
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div><span class="q-mark">Q</span> 진단 결과는 실시간으로 업데이트 되나요?</div>
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                종목을 검색하거나 모달을 열어 진단할 때마다, 즉각적으로 최신 데이터를 불러와 점수를 연산합니다.<br><br>
+                장 중 주가 변동 및 새롭게 업데이트된 재무제표 실적이 실시간으로 가치 점수와 평가 리포트에 반영됩니다.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div><span class="q-mark">Q</span> 주주 토론방에 남긴 글이 사라졌어요.</div>
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                싸비싸의 커뮤니티는 건강하고 최신의 정보만이 교류될 수 있도록 <span class="highlight">작성일 기준 30일이 지난 데이터는 자동으로 소거</span>되는 클린 엔진이 적용되어 있습니다.<br><br>
+                또한 스팸, 리딩방 유도, 과도한 욕설이 포함된 문구는 등록 단계에서 원천 차단됩니다.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                <div><span class="q-mark">Q</span> '올바른 종목명이나 티커를 확인해 주세요'라고 나옵니다.</div>
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                해당 메시지는 다음의 경우에 발생할 수 있습니다.<br>
+                1. 아직 싸비싸 엔진에 매핑되지 않은 극소형주이거나 신규 상장주인 경우<br>
+                2. 종목명이나 티커 코드에 오타가 있는 경우<br><br>
+                가급적 정확한 종목명이나 글로벌 표준 티커 코드로 다시 검색해 주시기 바랍니다.
+            </div>
+        </div>
         <div class="main-footer">
             © 2026 SSABISSA. All rights reserved.<br>
-            본 서비스의 증시 일정 데이터는 참고용이며, 해당 기업의<br>
-            사정에 따라 사전 예고 없이 변경될 수 있습니다.
+            본 서비스의 진단 점수 및 큐레이션은 투자 참고용이며,<br>
+            실제 투자 결과에 대한 법적 책임을 지지 않습니다.
         </div>
     </div>
 
-    <!-- ✅ 팝업 모달 HTML 영역 -->
     <div id="diagnoseModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -169,7 +209,6 @@
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <!-- ✅ 모바일 하단 네비게이션 홈 글씨 및 아이콘 회색 SVG 변경 -->
         <a href="/" class="nav-logo">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -178,9 +217,8 @@
             홈
         </a>
         <div class="nav-links">
-            <a href="/calendar" class="active">캘린더</a>
+            <a href="/calendar">캘린더</a>
             <a href="/ranking">랭킹</a>
-            <!-- ✅ 모바일 햄버거 메뉴 -->
             <div class="dropdown m-dropdown">
                 <button class="dropbtn" onclick="toggleMobileMenu(event)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -191,7 +229,7 @@
                 </button>
                 <div class="dropdown-content" id="mobileMenu">
                     <a href="/strategy">가이드</a>
-                    <a href="/faq">FAQ</a>
+                    <a href="/faq" style="color: var(--blue) !important;">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>
@@ -199,56 +237,29 @@
         </div>
     </div>
 
-   <!-- ✅ 캘린더 연동 및 검색창 모달 스크립트 -->
    <script>
-    // ✅ 캘린더 데이터 로드
-    document.addEventListener("DOMContentLoaded", () => {
-        fetch("/api/calendar/data")
-            .then(r => r.json())
-            .then(data => {
-                window.calendarData = data;
-                renderCalendar('dividend');
-            })
-            .catch(() => {
-                document.getElementById('calendar-board').innerHTML = '<div style="text-align: center; padding: 40px 20px; color: var(--red); font-weight: 800;">데이터를 불러오는 중 오류가 발생했습니다.</div>';
-            });
-    });
-
-    function switchCalTab(type) {
-        document.getElementById('tab-div').classList.remove('active');
-        document.getElementById('tab-earn').classList.remove('active');
-        if (type === 'dividend') document.getElementById('tab-div').classList.add('active');
-        else document.getElementById('tab-earn').classList.add('active');
-        renderCalendar(type);
-    }
-
-    function renderCalendar(type) {
-        const board = document.getElementById('calendar-board');
-        const data = window.calendarData ? window.calendarData[type] : [];
+    // FAQ 아코디언 토글 함수
+    function toggleFAQ(element) {
+        const answer = element.nextElementSibling;
+        const icon = element.querySelector('.faq-icon');
         
-        if (!data || data.length === 0) {
-            board.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding: 60px 20px; color: #94a3b8;">
-                    <div style="font-size: 2rem; margin-bottom: 12px;">📭</div>
-                    <div style="font-weight: 700; font-size: 0.95rem;">예정된 우량주 일정이 없습니다.</div>
-                </div>`;
-            return;
+        if (answer.classList.contains('open')) {
+            answer.classList.remove('open');
+            icon.classList.remove('open');
+            icon.innerText = "▼";
+        } else {
+            // 다른 열려있는 FAQ 닫기 (선택 사항, 원치 않으면 아래 3줄 삭제)
+            document.querySelectorAll('.faq-answer').forEach(el => el.classList.remove('open'));
+            document.querySelectorAll('.faq-icon').forEach(el => { el.classList.remove('open'); el.innerText = "▼"; });
+            
+            // 현재 클릭한 FAQ 열기
+            answer.classList.add('open');
+            icon.classList.add('open');
+            icon.innerText = "▲";
         }
-
-        let html = '';
-        data.forEach(item => {
-            // 클릭하면 해당 종목(대괄호 안의 티커나 이름)을 긁어와서 모달을 띄우는 로직을 붙여도 좋습니다.
-            // 여기서는 단순 리스트 렌더링
-            html += `
-                <div class="event-item">
-                    <div class="event-date">${item.date}</div>
-                    <div class="event-title">${item.title}</div>
-                </div>`;
-        });
-        board.innerHTML = html;
     }
 
-    // ✅ 햄버거 메뉴 토글 스크립트
+    // 네비게이션 드롭다운 함수
     function toggleDesktopMenu(e) {
         e.preventDefault();
         document.getElementById("desktopMenu").classList.toggle("show");
@@ -260,7 +271,7 @@
         document.getElementById("desktopMenu").classList.remove("show");
     }
 
-    // ✅ 진단 모달창 스크립트
+    // 검색 모달 기능
     function handleSearch(e) {
         e.preventDefault(); 
         const query = document.getElementById('searchInput').value.trim();
@@ -325,7 +336,7 @@
 
     function closeModal() { document.getElementById('diagnoseModal').style.display = 'none'; }
     
-    // ✅ 외부 클릭 시 햄버거 메뉴 및 모달 닫기
+    // 외부 클릭 시 닫기
     window.onclick = function(event) { 
         if (!event.target.closest('.dropbtn')) {
             var dropdowns = document.getElementsByClassName("dropdown-content");

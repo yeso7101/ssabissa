@@ -29,6 +29,10 @@ except Exception:
 
 STOCK_MAP_FILE = "stock_map.json"
 STOCK_MAP = {}
+if os.path.exists(STOCK_MAP_FILE):
+    with open(STOCK_MAP_FILE, "r", encoding="utf-8") as f:
+        STOCK_MAP = json.load(f)
+
 print("STOCK_MAP 개수:", len(STOCK_MAP))
 SEARCH_COUNT_KR = Counter()
 SEARCH_COUNT_US = Counter()
@@ -38,37 +42,29 @@ TICKER_CACHE = {}
 VOTE_DB = {}
 TALK_DB = {}
 
-# ================================================================
-# 2. 기반 파일(STOCK_MAP) 로드 및 기본 템플릿 세팅
-# ================================================================
-if os.path.exists(STOCK_MAP_FILE):
-    with open(STOCK_MAP_FILE, "r", encoding="utf-8") as f:
-        STOCK_MAP = json.load(f)
+# [추천 종목 캐시 선언]
+RECOMMENDATION_CACHE = []
 
+# ================================================================
+# 2. 기본 템플릿 세팅
+# ================================================================
 templates = Jinja2Templates(directory="templates")
 templates.env.cache = None
 
 # ================================================================
-# 🚀 신규: 배당률 오류 원천 차단 전용 함수
+# 🚀 배당률 오류 원천 차단 전용 함수
 # ================================================================
 def get_dividend_percent(info):
-    """
-    야후 파이낸스의 포맷 오류(소수점과 퍼센트 혼용)를 방지하기 위해
-    실제 배당금액(dividendRate)과 현재가(currentPrice)로 직접 계산합니다.
-    """
     div_rate = info.get("dividendRate")
     price = info.get("currentPrice") or info.get("regularMarketPrice")
     
-    # 1순위: 확실한 현금 배당금 / 주가 절대 비율 계산
     if div_rate and price and price > 0:
         return (div_rate / price) * 100
         
-    # 2순위: dividendRate가 없을 경우 dividendYield 활용
     dy = info.get("dividendYield") or 0
     if dy == 0:
         return 0
         
-    # 휴리스틱: 20% (0.2)가 넘는 배당률은 비정상적이므로, 야후가 이미 퍼센트 단위(예: 0.44%를 0.44로)로 보낸 것으로 간주합니다.
     if dy > 0.2:
         return dy
     return dy * 100
@@ -160,7 +156,6 @@ def update_and_get_history(ticker, current_score, info):
     if cur_price and high_52 and cur_price >= high_52 * 0.95:
         curations.append("🔥 52주 신고가 부근입니다. 강력한 모멘텀 혹은 고점 리스크가 공존합니다.")
         
-    # ✅ 개선된 배당률 함수 적용
     actual_div_percent = get_dividend_percent(info)
     if actual_div_percent >= 4.0:
         curations.append(f"💰 연 {round(actual_div_percent, 2)}% 수준의 고배당이 기대되어 하방 경직성이 튼튼합니다.")
@@ -194,8 +189,124 @@ app.add_middleware(
 )
 
 # ================================================================
-# 4. 캘린더 엔진
+# 4. 백그라운드 태스크 엔진 (캘린더, 랭킹, 추천 등)
 # ================================================================
+def save_ranking_to_file():
+    try:
+        payload = {"KR": dict(SEARCH_COUNT_KR), "US": dict(SEARCH_COUNT_US)}
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=4)
+    except Exception: pass
+
+def save_community_to_file():
+    global VOTE_DB, TALK_DB
+    try:
+        payload = {"VOTE": VOTE_DB, "TALK": TALK_DB}
+        with open(COMMUNITY_FILE, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=4)
+    except Exception: pass
+
+# 🚀 신규: 인덱스 페이지 추천 종목 생성기
+def fetch_recommendations():
+    global RECOMMENDATION_CACHE
+    large_caps = ["005930.KS", "000660.KS", "005380.KS", "AAPL", "MSFT", "NVDA", "TSLA", "GOOGL", "005490.KS", "105560.KS"]
+    temp_cache = []
+    for ticker in large_caps:
+        try:
+            info = yf.Ticker(ticker).info
+            cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
+            if cur:
+                score, color, reasons, brief = calculate_ssabissa_score(info, ticker)
+                name = info.get("longName") or info.get("shortName") or ticker
+                currency = info.get("currency", "$")
+                fmt = "{:,.0f}" if currency in ["KRW", "₩"] else "{:,.2f}"
+                score_change, cur_reason, backtest, h_dates, h_scores = update_and_get_history(ticker, score, info)
+                
+                temp_cache.append({
+                    "name": name, "ticker": ticker,
+                    "current_price": fmt.format(cur) + f" {currency}",
+                    "score": score, "color": color, "brief": brief, "reasons": reasons,
+                    "score_change": score_change, "curation_reason": cur_reason, "backtest_return": backtest,
+                    "history_dates": h_dates, "history_scores": h_scores
+                })
+        except Exception:
+            continue
+    if temp_cache:
+        RECOMMENDATION_CACHE = temp_cache
+
+def update_all_stock_scores_task():
+    for name, ticker in STOCK_MAP.items():
+        try:
+            ticker_upper = ticker.strip().upper()
+            if ticker_upper in TICKER_CACHE:
+                cached_score = TICKER_CACHE[ticker_upper].get("score", 50)
+                if cached_score != 50 and cached_score > 0: continue 
+                
+            stock_obj = yf.Ticker(ticker_upper)
+            info = stock_obj.info
+            if not info: continue
+                
+            cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
+            if not cur: continue
+                
+            score, color, reasons, brief = calculate_ssabissa_score(info, ticker_upper)
+            TICKER_CACHE[ticker_upper] = {"name": name, "score": score, "color": color}
+            
+            if ".KS" in ticker_upper or ".KQ" in ticker_upper:
+                if SEARCH_COUNT_KR[ticker_upper] == 0: SEARCH_COUNT_KR[ticker_upper] = 1
+            else:
+                if "000000" not in ticker_upper:
+                    if SEARCH_COUNT_US[ticker_upper] == 0: SEARCH_COUNT_US[ticker_upper] = 1
+            
+            time.sleep(random.uniform(0.8, 1.2))
+        except Exception:
+            continue
+            
+    try:
+        save_ranking_to_file()  
+        clear_expired_talks()   
+    except Exception as e: pass
+
+def start_scheduler():
+    def run_forever():
+        fetch_recommendations() # 서버 부팅 시 추천 종목 초기화
+        time.sleep(5)
+        while True:
+            try: 
+                update_all_stock_scores_task()
+                fetch_recommendations() # 점수 업데이트 시 추천 종목도 갱신
+            except Exception as e: pass
+            time.sleep(21600)
+    threading.Thread(target=run_forever, daemon=True).start()
+
+# 🚀 신규: 일일/주간 리셋 자동화 스케줄러 (조회수 & 투표 데이터)
+def start_reset_scheduler():
+    def run_reset():
+        global SEARCH_COUNT_KR, SEARCH_COUNT_US, VOTE_DB
+        kst = timezone(timedelta(hours=9))
+        last_daily_reset = datetime.now(kst).date()
+        last_weekly_reset = datetime.now(kst).date()
+        
+        while True:
+            time.sleep(60) # 1분마다 자정 통과 여부 체크
+            now_date = datetime.now(kst).date()
+            
+            # 1. 랭킹페이지 조회수 매일 자정 리셋
+            if now_date > last_daily_reset:
+                SEARCH_COUNT_KR.clear()
+                SEARCH_COUNT_US.clear()
+                last_daily_reset = now_date
+                save_ranking_to_file()
+                
+            # 2. 커뮤니티 응원바 매주 일요일 자정 리셋 (weekday() == 6)
+            if now_date.weekday() == 6 and now_date > last_weekly_reset:
+                for ticker in list(VOTE_DB.keys()):
+                    VOTE_DB[ticker] = {"up": 0, "down": 0}
+                last_weekly_reset = now_date
+                save_community_to_file()
+                
+    threading.Thread(target=run_reset, daemon=True).start()
+
 def update_market_calendar():
     sample_tickers = [
         "005930.KS", "000660.KS", "005380.KS", "373220.KS", "035420.KS", 
@@ -253,67 +364,14 @@ def start_calendar_automation():
             
     threading.Thread(target=run, daemon=True).start()
 
+# 스케줄러 일괄 실행
 start_calendar_automation()
-
-def save_ranking_to_file():
-    try:
-        payload = {"KR": dict(SEARCH_COUNT_KR), "US": dict(SEARCH_COUNT_US)}
-        with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=4)
-    except Exception: pass
-
-def save_community_to_file():
-    global VOTE_DB, TALK_DB
-    try:
-        payload = {"VOTE": VOTE_DB, "TALK": TALK_DB}
-        with open(COMMUNITY_FILE, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=4)
-    except Exception: pass
-
-def update_all_stock_scores_task():
-    for name, ticker in STOCK_MAP.items():
-        try:
-            ticker_upper = ticker.strip().upper()
-            if ticker_upper in TICKER_CACHE:
-                cached_score = TICKER_CACHE[ticker_upper].get("score", 50)
-                if cached_score != 50 and cached_score > 0: continue 
-                
-            stock_obj = yf.Ticker(ticker_upper)
-            info = stock_obj.info
-            if not info: continue
-                
-            cur = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("previousClose")
-            if not cur: continue
-                
-            score, color, reasons, brief = calculate_ssabissa_score(info, ticker_upper)
-            TICKER_CACHE[ticker_upper] = {"name": name, "score": score, "color": color}
-            
-            if ".KS" in ticker_upper or ".KQ" in ticker_upper:
-                if SEARCH_COUNT_KR[ticker_upper] == 0: SEARCH_COUNT_KR[ticker_upper] = 1
-            else:
-                if "000000" not in ticker_upper:
-                    if SEARCH_COUNT_US[ticker_upper] == 0: SEARCH_COUNT_US[ticker_upper] = 1
-            
-            time.sleep(random.uniform(0.8, 1.2))
-        except Exception:
-            continue
-            
-    try:
-        save_ranking_to_file()  
-        clear_expired_talks()   
-    except Exception as e: pass
-
-def start_scheduler():
-    def run_forever():
-        time.sleep(5)
-        while True:
-            try: update_all_stock_scores_task()
-            except Exception as e: pass
-            time.sleep(21600)
-    threading.Thread(target=run_forever, daemon=True).start()
-
 start_scheduler()
+start_reset_scheduler()
 
+# ================================================================
+# 5. 유틸리티 엔진 
+# ================================================================
 def get_score_color(score):
     if score <= 50: hue = int((score / 50) * 35)
     else: hue = int(35 + ((score - 50) / 50) * 85)
@@ -354,7 +412,6 @@ def calculate_ssabissa_score(info, ticker):
     pbr = info.get("priceToBook")
     if pbr and pbr < 0.8: score += 5; reasons.append("+ PBR 0.8배 미만 저평가")
 
-    # ✅ 개선된 배당률 함수 적용
     actual_div = get_dividend_percent(info)
     if actual_div >= 4.0: 
         score += 5
@@ -385,7 +442,7 @@ def calculate_ssabissa_score(info, ticker):
     return score, color, reasons, brief
 
 # ================================================================
-# 5. 라우터 설정 구역
+# 6. 라우터 설정 구역
 # ================================================================
 @app.get("/", response_class=HTMLResponse)
 @app.post("/", response_class=HTMLResponse)
@@ -401,6 +458,8 @@ async def home(request: Request):
         search_target = request.query_params.get("ticker") or request.query_params.get("q")
 
     result = None
+    recommendation = None
+    
     if search_target:
         clean_target = search_target.strip().lower().replace(" ", "")
         if clean_target in STOCK_MAP: resolved_ticker = STOCK_MAP[clean_target]
@@ -433,8 +492,12 @@ async def home(request: Request):
             save_ranking_to_file()
         except Exception: 
             result = {"error": "올바른 종목명이나 티커코드를 확인해 주세요."}
+    else:
+        # 🚀 신규: 검색어가 없을 때 추천 종목 로드
+        if RECOMMENDATION_CACHE:
+            recommendation = random.choice(RECOMMENDATION_CACHE)
             
-    return templates.TemplateResponse(request=request, name="index.html", context={"request": request, "result": result, "ticker": search_target})
+    return templates.TemplateResponse(request=request, name="index.html", context={"request": request, "result": result, "ticker": search_target, "recommendation": recommendation})
 
 @app.get("/api/diagnose/{ticker}")
 def api_diagnose(ticker: str = None): 
@@ -520,16 +583,21 @@ def about_page(request: Request): return templates.TemplateResponse(request=requ
 @app.get("/privacy", response_class=HTMLResponse)
 def privacy_page(request: Request): return templates.TemplateResponse(request=request, name="privacy.html", context={"request": request})
 
+# 🚀 신규: FAQ 페이지 라우터 추가
+@app.get("/faq", response_class=HTMLResponse)
+def faq_page(request: Request): return templates.TemplateResponse(request=request, name="faq.html", context={"request": request})
+
 @app.get("/sitemap.xml")
 def get_sitemap():
-    xml_content = """<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://www.ssabissa.com/</loc><priority>1.0</priority></url>\n<url><loc>https://www.ssabissa.com/ranking</loc><priority>0.8</priority></url>\n<url><loc>https://www.ssabissa.com/strategy</loc><priority>0.8</priority></url>\n<url><loc>https://www.ssabissa.com/about</loc><priority>0.5</priority></url>\n</urlset>"""
+    # FAQ 페이지가 사이트맵에 추가되었습니다.
+    xml_content = """<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://www.ssabissa.com/</loc><priority>1.0</priority></url>\n<url><loc>https://www.ssabissa.com/ranking</loc><priority>0.8</priority></url>\n<url><loc>https://www.ssabissa.com/strategy</loc><priority>0.8</priority></url>\n<url><loc>https://www.ssabissa.com/faq</loc><priority>0.7</priority></url>\n<url><loc>https://www.ssabissa.com/about</loc><priority>0.5</priority></url>\n</urlset>"""
     return Response(content=xml_content, media_type="application/xml")
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
 def get_robots_txt(): return "User-agent: *\nAllow: /\nSitemap: https://www.ssabissa.com/sitemap.xml"
 
 # ================================================================
-# 6. 커뮤니티 데이터 API 엔진
+# 7. 커뮤니티 데이터 API 엔진
 # ================================================================
 @app.get("/api/community/{ticker}")
 def get_community_data(ticker: str):
