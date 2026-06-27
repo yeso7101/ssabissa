@@ -206,7 +206,7 @@ def save_community_to_file():
             json.dump(payload, f, ensure_ascii=False, indent=4)
     except Exception: pass
 
-# 🚀 신규: 인덱스 페이지 추천 종목 생성기
+# 🚀 추천 종목 생성기
 def fetch_recommendations():
     global RECOMMENDATION_CACHE
     large_caps = ["005930.KS", "000660.KS", "005380.KS", "AAPL", "MSFT", "NVDA", "TSLA", "GOOGL", "005490.KS", "105560.KS"]
@@ -279,7 +279,7 @@ def start_scheduler():
             time.sleep(21600)
     threading.Thread(target=run_forever, daemon=True).start()
 
-# 🚀 신규: 일일/주간 리셋 자동화 스케줄러 (조회수 & 투표 데이터)
+# 🚀 일일/주간 리셋 자동화 스케줄러 (조회수 & 투표 데이터)
 def start_reset_scheduler():
     def run_reset():
         global SEARCH_COUNT_KR, SEARCH_COUNT_US, VOTE_DB
@@ -334,13 +334,15 @@ def update_market_calendar():
             if ex_date:
                 dt = datetime.fromtimestamp(ex_date, tz=kst).date()
                 if dt >= today_date:
-                    dividend_events.append({"date": dt.strftime('%Y-%m-%d'), "title": f"[{t.replace('.KS','')}] {name} 배당락"})
+                    # 💡 날짜 포맷 변경 및 '배당락' 문자열 제거 적용
+                    dividend_events.append({"date": dt.strftime('%y.%m.%d'), "title": f"[{t.replace('.KS','')}] {name}"})
             
             earning_date = info.get("earningsTimestamp") or info.get("earningsTimestampStart")
             if earning_date:
                 edt = datetime.fromtimestamp(earning_date, tz=kst).date()
                 if edt >= today_date:
-                    earning_events.append({"date": edt.strftime('%Y-%m-%d'), "title": f"[{t.replace('.KS','')}] {name} 실적발표"})
+                    # 💡 날짜 포맷 변경 및 '실적발표' 문자열 제거 적용
+                    earning_events.append({"date": edt.strftime('%y.%m.%d'), "title": f"[{t.replace('.KS','')}] {name}"})
         except Exception:
             continue
 
@@ -493,7 +495,7 @@ async def home(request: Request):
         except Exception: 
             result = {"error": "올바른 종목명이나 티커코드를 확인해 주세요."}
     else:
-        # 🚀 신규: 검색어가 없을 때 추천 종목 로드
+        # 검색어가 없을 때 추천 종목 로드
         if RECOMMENDATION_CACHE:
             recommendation = random.choice(RECOMMENDATION_CACHE)
             
@@ -583,13 +585,11 @@ def about_page(request: Request): return templates.TemplateResponse(request=requ
 @app.get("/privacy", response_class=HTMLResponse)
 def privacy_page(request: Request): return templates.TemplateResponse(request=request, name="privacy.html", context={"request": request})
 
-# 🚀 신규: FAQ 페이지 라우터 추가
 @app.get("/faq", response_class=HTMLResponse)
 def faq_page(request: Request): return templates.TemplateResponse(request=request, name="faq.html", context={"request": request})
 
 @app.get("/sitemap.xml")
 def get_sitemap():
-    # FAQ 페이지가 사이트맵에 추가되었습니다.
     xml_content = """<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://www.ssabissa.com/</loc><priority>1.0</priority></url>\n<url><loc>https://www.ssabissa.com/ranking</loc><priority>0.8</priority></url>\n<url><loc>https://www.ssabissa.com/strategy</loc><priority>0.8</priority></url>\n<url><loc>https://www.ssabissa.com/faq</loc><priority>0.7</priority></url>\n<url><loc>https://www.ssabissa.com/about</loc><priority>0.5</priority></url>\n</urlset>"""
     return Response(content=xml_content, media_type="application/xml")
 
