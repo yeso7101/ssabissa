@@ -119,13 +119,17 @@ def update_and_get_history(ticker, current_score, info):
             history[ticker]["dates"].pop(0)
             history[ticker]["scores"].pop(0)
             
-        # 2. 가상 수익률 계산
+        # 가상 수익률 계산
         if len(history[ticker]["scores"]) > 1:
             prev_score = history[ticker]["scores"][-2]
             diff = (current_score - prev_score) * 0.15 
             history[ticker]["virtual_return"] += diff
             history[ticker]["virtual_return"] = round(history[ticker]["virtual_return"], 2)
             
+        save_history(history)
+    else:
+        # ✅ 이미 오늘 기록이 있다면 최신 점수로 갱신 (정확한 '어제 대비 점수' 계산을 위해)
+        history[ticker]["scores"][-1] = current_score
         save_history(history)
     
     dates = history[ticker]["dates"]
@@ -151,8 +155,11 @@ def update_and_get_history(ticker, current_score, info):
     if cur_price and high_52 and cur_price >= high_52 * 0.95:
         curations.append("🔥 52주 신고가 부근입니다. 강력한 모멘텀 혹은 고점 리스크가 공존합니다.")
         
-    if div_yield and div_yield > 0.04:
-        curations.append(f"💰 연 {round(div_yield*100, 2)}% 수준의 고배당이 기대되어 하방 경직성이 튼튼합니다.")
+    # ✅ 배당률 버그 수정: yfinance 데이터가 0.05 형태인지 5.0 형태인지 판별하여 정규화
+    if div_yield:
+        actual_div_yield = div_yield * 100 if div_yield < 1 else div_yield
+        if actual_div_yield >= 4.0:
+            curations.append(f"💰 연 {round(actual_div_yield, 2)}% 수준의 고배당이 기대되어 하방 경직성이 튼튼합니다.")
         
     if not curations:
         if current_score >= 60:
@@ -184,7 +191,7 @@ app.add_middleware(
 )
 
 # ================================================================
-# 4. 캘린더 엔진 (✅ 과거 데이터 제외, 다수 종목 수집)
+# 4. 캘린더 엔진 (과거 데이터 제외, 다수 종목 수집)
 # ================================================================
 def update_market_calendar():
     sample_tickers = [
@@ -347,7 +354,11 @@ def calculate_ssabissa_score(info, ticker):
     pbr = info.get("priceToBook")
     if pbr and pbr < 0.8: score += 5; reasons.append("+ PBR 0.8배 미만 저평가")
 
-    if (info.get("dividendYield", 0) or 0) * 100 >= 4.0: score += 5; reasons.append("+ 고배당 수익률")
+    # ✅ 배당률 100배 버그 로직 수정 적용
+    div_yield_val = info.get("dividendYield", 0) or 0
+    actual_div = div_yield_val * 100 if div_yield_val < 1 else div_yield_val
+    if actual_div >= 4.0: score += 5; reasons.append("+ 고배당 수익률")
+    
     if (info.get("earningsGrowth", 0) or 0) * 100 >= 30: score += 8; reasons.append("+ 고성장 기업 프리미엄")
 
     if (info.get("debtToEquity", 0) or 0) > 150: score -= 10; reasons.append("- 부채비율 과다")

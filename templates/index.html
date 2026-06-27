@@ -36,7 +36,7 @@
             box-sizing: border-box; 
         }
 
-        /* 🖥️ 데스크탑 상단 네비게이션 (메뉴명 '홈'으로 수정) */
+        /* 🖥️ 데스크탑 상단 네비게이션 (메뉴명 '홈'으로 수정 & 플로팅 그림자 추가) */
         .top-nav { 
             position: fixed; 
             top: 20px; 
@@ -52,10 +52,10 @@
             -webkit-backdrop-filter: blur(12px); 
             padding: 10px 20px; 
             border-radius: 100px; 
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05); 
             border: 1px solid rgba(255, 255, 255, 0.8); 
             box-sizing: border-box; 
             z-index: 1000; 
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* ✅ 진하고 뚜렷하고 얇은 플로팅 그림자 */
         }
         .top-nav .nav-logo { 
             text-decoration: none; 
@@ -80,7 +80,7 @@
             color: var(--blue); 
         }
 
-        /* 🔍 공통 검색창 스타일 */
+        /* 🔍 공통 검색창 스타일 (플로팅 그림자 추가) */
         .main-search-wrapper { 
             margin-bottom: 24px; 
         }
@@ -99,12 +99,12 @@
             font-size: 0.95rem; 
             box-sizing: border-box; 
             font-weight: 600; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02); 
             transition: all 0.3s; 
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* ✅ 플로팅 그림자 */
         }
         .page-search input:focus { 
             border-color: var(--blue); 
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1); 
+            box-shadow: 2px 2px 8px rgba(59, 130, 246, 0.5); 
         }
         .page-search button { 
             position: absolute; 
@@ -126,14 +126,14 @@
             transform: scale(1.05); 
         }
 
-        /* 📊 메인 페이지 카드 및 콘텐츠 스타일 */
+        /* 📊 메인 페이지 카드 및 콘텐츠 스타일 (플로팅 그림자 추가) */
         .card { 
             background: white; 
             border-radius: 16px; 
             padding: 20px; 
             margin-bottom: 16px; 
-            box-shadow: 0 4px 16px rgba(0,0,0,0.03); 
             border: 1px solid var(--border); 
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* ✅ 플로팅 그림자 */
         }
         .card-title { 
             font-size: 0.95rem; 
@@ -189,8 +189,8 @@
             font-size: 2.2rem; 
             font-weight: 900; 
             color: white; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
             margin-bottom: 12px; 
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* ✅ 점수원 플로팅 그림자 */
         }
         .score-change { 
             font-size: 0.85rem; 
@@ -307,9 +307,10 @@
             font-weight: 500; 
             line-height: 1.6; 
             font-size: 0.9rem; 
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* ✅ 안내 박스 그림자 */
         }
 
-        /* ✅ 1번: 하단 면책조항 텍스트 */
+        /* 하단 면책조항 텍스트 */
         .main-footer { 
             text-align: center; 
             margin-top: 30px; 
@@ -320,7 +321,7 @@
             padding-bottom: 20px; 
         }
 
-        /* 📱 모바일 하단 네비게이션 가독성 개선 */
+        /* 📱 모바일 하단 네비게이션 가독성 개선 (플로팅 그림자 추가) */
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
             body { padding-top: 20px; margin-bottom: 80px; }
@@ -336,7 +337,6 @@
                 height: 52px; 
                 border-radius: 100px; 
                 border: 1px solid rgba(255, 255, 255, 0.9); 
-                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08); 
                 justify-content: space-between; 
                 align-items: center; 
                 width: calc(100% - 32px); 
@@ -344,6 +344,7 @@
                 box-sizing: border-box; 
                 display: flex !important; 
                 z-index: 900; 
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); /* ✅ 모바일 하단바 그림자 */
             }
             .mobile-sub-nav .nav-logo { 
                 text-decoration: none; 
@@ -390,7 +391,7 @@
             max-width: 400px; 
             border-radius: 20px; 
             padding: 24px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.4); /* ✅ 모달 그림자 */
             position: relative; 
             max-height: 85vh; 
             overflow-y: auto; 
@@ -420,7 +421,7 @@
             font-weight: 900; 
             color: white; 
             margin: 10px auto 20px auto; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); 
         }
         .m-header { 
             text-align: center; 
@@ -477,8 +478,8 @@
 
     <div class="container">
         <div class="main-search-wrapper">
-            <form class="page-search" onsubmit="handleSearch(event)">
-                <input type="text" id="searchInput" placeholder="종목명 또는 티커 (예: 삼성전자, AAPL)" required autocomplete="off">
+            <form class="page-search" action="/" method="GET">
+                <input type="text" name="ticker" id="searchInput" placeholder="종목명 또는 티커 (예: 삼성전자, AAPL)" required autocomplete="off">
                 <button type="submit">🔍</button>
             </form>
         </div>
@@ -631,7 +632,7 @@
                 </script>
             {% endif %}
         {% else %}
-            <div class="state-msg" style="margin-top: 30px; border:none; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+            <div class="state-msg" style="margin-top: 30px;">
                 <div style="font-size: 2.2rem; margin-bottom: 12px;">📈</div>
                 <h2 style="color: var(--text-main); margin-top:0; font-weight:700; font-size: 1.1rem;">어떤 종목을 진단해 드릴까요?</h2>
                 <p style="font-size:0.9rem; color: #475569;">상단의 검색창에 종목명이나 티커 코드를 입력하시면<br>11가지 지표에 기반한 데이터 진단이 즉시 시작됩니다.</p>
@@ -668,13 +669,7 @@
     </div>
 
     <script>
-        function handleSearch(e) {
-            e.preventDefault(); // 폼 제출로 인한 페이지 새로고침 방지
-            const query = document.getElementById('searchInput').value.trim();
-            if(!query) return;
-            openModal(query);
-        }
-
+        // ✅ 6번: 캘린더 등 다른 곳에서 모달 호출 시 '어제 대비 점수' 표시되도록 자바스크립트 개선
         function openModal(ticker) {
             const modal = document.getElementById('diagnoseModal');
             const body = document.getElementById('modalBody');
@@ -701,12 +696,25 @@
                         reasonsHtml = `<li class="m-reason-item" style="color: #94a3b8; text-align:center;">특이 평가 항목이 없습니다.</li>`;
                     }
 
+                    // ✅ 어제 대비 등락 점수 HTML 조립
+                    let changeHtml = '';
+                    if (data.score_change > 0) {
+                        changeHtml = `<span class="change-up">▲ ${data.score_change}</span>`;
+                    } else if (data.score_change < 0) {
+                        changeHtml = `<span class="change-down">▼ ${data.score_change * -1}</span>`;
+                    } else {
+                        changeHtml = `<span>-</span>`;
+                    }
+
                     body.innerHTML = `
                         <div class="m-header">
                             <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
                             <div class="m-price">${data.current_price}</div>
                         </div>
                         <div class="m-score-circle" style="background-color: ${data.color};">${data.score}</div>
+                        <div style="display:flex; justify-content:center; margin-bottom:16px;">
+                            <div class="score-change">어제 대비 ${changeHtml}</div>
+                        </div>
                         <div class="m-brief">${data.brief}</div>
                         <div class="m-curation">🤖 ${data.curation_reason}</div>
                         <ul class="m-reason-list">${reasonsHtml}</ul>
