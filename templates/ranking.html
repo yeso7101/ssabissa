@@ -29,7 +29,7 @@
             box-sizing: border-box; 
             color: var(--text-main); 
             
-            /* [수정 1] 가독성 최적화 세팅 (줄바꿈 및 정렬) */
+            /* 가독성 최적화 세팅 (줄바꿈 및 정렬) */
             word-break: keep-all; 
             overflow-wrap: break-word;
             line-height: 1.65;
@@ -166,9 +166,10 @@
         .rank-name { font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .rank-ticker { font-size: 0.8rem; font-weight: 600; color: var(--text-sub); }
         
+        /* 모바일 및 데스크탑 크기 찌그러짐 원천 차단 속성 추가 */
         .rank-score { 
             width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; font-size: 1rem; font-weight: 900; color: white; flex-shrink: 0; 
+            justify-content: center; font-size: 1rem; font-weight: 900; color: white; flex-shrink: 0 !important; 
             box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3); 
         }
 
@@ -198,7 +199,7 @@
             .m-dropdown .dropdown-content { top: auto; bottom: 50px; right: -5px; }
         }
 
-        /* 🔍 진단 모달 UI 공통 (별표 버그 수정 포함) */
+        /* 🔍 진단 모달 UI 공통 */
         .modal-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px); 
@@ -219,14 +220,13 @@
         .m-score-circle { 
             width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; 
             justify-content: center; font-size: 2rem; font-weight: 900; color: white; 
-            margin: 10px auto 20px auto; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); 
+            margin: 10px auto 20px auto; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); flex-shrink: 0 !important;
         }
         .m-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
-        .m-header-left { flex: 1; text-align: left; min-width: 0; padding-right: 20px; }
-        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .m-header-left { flex: 1; text-align: left; min-width: 0; padding-right: 20px; m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; display: flex; align-items: center; }
         
-        /* [수정 3] ⭐ 관심종목 별표 버튼 (버그 수정 적용) */
+        /* ⭐ 관심종목 별표 버튼 스타일 동기화 교정 */
         .fav-btn { 
             background: none; border: none; cursor: pointer; padding: 4px; 
             display: flex; align-items: center; justify-content: center; transition: transform 0.2s; 
@@ -235,17 +235,17 @@
         .fav-btn:active { transform: scale(0.9); }
         .fav-icon { 
             width: 26px; height: 26px; 
-            fill: none; /* 빈 별 유지 */
+            fill: none;
             stroke: #fbbf24; stroke-width: 2; transition: all 0.2s; 
         }
         .fav-icon.active { 
-            fill: #fbbf24; /* 활성화 시 색 채움 */
+            fill: #fbbf24 !important; 
         }
 
         .m-brief { font-size: 0.9rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; }
         .m-curation { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 16px; border: 1px solid #e2e8f0; }
         .m-reason-list { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; margin-bottom: 20px;}
-        .m-reason-item { padding: 8px 0; border-bottom: 1px dashed #f1f3f5; font-weight: 600; }
+        .m-reason-item { padding: 8px 0; border-bottom: 1px dashed #f1f3f5; font-weight: 600; display: flex; align-items: flex-start; gap: 6px; }
         .m-btn-detail { display: block; width: 100%; text-align: center; background: var(--blue); color: white; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 800; transition: transform 0.2s; box-sizing: border-box; font-size: 0.9rem; }
         .m-btn-detail:active { transform: scale(0.97); }
         
@@ -260,7 +260,6 @@
     <div class="top-nav">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <!-- [수정 2] '관심종목' -> '관심' 변경 -->
             <a href="/favorites">관심</a> 
             <a href="/ranking" class="active">랭킹</a>
             <div class="dropdown">
@@ -346,7 +345,7 @@
 
         <div class="update-info">랭킹 데이터는 당일 누적 검색량을 기준으로 자정마다 갱신됩니다.</div>
         
-        <!-- 하단 푸터 (누락 방지) -->
+        <!-- 하단 푸터 -->
         <div class="main-footer">
             © 2026 SSABISSA. All rights reserved.<br>
             싸비싸의 진단 점수 및 큐레이션은 투자 판단을 위한 보조 지표이며,<br>
@@ -368,7 +367,6 @@
     <div class="mobile-sub-nav" style="display: none;">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <!-- [수정 2] '관심종목' -> '관심' 변경 -->
             <a href="/favorites">관심</a> 
             <a href="/ranking" class="active">랭킹</a>
             
@@ -393,7 +391,6 @@
 
     <!-- 자바스크립트 로직 -->
     <script>
-        // 메뉴 및 탭 토글 로직
         function toggleDesktopMenu(e) { 
             e.preventDefault(); 
             document.getElementById("desktopMenu").classList.toggle("show"); 
@@ -418,7 +415,6 @@
             if (event.target == document.getElementById('diagnoseModal')) closeModal(); 
         }
 
-        // 국가별 탭 스위치
         function switchTab(type) {
             document.getElementById('tab-kr').classList.remove('active');
             document.getElementById('tab-us').classList.remove('active');
@@ -429,40 +425,43 @@
             document.getElementById('list-' + type).classList.add('active');
         }
 
-        // 검색 처리
         function handleSearchSubmit(e) {
             e.preventDefault();
             const query = document.getElementById('searchInput').value.trim();
             if(query) openModal(query);
         }
 
-        // 관심 종목 연동 (로컬 스토리지 기반)
         function getFavorites() { 
             return JSON.parse(localStorage.getItem('ssabissa_favorites')) || []; 
         }
         
+        // [4번 수정] 모달 내부 관심 버튼 토글 시 상한 규격(10개 제한) 검증 예외 방어막 추가
         function toggleFavorite(ticker) {
             let favs = getFavorites();
             if (favs.includes(ticker)) {
                 favs = favs.filter(t => t !== ticker);
             } else {
+                if (favs.length >= 10) {
+                    alert("⚠️ 관심 종목은 최대 10개까지만 등록할 수 있습니다. 기존에 저장한 종목을 해제한 후 다시 시도해 주세요.");
+                    return;
+                }
                 favs.push(ticker);
             }
             localStorage.setItem('ssabissa_favorites', JSON.stringify(favs));
             updateFavoriteUI(ticker);
         }
         
+        // [2번 수정] 모달창 별표 활성화 색상 실시간 피드백 동기화
         function updateFavoriteUI(ticker) {
             const favs = getFavorites();
             const isActive = favs.includes(ticker);
             const modalIcon = document.getElementById('favBtnModal_icon');
-            if (modalIcon && modalIcon.dataset.ticker === ticker) {
+            if (modalIcon && modalIcon.getAttribute('data-ticker') === ticker) {
                 if (isActive) modalIcon.classList.add('active');
                 else modalIcon.classList.remove('active');
             }
         }
 
-        // 모달 데이터 호출 엔진
         function openModal(ticker) {
             const modal = document.getElementById('diagnoseModal');
             const body = document.getElementById('modalBody');
@@ -483,7 +482,7 @@
                             let color = 'var(--text-main)';
                             if(r.startsWith('+')) color = 'var(--red)';
                             if(r.startsWith('-')) color = 'var(--blue)';
-                            reasonsHtml += `<li class="m-reason-item" style="color:${color}">${r}</li>`;
+                            reasonsHtml += `<li class="m-reason-item" style="color:${color}"><span>💡</span>${r}</li>`;
                         });
                     } else {
                         reasonsHtml = `<li class="m-reason-item" style="color: #94a3b8; text-align:center;">특이 평가 항목이 없습니다.</li>`;
@@ -504,7 +503,7 @@
                     body.innerHTML = `
                         <div class="m-header">
                             <div class="m-header-left">
-                                <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
+                                <div class="m-name" style="font-size:1.15rem; font-weight:900;">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
                                 <div class="m-price">
                                     ${data.current_price}
                                     <button class="fav-btn" onclick="toggleFavorite('${data.ticker}')">

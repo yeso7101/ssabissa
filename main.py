@@ -47,6 +47,11 @@ TALK_DB = {}
 # [추천 종목 캐시 선언]
 RECOMMENDATION_CACHE = []
 
+# [나만 보는 일일 방문자 전역 모니터링 변수 선언]
+DAILY_VISITOR_COUNT = 0
+kst_zone = timezone(timedelta(hours=9))
+LAST_RESET_DATE = datetime.now(kst_zone).date()
+
 # ================================================================
 # 2. 기본 템플릿 세팅
 # ================================================================
@@ -189,6 +194,29 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 🚀 독점 일일 트래픽 측정용 전역 미들웨어 필터 장착
+@app.middleware("http")
+async def count_daily_visitors(request: Request, call_next):
+    global DAILY_VISITOR_COUNT, LAST_RESET_DATE
+    try:
+        kst = timezone(timedelta(hours=9))
+        current_today = datetime.now(kst).date()
+        
+        # 날짜가 바뀌면 어제 누적치를 클리어하고 오늘 카운트로 새로 시작
+        if current_today > LAST_RESET_DATE:
+            DAILY_VISITOR_COUNT = 0
+            LAST_RESET_DATE = current_today
+            
+        # 정적 파일이나 sitemap 에셋이 아닌 실제 웹 조회만 추적
+        path = request.url.path
+        if not path.endswith((".xml", ".txt", ".png", ".jpg", ".css", ".js")) and "api" not in path:
+            DAILY_VISITOR_COUNT += 1
+    except Exception:
+        pass
+        
+    response = await call_next(request)
+    return response
 
 # ================================================================
 # 4. 백그라운드 태스크 엔진 (캘린더, 랭킹, 추천 등)
@@ -402,6 +430,11 @@ def calculate_ssabissa_score(info, ticker):
     reasons = []
     is_kr = ".KS" in ticker or ".KQ" in ticker
     
+    # 6번 요구사항 반영: 미국 주식(미장)일 때 기본 프리미엄 보정치 적용 및 밸류에이션 완화
+    if not is_kr:
+        score += 3  # 미국 시장 주식의 높은 성장성과 유동성 가점
+        reasons.append("+ 글로벌 마켓 프리미엄 보정")
+
     target = info.get("targetMeanPrice")
     cur = info.get("currentPrice") or info.get("regularMarketPrice")
     if target and cur and target > cur:
@@ -410,11 +443,23 @@ def calculate_ssabissa_score(info, ticker):
     
     per = info.get("forwardPE")
     if per:
-        if is_kr and per < 10: score += 7; reasons.append("+ 국장 극저평가 메리트")
-        elif not is_kr and per < 20: score += 7; reasons.append("+ 미장 합리적 밸류에이션")
+        if is_kr and per < 10: 
+            score += 7
+            reasons.append("+ 국장 극저평가 메리트")
+        elif not is_kr:
+            if per < 15:
+                score += 8
+                reasons.append("+ 미장 매력적 밸류에이션 (PE 저평가)")
+            elif per < 25:
+                score += 6
+                reasons.append("+ 미장 합리적 프리미엄 구간")
 
     pbr = info.get("priceToBook")
-    if pbr and pbr < 0.8: score += 5; reasons.append("+ PBR 0.8배 미만 저평가")
+    if pbr:
+        if is_kr and pbr < 0.8: 
+            score += 5; reasons.append("+ PBR 0.8배 미만 저평가")
+        elif not is_kr and pbr < 2.5: 
+            score += 4; reasons.append("+ 자산 효율성 대비 합리적 PBR")
 
     actual_div = get_dividend_percent(info)
     if actual_div >= 4.0: 
@@ -448,6 +493,19 @@ def calculate_ssabissa_score(info, ticker):
 # ================================================================
 # 6. 라우터 설정 구역
 # ================================================================
+
+# 🚀 [나만 보는 전역 모니터링 API 장착]
+@app.get("/api/admin/visitors")
+def get_exclusive_daily_visitors(password: str):
+    if password != "jooseong1001":
+        raise HTTPException(status_code=403, detail="요청 승인 권한이 거부되었습니다.")
+    return {
+        "success": True,
+        "date": str(LAST_RESET_DATE),
+        "today_total_visitors": DAILY_VISITOR_COUNT,
+        "msg": "자정이 지나면 자동으로 0으로 카운트 리셋 동기화됩니다."
+    }
+
 @app.get("/", response_class=HTMLResponse)
 @app.post("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -559,19 +617,16 @@ def ranking(request: Request):
 async def calendar_page(request: Request):
     template_file = "calender.html" if os.path.exists("templates/calender.html") else "calendar.html"
     
-    # [수정됨] 캘린더 실제 데이터를 수집하여 템플릿(jinja)로 넘겨줍니다.
     events = {}
     if os.path.exists(CALENDAR_FILE):
         try:
             with open(CALENDAR_FILE, "r", encoding="utf-8") as f:
                 cal_data = json.load(f)
                 
-                # 배당락일 가공
                 for item in cal_data.get("dividend", []):
                     date_str = item["date"]
                     if date_str not in events: events[date_str] = []
                     
-                    # 괄호 사이의 티커 기호 추출 (ex. "[AAPL] 애플" -> "AAPL")
                     ticker = item["title"].split("]")[0].replace("[", "").strip() if "[" in item["title"] else ""
                     
                     events[date_str].append({
@@ -583,7 +638,6 @@ async def calendar_page(request: Request):
                         "ticker": ticker
                     })
                     
-                # 실적발표 가공
                 for item in cal_data.get("earning", []):
                     date_str = item["date"]
                     if date_str not in events: events[date_str] = []
@@ -599,7 +653,6 @@ async def calendar_page(request: Request):
                         "ticker": ticker
                     })
                     
-            # 날짜순(오름차순) 정렬
             events = dict(sorted(events.items()))
         except Exception as e:
             print(f"Calendar Fetch Error: {e}")
@@ -731,7 +784,7 @@ def clear_expired_talks():
     now_dt = datetime.now(kst)
     removed_count = 0
     
-    for ticker in list(TALK_DB.keys()):
+    for ticker in list(DAILY_VISITOR_COUNT.keys() if hasattr(DAILY_VISITOR_COUNT, "keys") else TALK_DB.keys()):
         valid_talks = []
         for talk in TALK_DB[ticker]:
             try:
@@ -745,7 +798,7 @@ def clear_expired_talks():
 
 @app.delete("/api/admin/clear/talk")
 def admin_clear_talk(ticker: str, password: str, index: int = 0):
-    if password != "jusongsecret123": raise HTTPException(status_code=403, detail="권한이 없습니다.")
+    if password != "jooseong1001": raise HTTPException(status_code=403, detail="권한이 없습니다.")
     t = ticker.strip().upper()
     if t in TALK_DB and len(TALK_DB[t]) > index:
         TALK_DB[t].pop(index)

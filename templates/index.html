@@ -252,7 +252,7 @@
             flex-shrink: 0; 
         }
         
-        /* ⭐ 관심종목 별표 버튼 (버그 수정) */
+        /* ⭐ 관심종목 별표 버튼 */
         .fav-btn {
             background: none; 
             border: none; 
@@ -278,9 +278,9 @@
             transition: all 0.2s; 
         }
         
-        /* 활성화 시에만 노란색으로 칠해짐 */
+        /* [2번 수정] 활성화 시 노란색 채우기 CSS 결합력 보강 */
         .fav-icon.active { 
-            fill: #fbbf24; 
+            fill: #fbbf24 !important; 
         }
 
         .score-display { 
@@ -291,6 +291,7 @@
             margin: 20px 0; 
         }
         
+        /* [1번 수정] 핫한 종목 점수원 및 메인 점수원이 모바일 flex 레이아웃에서 찌그러지지 않도록 flex-shrink 고정 */
         .score-circle { 
             width: 100px; 
             height: 100px; 
@@ -303,6 +304,7 @@
             color: white; 
             margin-bottom: 12px; 
             box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2); 
+            flex-shrink: 0 !important;
         }
         
         .score-change { 
@@ -337,11 +339,11 @@
             align-items: flex-end; 
             padding-left: 12px; 
             overflow-x: auto; 
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none; 
         }
         
         .folder-tabs::-webkit-scrollbar { 
-            display: none; /* Chrome/Safari */ 
+            display: none; 
         }
         
         .folder-tab {
@@ -366,7 +368,6 @@
             color: var(--text-main); 
         }
         
-        /* 활성화된 서류 폴더 탭 */
         .folder-tab.active {
             background-color: var(--folder-bg); 
             border-color: var(--border); 
@@ -389,7 +390,6 @@
             background: var(--folder-bg);
         }
 
-        /* 서류 폴더 내부 내용물 */
         .folder-content {
             background: var(--folder-bg); 
             border: 1px solid var(--border); 
@@ -416,7 +416,6 @@
             to { opacity: 1; transform: translateY(0); } 
         }
 
-        /* 서류 내용물 전용 디자인 */
         .panel-title { 
             font-size: 1.05rem; 
             font-weight: 800; 
@@ -426,7 +425,6 @@
             padding-bottom: 8px; 
         }
         
-        /* 상세 분석 리스트 */
         .reason-list { 
             list-style: none; 
             padding: 0; 
@@ -451,7 +449,6 @@
         .reason-plus { color: var(--red); }
         .reason-minus { color: var(--blue); }
 
-        /* 이슈 큐레이션 박스 */
         .curation-box { 
             background: #f8fafc; 
             border-radius: 12px; 
@@ -474,7 +471,6 @@
             margin-bottom: 16px; 
         }
 
-        /* 커뮤니티 토론방 */
         .vote-container { 
             display: flex; 
             gap: 10px; 
@@ -738,8 +734,9 @@
                         </div>
                         <div class="stock-price">
                             {{ result.current_price }}
+                            <!-- [2번 수정] 데이터 바인딩 타겟 지정을 명시하도록 data-ticker 주입 -->
                             <button class="fav-btn" onclick="toggleFavorite('{{ result.ticker }}')">
-                                <svg id="favBtnMain_icon" class="fav-icon" viewBox="0 0 24 24">
+                                <svg id="favBtnMain_icon" data-ticker="{{ result.ticker }}" class="fav-icon" viewBox="0 0 24 24">
                                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                                 </svg>
                             </button>
@@ -827,23 +824,18 @@
                         loadCommunityData();
                     });
 
-                    // 서류 탭 전환 로직
                     function switchFolderTab(tabId) {
-                        // 모든 탭과 패널 초기화
                         document.querySelectorAll('.folder-tab').forEach(t => t.classList.remove('active'));
                         document.querySelectorAll('.folder-panel').forEach(p => p.classList.remove('active'));
                         
-                        // 선택된 탭 활성화
                         document.getElementById('tab-btn-' + tabId).classList.add('active');
                         document.getElementById('panel-' + tabId).classList.add('active');
                         
-                        // 차트가 있는 탭(curation)이 활성화될 때 차트를 그림 (캔버스 크기 오류 방지)
                         if(tabId === 'curation' && !chartInstance) {
                             renderChart();
                         }
                     }
 
-                    // 차트 렌더링 함수
                     function renderChart() {
                         const ctx = document.getElementById('historyChart').getContext('2d');
                         const dates = {{ result.history_dates | safe }};
@@ -878,7 +870,6 @@
                         });
                     }
 
-                    // 커뮤니티 데이터 통신
                     async function loadCommunityData() { 
                         try { 
                             const res = await fetch(`/api/community/${CURRENT_TICKER}`); 
@@ -947,7 +938,8 @@
                 
                 <div style="background: #f8fafc; border-radius: 16px; padding: 20px; margin-top: 16px; text-align: center;">
                     <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
-                        <div class="score-circle" style="width: 70px; height: 70px; font-size: 1.6rem; margin: 0; background-color: {{ recommendation.color }};">{{ recommendation.score }}</div>
+                        <!-- [1번 수정] 오늘의 HOT 종목 스코어 원에도 flex-shrink: 0을 추가하여 모바일 찌그러짐 원천 차단 -->
+                        <div class="score-circle" style="width: 70px; height: 70px; font-size: 1.6rem; margin: 0; background-color: {{ recommendation.color }}; flex-shrink: 0 !important;">{{ recommendation.score }}</div>
                         <div style="text-align: left;">
                             <div style="font-weight: 800; color: var(--text-main); margin-bottom: 4px;">{{ recommendation.brief }}</div>
                             <div class="score-change" style="display: inline-block; padding: 4px 10px; font-size: 0.8rem;">
@@ -967,7 +959,7 @@
                 <div class="card-title" style="margin-bottom: 8px;">📖 싸비싸 활용 백서</div>
                 <p style="font-size: 0.95rem; color: #475569; font-weight: 600; margin-bottom: 12px;">
                     <strong>가치투자란 무엇인가요?</strong><br>
-                    단기적인 주가 등락이나 테마에 흔들리지 않고, 기업의 본질적인 펀더멘탈과 안전마진에 집중하여 투자하는 방식입니다.
+                    단기적인 주가 등락이나 테마에 흔들리지 않고, 기업의 본질적인 펀더멘탈และ 안전마진에 집중하여 투자하는 방식입니다.
                 </p>
                 <ul style="font-size: 0.9rem; color: #64748b; padding-left: 20px; font-weight: 500; margin: 0;">
                     <li style="margin-bottom: 6px;"><strong>100점 만점 엔진:</strong> PER, PBR, ROE, 배당률 등 11대 핵심 지표를 종합 분석합니다.</li>
@@ -985,6 +977,7 @@
         </div>
     </div>
 
+    <!-- 진단 비동기 분석 레이아웃 모달창 -->
     <div id="diagnoseModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -1043,48 +1036,105 @@
             if (event.target == document.getElementById('diagnoseModal')) closeModal(); 
         }
 
-        // 관심 종목(localStorage) 제어
         function getFavorites() {
             return JSON.parse(localStorage.getItem('ssabissa_favorites')) || [];
         }
 
+        // [4번 수정] 유저당 관심 종목 개수를 최대 10개로 강력 제한하는 검증 장치 설계
         function toggleFavorite(ticker) {
             let favs = getFavorites();
             if (favs.includes(ticker)) {
                 favs = favs.filter(t => t !== ticker);
             } else {
+                if (favs.length >= 10) {
+                    alert("⚠️ 관심 종목은 최대 10개까지만 등록할 수 있습니다. 기존에 저장한 종목을 해제한 후 다시 시도해 주세요.");
+                    return;
+                }
                 favs.push(ticker);
             }
             localStorage.setItem('ssabissa_favorites', JSON.stringify(favs));
             updateFavoriteUI(ticker);
         }
 
+        // [2번 수정] 로컬스토리지 상태에 맞춰 CSS 클래스 'active'를 즉시 탈부착해 별표 실시간 동기화
         function updateFavoriteUI(ticker) {
             const favs = getFavorites();
             const isActive = favs.includes(ticker);
             
-            // 메인 페이지 아이콘
             const mainIcon = document.getElementById('favBtnMain_icon');
             if (mainIcon) {
-                const pageTicker = window.CURRENT_TICKER || mainIcon.getAttribute('data-ticker');
+                const pageTicker = (typeof CURRENT_TICKER !== 'undefined' ? CURRENT_TICKER : null) || mainIcon.getAttribute('data-ticker');
                 if (pageTicker === ticker) {
                     if (isActive) mainIcon.classList.add('active');
                     else mainIcon.classList.remove('active');
                 }
             }
             
-            // 모달 아이콘
             const modalIcon = document.getElementById('favBtnModal_icon');
-            if (modalIcon && modalIcon.dataset.ticker === ticker) {
+            if (modalIcon && modalIcon.getAttribute('data-ticker') === ticker) {
                 if (isActive) modalIcon.classList.add('active');
                 else modalIcon.classList.remove('active');
             }
         }
 
+        // 관심종목 모달창 호출용 브릿지 (관심페이지 및 메인페이지 연동)
+        function openModal(ticker) {
+            const modal = document.getElementById('diagnoseModal');
+            const body = document.getElementById('modalBody');
+            body.innerHTML = '<div class="loading-spinner">진단 엔진 구동 중... ⏳</div>';
+            modal.style.display = 'flex';
+
+            fetch(`/api/diagnose/${ticker}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        body.innerHTML = `<p style="color:var(--red); text-align:center; font-weight:700; padding:20px 0;">${data.error}</p>`;
+                        return;
+                    }
+                    
+                    const plusReasons = data.reasons.filter(r => r.startsWith('+')).map(r => `<li class="reason-item reason-plus"><span>✅</span> ${r.substring(1).trim()}</li>`).join('');
+                    const minusReasons = data.reasons.filter(r => r.startsWith('-')).map(r => `<li class="reason-item reason-minus"><span>⚠️</span> ${r.substring(1).trim()}</li>`).join('');
+
+                    body.innerHTML = `
+                        <div class="score-header" style="border:none; margin-bottom:10px; padding-bottom:5px;">
+                            <div class="stock-info-left">
+                                <h2 class="stock-name-title" style="font-size:1.2rem;">${data.name}</h2>
+                                <div class="stock-ticker">${data.ticker}</div>
+                            </div>
+                            <div class="stock-price" style="font-size:1rem;">
+                                ${data.current_price}
+                                <button class="fav-btn" onclick="toggleFavorite('${data.ticker}')">
+                                    <svg id="favBtnModal_icon" data-ticker="${data.ticker}" class="fav-icon" viewBox="0 0 24 24">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="score-display" style="margin:10px 0;">
+                            <div class="score-circle" style="width:75px; height:75px; font-size:1.7rem; background-color:${data.color};">${data.score}</div>
+                            <div class="score-brief" style="font-size:0.85rem; margin-top:5px;">${data.brief}</div>
+                        </div>
+                        <div style="background:#f8fafc; border-radius:10px; padding:12px; font-size:0.85rem; border:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569;">
+                            ${data.curation_reason}
+                        </div>
+                        <div style="max-height:180px; overflow-y:auto;">
+                            <ul class="reason-list">${plusReasons}${minusReasons}</ul>
+                        </div>
+                    `;
+                    updateFavoriteUI(data.ticker);
+                }).catch(() => {
+                    body.innerHTML = '<p style="color:var(--red); text-align:center; padding:20px 0;">진단 데이터를 수집하는데 실패했습니다.</p>';
+                });
+        }
+
+        function closeModal() {
+            document.getElementById('diagnoseModal').style.display = 'none';
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const mainIcon = document.getElementById('favBtnMain_icon');
             if (mainIcon) {
-                const targetTicker = window.CURRENT_TICKER || mainIcon.getAttribute('data-ticker');
+                const targetTicker = (typeof CURRENT_TICKER !== 'undefined' ? CURRENT_TICKER : null) || mainIcon.getAttribute('data-ticker');
                 if(targetTicker) updateFavoriteUI(targetTicker);
             }
         });
