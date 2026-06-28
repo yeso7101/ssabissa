@@ -139,16 +139,6 @@
             transform: scale(1.1); 
         }
 
-        /* 📊 카드 UI */
-        .card { 
-            background: white; 
-            border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 16px; 
-            border: 1px solid var(--border); 
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); 
-        }
-
         /* 📅 달력 그리드 타임라인 UI */
         .timeline-container {
             display: flex;
@@ -448,7 +438,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="desktopMenu">
-                    <a href="/calendar">캘린더</a>
+                    <a href="/calendar" style="color:var(--blue) !important;">캘린더</a>
                     <a href="/strategy">가이드</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
@@ -515,7 +505,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="mobileMenu">
-                    <a href="/calendar">캘린더</a>
+                    <a href="/calendar" class="active">캘린더</a>
                     <a href="/strategy">가이드</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
@@ -549,7 +539,6 @@
             return JSON.parse(localStorage.getItem('ssabissa_favorites')) || [];
         }
 
-        // [4번 수정] 모달 내부 관심 토글 동작 시 10개 상한선 체크 디펜스 주입
         function toggleFavorite(ticker) {
             let favs = getFavorites();
             if (favs.includes(ticker)) {
@@ -565,7 +554,6 @@
             updateFavoriteUI(ticker);
         }
 
-        // [2번 수정] 모달창 관심 별표 활성화 투명도/색상 실시간 반사
         function updateFavoriteUI(ticker) {
             const favs = getFavorites();
             const isActive = favs.includes(ticker);
@@ -577,7 +565,6 @@
             }
         }
 
-        // [1번 수정] 일정 페이지 내 리스트 클릭 시 상세 비동기 진단 결과 팝업 호출 브릿지 구현
         function openModal(ticker) {
             if(!ticker) return;
             const modal = document.getElementById('diagnoseModal');
@@ -701,32 +688,50 @@
 
                 globalEvents = {};
 
-                if (data.dividend) {
-                    data.dividend.forEach(item => {
+                // 오늘 기준 KST 날짜 변환용 로직 세팅
+                const now = new Date();
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const todayKST = new Date(utc + (3600000 * 9));
+                todayKST.setHours(0,0,0,0);
+
+                // 3일(72시간) 타임 디펜스 필터 한계값 설정
+                const filterLimitTime = todayKST.getTime() - (3 * 24 * 60000 * 60);
+
+                const processItem = (item, type, typeName, desc) => {
+                    // item.date 규격 형식: "26.06.28" -> "2026-06-28" 파싱 변환
+                    const parts = item.date.split('.');
+                    if (parts.length === 3) {
+                        const itemYear = parseInt('20' + parts[0]);
+                        const itemMonth = parseInt(parts[1]) - 1;
+                        const itemDay = parseInt(parts[2]);
+                        const itemDateObj = new Date(itemYear, itemMonth, itemDay, 0, 0, 0, 0);
+
+                        // 3일 이상 지난 과거 일정은 취합 단계에서 완전히 배제
+                        if (itemDateObj.getTime() < filterLimitTime) {
+                            return;
+                        }
+
                         if (!globalEvents[item.date]) globalEvents[item.date] = [];
                         const ticker = item.title.match(/\[(.*?)\]/)?.[1] || '';
                         globalEvents[item.date].push({
-                            time: '종일',
+                            time: type === 'dividend' ? '종일' : '발표일',
                             title: item.title,
-                            description: '배당락일 (해당일 전까지 매수 필요)',
-                            type: 'dividend',
-                            type_name: '배당락일',
+                            description: desc,
+                            type: type,
+                            type_name: typeName,
                             ticker: ticker
                         });
+                    }
+                };
+
+                if (data.dividend) {
+                    data.dividend.forEach(item => {
+                        processItem(item, 'dividend', '배당락일', '배당락일 (해당일 전까지 매수 필요)');
                     });
                 }
                 if (data.earning) {
                     data.earning.forEach(item => {
-                        if (!globalEvents[item.date]) globalEvents[item.date] = [];
-                        const ticker = item.title.match(/\[(.*?)\]/)?.[1] || '';
-                        globalEvents[item.date].push({
-                            time: '발표일',
-                            title: item.title,
-                            description: '기업 실적 발표 (예정)',
-                            type: 'earnings',
-                            type_name: '실적발표',
-                            ticker: ticker
-                        });
+                        processItem(item, 'earnings', '실적발표', '기업 실적 발표 (예정)');
                     });
                 }
                 

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>싸비싸 - 실시간 인기 랭킹</title>
     
-    <!-- 폰트 및 외부 스크립트 (기존 유지) -->
     <link rel="stylesheet" as="style" crossorigin href="https://fastly.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8149587000580969" crossorigin="anonymous"></script>
     
@@ -223,7 +222,8 @@
             margin: 10px auto 20px auto; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); flex-shrink: 0 !important;
         }
         .m-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
-        .m-header-left { flex: 1; text-align: left; min-width: 0; padding-right: 20px; m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .m-header-left { flex: 1; text-align: left; min-width: 0; padding-right: 20px; }
+        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; display: flex; align-items: center; }
         
         /* ⭐ 관심종목 별표 버튼 스타일 동기화 교정 */
@@ -256,7 +256,6 @@
 </head>
 <body>
 
-    <!-- 상단 네비게이션바 -->
     <div class="top-nav">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
@@ -281,10 +280,8 @@
         </div>
     </div>
 
-    <!-- 메인 컨테이너 영역 -->
     <div class="container">
         
-        <!-- 검색창 영역 -->
         <div class="main-search-wrapper">
             <form class="page-search" onsubmit="handleSearchSubmit(event)">
                 <input type="text" id="searchInput" placeholder="종목명 또는 티커 (예: 삼성전자, AAPL)" required autocomplete="off">
@@ -301,13 +298,11 @@
             <span style="font-size: 1.6rem;">🔥</span> 실시간 인기 랭킹
         </h2>
 
-        <!-- 랭킹 탭 전환 메뉴 -->
         <div class="rank-tabs">
             <div class="rank-tab active" id="tab-kr" onclick="switchTab('kr')">🇰🇷 국내 주식</div>
             <div class="rank-tab" id="tab-us" onclick="switchTab('us')">🇺🇸 미국 주식</div>
         </div>
 
-        <!-- 국내 주식 랭킹 리스트 렌더링 -->
         <div class="rank-list active" id="list-kr">
             {% if kr_rankings %}
                 {% for item in kr_rankings %}
@@ -325,7 +320,6 @@
             {% endif %}
         </div>
 
-        <!-- 미국 주식 랭킹 리스트 렌더링 -->
         <div class="rank-list" id="list-us">
             {% if us_rankings %}
                 {% for item in us_rankings %}
@@ -345,7 +339,6 @@
 
         <div class="update-info">랭킹 데이터는 당일 누적 검색량을 기준으로 자정마다 갱신됩니다.</div>
         
-        <!-- 하단 푸터 -->
         <div class="main-footer">
             © 2026 SSABISSA. All rights reserved.<br>
             싸비싸의 진단 점수 및 큐레이션은 투자 판단을 위한 보조 지표이며,<br>
@@ -353,7 +346,6 @@
         </div>
     </div>
 
-    <!-- 진단 모달창 영역 -->
     <div id="diagnoseModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -363,7 +355,6 @@
         </div>
     </div>
 
-    <!-- 모바일 하단 네비게이션 -->
     <div class="mobile-sub-nav" style="display: none;">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
@@ -389,7 +380,6 @@
         </div>
     </div>
 
-    <!-- 자바스크립트 로직 -->
     <script>
         function toggleDesktopMenu(e) { 
             e.preventDefault(); 
@@ -435,7 +425,6 @@
             return JSON.parse(localStorage.getItem('ssabissa_favorites')) || []; 
         }
         
-        // [4번 수정] 모달 내부 관심 버튼 토글 시 상한 규격(10개 제한) 검증 예외 방어막 추가
         function toggleFavorite(ticker) {
             let favs = getFavorites();
             if (favs.includes(ticker)) {
@@ -451,7 +440,6 @@
             updateFavoriteUI(ticker);
         }
         
-        // [2번 수정] 모달창 별표 활성화 색상 실시간 피드백 동기화
         function updateFavoriteUI(ticker) {
             const favs = getFavorites();
             const isActive = favs.includes(ticker);
@@ -503,7 +491,7 @@
                     body.innerHTML = `
                         <div class="m-header">
                             <div class="m-header-left">
-                                <div class="m-name" style="font-size:1.15rem; font-weight:900;">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
+                                <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
                                 <div class="m-price">
                                     ${data.current_price}
                                     <button class="fav-btn" onclick="toggleFavorite('${data.ticker}')">

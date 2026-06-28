@@ -177,7 +177,7 @@
         }
         
         .faq-item.active .faq-answer {
-            max-height: 600px; /* 답변 텍스트 길이에 맞춰 유연하게 확장 */
+            max-height: 1000px; /* 대형화된 답변 스케일에 맞춰 최적화 */
             transition: max-height 0.3s ease-in;
         }
 
@@ -319,6 +319,90 @@
                     <div class="faq-answer">
                         <div class="faq-answer-content">
                             네, 그렇습니다! 미국 주식 시장은 한국 시장에 비해 평균적인 밸류에이션(PE, PBR) 프리미엄이 높게 형성되어 있으며 주주 환원 및 성장 모멘텀이 강력한 특성이 있습니다. 이를 반영하여 미국 주식 진단 시에는 글로벌 마켓 프리미엄 가산점(+3.5점)이 적용되며, 우량주 기술 기업들의 성장성 가중치가 한국 주식 대비 완화된 기준으로 적용되어 보다 정교하게 산출됩니다.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        <span>Q6. '가치함정(Value Trap)' 문구는 무슨 뜻인가요?</span>
+                        <span class="faq-toggle-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            가치함정이란 겉보기에는 PER이나 PBR이 매우 낮아 저평가된 매력적인 주식처럼 보이지만, 실제로는 기업의 기술 경쟁력 상실, 사양 산업 진입, 만성적인 영업적자 등으로 인해 주가가 장기간 회복되지 못하고 하락하거나 정체되는 현상을 말합니다. 싸비싸 엔진은 6개월간 주가가 15% 이상 연속 하락하거나 재무 결함이 포착될 경우 리스크 경고 차원에서 마이너스 감점을 부여해 가치함정을 걸러냅니다.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        <span>Q7. 관심 종목을 등록했는데 브라우저를 끄면 지워지나요?</span>
+                        <span class="faq-toggle-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            아닙니다! 싸비싸 서비스는 완전한 익명성 보장과 개인정보 보호를 위해 회원의 민감 정보를 별도 서버 데이터베이스에 저장하지 않는 대신, 회원이 사용 중인 기기의 브라우저 자체 영구 저장소인 <strong>로컬 스토리지(LocalStorage)</strong>를 활용합니다. 따라서 브라우저를 종료하거나 컴퓨터를 재부팅하더라도 관심 종목은 안전하게 보존됩니다. 다만, 브라우저의 '인터넷 사용 기록 삭제'나 '쿠키 및 사이트 데이터 초기화'를 진행하시면 유실될 수 있으니 유의하시기 바랍니다.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        <span>Q8. 왜 특정 종목은 검색해도 데이터를 받아오지 못하나요?</span>
+                        <span class="faq-toggle-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            싸비싸 엔진은 신뢰도 높은 글로벌 금융 포털 야후 파이낸스의 실시간 마켓 피드를 분석합니다. 신규 상장된 지 며칠 지나지 않은 종목, 거래가 정지되어 재무제표 및 주가 데이터 업데이트가 일시 차단된 종목, 혹은 리츠(REITs)나 선박펀드와 같이 일반적인 11대 기업 재무 지표를 적용할 수 없는 특수 자산의 경우 가치 연산이 불가능하여 오류 메시지가 출력될 수 있습니다. 입력하신 티커 코드나 종목명의 철자를 다시 한번 확인해 주세요.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        <span>Q9. 캘린더 타임라인 페이지에 일정이 왜 다 안 나오나요?</span>
+                        <span class="faq-toggle-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            싸비싸 캘린더 엔진은 사용자의 직관적인 투자 판단 흐름을 돕기 위해 국내외 증시의 시가총액 최상위 대표 우량주 대형 기업들을 우선적으로 샘플링하여 배당락일과 실적 발표일을 실시간 트래킹합니다. 또한, 지나간 과거 일정에 매몰되지 않고 다가오는 향후 일정에 집중할 수 있도록 **오늘 날짜 기준 3일 이상 지난 과거 일정은 타임라인에서 자동으로 완전히 필터링**하여 클리어하는 청정 시스템이 가동되고 있기 때문입니다.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        <span>Q10. 주주 토론방에 의견을 작성할 때 제한 글자수가 있나요?</span>
+                        <span class="faq-toggle-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            네, 싸비싸 주주 토론방은 스팸성 도배나 가독성을 해치는 장문의 글을 방지하고 정제된 핵심 의견만을 공유할 수 있도록 한 포스트당 **최대 30자 이내(또는 플랫폼에 따라 100자)**의 간결한 한 줄 평 형태로만 등록이 가능합니다. 짧고 명확한 호재 및 악재 정보를 실시간으로 나누는 쾌적한 커뮤니티 생태계를 함께 만들어 가 주시길 부탁드립니다.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        <span>Q11. 주주 토크방 댓글 등록 시 자꾸 오류 창이 뜹니다.</span>
+                        <span class="faq-toggle-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            싸비싸는 클린 플랫폼 원칙을 엄격하게 고수합니다. 작성하신 의견 내부에 '리딩방', '카톡방', '수익보장', '무료추천주', '오픈채팅' 등 불법 주식 리딩방 유도 광고성 문구나, 시스템이 인지하는 불필요한 욕설 및 비방용 유해 단어가 단 한 글자라도 포함되어 있다면 백엔드 AI 필터링 엔진에 의해 등록이 전면 차단되며 에러 경고창이 발생하게 됩니다.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">
+                        <span>Q12. 싸비싸 점수 지수가 높으면 무조건 매수해야 하나요?</span>
+                        <span class="faq-toggle-icon">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            절대 아닙니다! 싸비싸 종합 안전마진 지수는 기업의 재무제표라는 '정량적 숫자'를 수학적 알고리즘으로 명확히 계량화한 보조 도구일 뿐입니다. 실제 주식 시장에는 숫자에 즉시 반영되지 않는 거시경제 금리 인상, 업황 섹터의 규제 리스크, 경영진의 횡령이나 도덕적 해이 등 수많은 '정성적 리스크'가 존재합니다. 따라서 75점 이상의 높은 점수가 나왔더라도 산업의 미래와 공시 뉴스를 함께 검토하시어 언제나 분할 매수 관점으로 신중히 결정하시길 권장합니다.
                         </div>
                     </div>
                 </div>
