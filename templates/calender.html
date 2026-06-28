@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,6 @@
             padding-bottom: 60px; 
             box-sizing: border-box; 
             color: var(--text-main); 
-            /* ✅ 전역 가독성 개선: 단어 단위 줄바꿈 및 줄 간격 확보 */
             word-break: keep-all; 
             line-height: 1.6;
         }
@@ -27,11 +26,10 @@
         /* ✅ 상단 네비게이션 */
         .top-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 500px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); box-sizing: border-box; z-index: 1000; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
         .top-nav .nav-logo { text-decoration: none; color: #64748b; font-weight: 800; font-size: 0.95rem; letter-spacing: -0.5px; display: flex; align-items: center; }
-        .top-nav .nav-logo:hover { color: #475569; }
+        .top-nav .nav-logo.ssb-logo { font-size: 26px; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: -1px; text-shadow: 1px 1px 0 #0f172a, 2px 2px 0 #0f172a, 3px 3px 0 #0f172a, 4px 4px 0 #0f172a, 5px 5px 6px rgba(0, 0, 0, 0.3); display: flex; align-items: center; margin-right: 10px; }
         .top-nav .nav-links { display: flex; gap: 14px; align-items: center; }
         .top-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-size: 0.8rem; font-weight: 600; transition: all 0.3s; }
         .top-nav a:not(.nav-logo):hover { color: var(--blue); }
-        .top-nav a.active { color: var(--blue); font-weight: 800; }
 
         /* ✅ 드롭다운 (햄버거 메뉴) */
         .dropdown { position: relative; display: flex; align-items: center; }
@@ -41,6 +39,7 @@
         .dropdown-content.show { display: flex; }
         .dropdown-content a { padding: 12px 16px; text-decoration: none; display: block; text-align: center; color: #475569 !important; font-size: 0.85rem !important; font-weight: 700 !important; }
         .dropdown-content a:hover { background-color: #f1f5f9; color: var(--blue) !important; }
+        .dropdown-content a.current { color: var(--blue) !important; background-color: #f8fafc; }
         
         /* 🔍 검색창 */
         .page-search { position: relative; width: 100%; max-width: 400px; margin: 0 auto 20px auto; display: flex; align-items: center; }
@@ -67,20 +66,27 @@
 
         .main-footer { text-align: center; margin-top: 30px; font-size: 0.75rem; color: #94a3b8; line-height: 1.6; font-weight: 400; padding-bottom: 20px; }
 
-        /* ✅ 모달 UI */
+        /* ✅ 모달 UI (관심종목 렌더링 호환성 패치) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center; }
         .modal-content { background: #fff; width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; position: relative; max-height: 85vh; overflow-y: auto; box-shadow: 2px 2px 10px rgba(0,0,0,0.4); }
-        .modal-close { position: absolute; top: 16px; right: 20px; cursor: pointer; font-size: 1.8rem; color: #94a3b8; background: none; border: none; padding: 0; line-height: 1; transition: color 0.2s; }
+        .modal-close { position: absolute; top: 16px; right: 20px; cursor: pointer; font-size: 1.8rem; color: #94a3b8; background: none; border: none; padding: 0; line-height: 1; transition: color 0.2s; z-index: 2; }
         .modal-close:hover { color: var(--text-main); }
-        .m-score-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: white; margin: 10px auto 20px auto; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
         
+        .m-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
+        .m-header-left { flex: 1; text-align: left; min-width: 0; padding-right: 20px; }
+        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; display: flex; align-items: center; }
+        
+        /* ⭐ 누락되었던 관심종목 별표 버튼 CSS 복구 */
+        .fav-btn { background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; margin-left: 8px; }
+        .fav-btn:active { transform: scale(0.9); }
+        .fav-icon { width: 24px; height: 24px; fill: none; stroke: #fbbf24; stroke-width: 2; transition: all 0.2s; }
+        .fav-icon.active { fill: #fbbf24; }
+
+        .m-score-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: white; margin: 10px auto 20px auto; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
         .score-change { font-size: 0.85rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: #f1f5f9; color: #475569; display: inline-block; }
         .change-up { color: var(--red); font-weight: 700; }
         .change-down { color: var(--blue); font-weight: 700; }
-
-        .m-header { text-align: center; border-bottom: 1px solid #f1f3f5; padding-bottom: 16px; margin-bottom: 16px; }
-        .m-name { font-size: 1.2rem; font-weight: 900; color: var(--text-main); margin-bottom: 4px; }
-        .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; }
         .m-brief { font-size: 0.9rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; line-height: 1.4; }
         .m-curation { background: #f8fafc; padding: 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 16px; line-height: 1.5; border: 1px solid #e2e8f0; }
         .m-reason-list { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; margin-bottom: 20px;}
@@ -93,12 +99,12 @@
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
             body { padding-top: 20px; margin-bottom: 80px; }
+            .nav-logo.ssb-logo { font-size: 20px; text-shadow: 1px 1px 0 #0f172a, 2px 2px 0 #0f172a, 3px 3px 0 #0f172a, 4px 4px 4px rgba(0, 0, 0, 0.3); }
             .mobile-sub-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 0 16px; height: 52px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.9); justify-content: space-between; align-items: center; width: calc(100% - 32px); max-width: 400px; box-sizing: border-box; display: flex !important; z-index: 900; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); }
-            .mobile-sub-nav .nav-logo { text-decoration: none; color: #64748b !important; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.5px; display: flex; align-items: center; }
+            .mobile-sub-nav .nav-logo { text-decoration: none; display: flex; align-items: center; }
             .mobile-sub-nav .nav-links { display: flex; gap: 6px; align-items: center; }
             .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.75rem; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
             .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); }
-            .mobile-sub-nav a.active { color: var(--blue) !important; font-weight: 800; }
             .m-dropdown .dropdown-content { top: auto; bottom: 50px; right: -5px; }
         }
     </style>
@@ -106,15 +112,9 @@
 <body>
 
     <div class="top-nav">
-        <a href="/" class="nav-logo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            홈
-        </a>
+        <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/calendar" class="active">캘린더</a>
+            <a href="/favorites">관심종목</a>
             <a href="/ranking">랭킹</a>
             <a href="/strategy">가이드</a>
             <div class="dropdown">
@@ -126,6 +126,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="desktopMenu">
+                    <a href="/calendar" class="current">캘린더</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
@@ -176,15 +177,9 @@
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" class="nav-logo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            홈
-        </a>
+        <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/calendar" class="active">캘린더</a>
+            <a href="/favorites">관심종목</a>
             <a href="/ranking">랭킹</a>
             <div class="dropdown m-dropdown">
                 <button class="dropbtn" onclick="toggleMobileMenu(event)">
@@ -195,6 +190,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="mobileMenu">
+                    <a href="/calendar" class="current">캘린더</a>
                     <a href="/strategy">가이드</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
@@ -205,7 +201,6 @@
     </div>
 
    <script>
-    // ✅ 캘린더 데이터 로드 및 렌더링 로직 복구 완료 (기존 구조 완벽 유지)
     document.addEventListener("DOMContentLoaded", () => {
         fetch("/api/calendar/data")
             .then(r => r.json())
@@ -241,8 +236,6 @@
 
         let html = '';
         data.forEach(item => {
-            // 백엔드에서 yy.mm.dd 형식으로, 텍스트(배당락/실적발표) 제거된 상태로 넘어오므로 그대로 출력합니다.
-            // 💡 클릭 시 종목 모달을 열도록 onclick 이벤트 추가
             const tickerMatch = item.title.match(/\[(.*?)\]/);
             const tickerStr = tickerMatch ? tickerMatch[1] : '';
             html += `
@@ -265,7 +258,33 @@
         document.getElementById("desktopMenu").classList.remove("show");
     }
 
-    // ✅ 진단 모달창 스크립트 복구 완료
+    // ⭐ 누락되었던 관심종목 JS 기능 복구
+    function getFavorites() {
+        return JSON.parse(localStorage.getItem('ssabissa_favorites')) || [];
+    }
+
+    function toggleFavorite(ticker) {
+        let favs = getFavorites();
+        if (favs.includes(ticker)) {
+            favs = favs.filter(t => t !== ticker);
+        } else {
+            favs.push(ticker);
+        }
+        localStorage.setItem('ssabissa_favorites', JSON.stringify(favs));
+        updateFavoriteUI(ticker);
+    }
+
+    function updateFavoriteUI(ticker) {
+        const favs = getFavorites();
+        const isActive = favs.includes(ticker);
+        const modalIcon = document.getElementById('favBtnModal_icon');
+        
+        if (modalIcon && modalIcon.dataset.ticker === ticker) {
+            if (isActive) modalIcon.classList.add('active');
+            else modalIcon.classList.remove('active');
+        }
+    }
+
     function handleSearch(e) {
         e.preventDefault(); 
         const query = document.getElementById('searchInput').value.trim();
@@ -309,10 +328,23 @@
                     changeHtml = `<span>-</span>`;
                 }
 
+                // ⭐ 렌더링 시점에 관심종목 체크
+                const isFav = getFavorites().includes(data.ticker);
+                const favClass = isFav ? 'active' : '';
+
                 body.innerHTML = `
                     <div class="m-header">
-                        <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
-                        <div class="m-price">${data.current_price}</div>
+                        <div class="m-header-left">
+                            <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
+                            <div class="m-price">
+                                ${data.current_price}
+                                <button class="fav-btn" onclick="toggleFavorite('${data.ticker}')">
+                                    <svg id="favBtnModal_icon" data-ticker="${data.ticker}" class="fav-icon ${favClass}" viewBox="0 0 24 24">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="m-score-circle" style="background-color: ${data.color};">${data.score}</div>
                     <div style="display:flex; justify-content:center; margin-bottom:16px;">
@@ -331,7 +363,6 @@
 
     function closeModal() { document.getElementById('diagnoseModal').style.display = 'none'; }
     
-    // ✅ 외부 클릭 시 햄버거 메뉴 및 모달 닫기
     window.onclick = function(event) { 
         if (!event.target.closest('.dropbtn')) {
             var dropdowns = document.getElementsByClassName("dropdown-content");

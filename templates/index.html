@@ -29,7 +29,6 @@
             padding-bottom: 60px; 
             box-sizing: border-box; 
             color: var(--text-main); 
-            /* ✅ 전역 가독성 개선: 단어 단위 줄바꿈 및 줄 간격 확보 */
             word-break: keep-all; 
             line-height: 1.6;
         }
@@ -61,18 +60,26 @@
             z-index: 1000; 
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); 
         }
-        .top-nav .nav-logo { 
-            text-decoration: none; 
-            color: #64748b; 
-            font-weight: 800; 
-            font-size: 0.95rem; 
+        
+        /* 🎨 CSS로 구현한 3D 텍스트 로고 (이미지 대체) */
+        .nav-logo.ssb-logo {
+            font-size: 26px;
+            font-weight: 900;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: -1px;
+            /* 이미지와 같은 입체적인 다중 그림자(3D) 효과 부여 */
+            text-shadow: 
+                1px 1px 0 #0f172a, 
+                2px 2px 0 #0f172a, 
+                3px 3px 0 #0f172a, 
+                4px 4px 0 #0f172a, 
+                5px 5px 6px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
-            letter-spacing: -0.5px; 
+            margin-right: 10px;
         }
-        .top-nav .nav-logo:hover {
-            color: #475569;
-        }
+        
         .top-nav .nav-links { 
             display: flex; 
             gap: 14px; 
@@ -89,7 +96,7 @@
             color: var(--blue); 
         }
 
-        /* ✅ 드롭다운 (햄버거 메뉴) 공통 스타일 */
+        /* 드롭다운 (햄버거 메뉴) 공통 스타일 */
         .dropdown { position: relative; display: flex; align-items: center; }
         .dropbtn { background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: stroke 0.2s; }
         .dropbtn:hover svg { stroke: var(--blue); }
@@ -169,15 +176,15 @@
         .score-header { 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-end; 
+            align-items: flex-start;
             border-bottom: 1px solid #f1f3f5; 
             padding-bottom: 14px; 
             margin-bottom: 14px; 
         }
         .stock-info-left {
             flex: 1;
-            min-width: 0; /* 긴 텍스트로 인해 영역이 늘어나는 것을 방지 */
-            margin-right: 15px; /* 가격과의 간격 확보 */
+            min-width: 0; 
+            margin-right: 15px; 
         }
         .stock-name-title { 
             margin: 0; 
@@ -185,7 +192,6 @@
             font-weight: 800; 
             color: var(--text-main); 
             letter-spacing: -0.5px; 
-            /* 긴 종목명 말줄임표 처리 */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -196,7 +202,6 @@
             color: var(--text-sub); 
             font-weight: 500; 
             margin-top: 2px; 
-            /* 긴 티커 말줄임표 처리 */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -205,10 +210,36 @@
             font-size: 1.05rem; 
             font-weight: 700; 
             color: var(--blue); 
-            /* 가격 영역은 텍스트가 줄바꿈되거나 줄어들지 않도록 고정 */
             white-space: nowrap;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
+        
+        /* ⭐ 관심종목 별표 버튼 스타일 */
+        .fav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            margin-left: 8px;
+        }
+        .fav-btn:active { transform: scale(0.9); }
+        .fav-icon {
+            width: 24px; height: 24px;
+            fill: none;
+            stroke: #fbbf24;
+            stroke-width: 2;
+            transition: all 0.2s;
+        }
+        .fav-icon.active {
+            fill: #fbbf24;
+        }
+
         .score-display { 
             display: flex; 
             flex-direction: column; 
@@ -354,6 +385,17 @@
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
             body { padding-top: 20px; margin-bottom: 80px; }
+            
+            /* 모바일 로고 크기 축소 */
+            .nav-logo.ssb-logo {
+                font-size: 20px;
+                text-shadow: 
+                    1px 1px 0 #0f172a, 
+                    2px 2px 0 #0f172a, 
+                    3px 3px 0 #0f172a, 
+                    4px 4px 4px rgba(0, 0, 0, 0.3);
+            }
+            
             .mobile-sub-nav { 
                 position: fixed; 
                 bottom: 20px; 
@@ -377,10 +419,6 @@
             }
             .mobile-sub-nav .nav-logo { 
                 text-decoration: none; 
-                color: #64748b !important; 
-                font-weight: 800; 
-                font-size: 0.9rem; 
-                letter-spacing: -0.5px; 
                 display: flex;
                 align-items: center;
             }
@@ -405,7 +443,7 @@
             .m-dropdown .dropdown-content { top: auto; bottom: 50px; right: -5px; }
         }
 
-        /* ✅ 모달 UI */
+        /* 모달 UI */
         .modal-overlay { 
             display: none; 
             position: fixed; 
@@ -442,6 +480,7 @@
             padding: 0; 
             line-height: 1; 
             transition: color 0.2s; 
+            z-index: 2;
         }
         .modal-close:hover { color: var(--text-main); }
         .m-score-circle { 
@@ -458,22 +497,35 @@
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); 
         }
         .m-header { 
-            text-align: center; 
+            display: flex; 
+            justify-content: space-between;
+            align-items: flex-start;
             border-bottom: 1px solid #f1f3f5; 
             padding-bottom: 16px; 
             margin-bottom: 16px; 
+        }
+        .m-header-left {
+            flex: 1;
+            text-align: left;
+            min-width: 0;
+            padding-right: 20px;
         }
         .m-name { 
             font-size: 1.2rem; 
             font-weight: 900; 
             color: var(--text-main); 
             margin-bottom: 4px; 
-            /* 모달에서도 말줄임표 처리 */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .m-price { font-size: 1.05rem; color: var(--blue); font-weight: 800; }
+        .m-price { 
+            font-size: 1.05rem; 
+            color: var(--blue); 
+            font-weight: 800; 
+            display: flex;
+            align-items: center;
+        }
         .m-brief { font-size: 0.9rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; }
         .m-curation { 
             background: #f8fafc; 
@@ -498,7 +550,7 @@
             text-decoration: none; 
             font-weight: 800; 
             transition: transform 0.2s; 
-            box-sizing: border-box; /* 패딩으로 인한 크기 초과 방지 */
+            box-sizing: border-box; 
             font-size: 0.9rem;
         }
         .m-btn-detail:active { transform: scale(0.97); }
@@ -508,15 +560,10 @@
 <body>
 
     <div class="top-nav">
-        <a href="/" class="nav-logo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            홈
-        </a>
+        <!-- 🎨 수정됨: 텍스트에 CSS 속성을 부여하여 3D 로고 형태로 구현 -->
+        <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/calendar">캘린더</a>
+            <a href="/favorites">관심종목</a>
             <a href="/ranking">랭킹</a>
             <a href="/strategy">가이드</a>
             <div class="dropdown">
@@ -528,6 +575,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="desktopMenu">
+                    <a href="/calendar">캘린더</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
@@ -559,7 +607,15 @@
                             <h1 class="stock-name-title">{{ result.name }}</h1>
                             <div class="stock-ticker">{{ result.ticker }}</div>
                         </div>
-                        <div class="stock-price">{{ result.current_price }}</div>
+                        <div class="stock-price">
+                            {{ result.current_price }}
+                            <!-- ⭐ 관심종목 버튼 -->
+                            <button class="fav-btn" onclick="toggleFavorite('{{ result.ticker }}')">
+                                <svg id="favBtnMain_icon" class="fav-icon" viewBox="0 0 24 24">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="score-display">
                         <div class="score-circle" style="background-color: {{ result.color }};">{{ result.score }}</div>
@@ -715,7 +771,14 @@
                         <h1 class="stock-name-title">{{ recommendation.name }}</h1>
                         <div class="stock-ticker">{{ recommendation.ticker }}</div>
                     </div>
-                    <div class="stock-price">{{ recommendation.current_price }}</div>
+                    <div class="stock-price">
+                        {{ recommendation.current_price }}
+                        <button class="fav-btn" onclick="toggleFavorite('{{ recommendation.ticker }}')">
+                            <svg id="favBtnMain_icon" class="fav-icon" viewBox="0 0 24 24" data-ticker="{{ recommendation.ticker }}">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="score-display">
                     <div class="score-circle" style="background-color: {{ recommendation.color }};">{{ recommendation.score }}</div>
@@ -766,15 +829,10 @@
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" class="nav-logo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            홈
-        </a>
+        <!-- 🎨 수정됨: 모바일용 CSS 3D 로고 -->
+        <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/calendar">캘린더</a>
+            <a href="/favorites">관심종목</a>
             <a href="/ranking">랭킹</a>
             
             <div class="dropdown m-dropdown">
@@ -786,6 +844,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="mobileMenu">
+                    <a href="/calendar">캘린더</a>
                     <a href="/strategy">가이드</a>
                     <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
@@ -796,21 +855,18 @@
     </div>
 
     <script>
-        // ✅ 햄버거 메뉴 열기/닫기 스크립트
         function toggleDesktopMenu(e) {
             e.preventDefault();
             document.getElementById("desktopMenu").classList.toggle("show");
-            document.getElementById("mobileMenu").classList.remove("show"); // 다른 메뉴 닫기
+            document.getElementById("mobileMenu").classList.remove("show");
         }
         function toggleMobileMenu(e) {
             e.preventDefault();
             document.getElementById("mobileMenu").classList.toggle("show");
-            document.getElementById("desktopMenu").classList.remove("show"); // 다른 메뉴 닫기
+            document.getElementById("desktopMenu").classList.remove("show");
         }
 
-        // 화면 바깥 클릭 시 모달 및 드롭다운 닫기
         window.onclick = function(event) { 
-            // 햄버거 메뉴 바깥 영역 클릭 시 닫기
             if (!event.target.closest('.dropbtn')) {
                 var dropdowns = document.getElementsByClassName("dropdown-content");
                 for (var i = 0; i < dropdowns.length; i++) {
@@ -820,9 +876,52 @@
                     }
                 }
             }
-            // 진단 모달 닫기
             if (event.target == document.getElementById('diagnoseModal')) closeModal(); 
         }
+
+        // 관심 종목(localStorage) 스크립트
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('ssabissa_favorites')) || [];
+        }
+
+        function toggleFavorite(ticker) {
+            let favs = getFavorites();
+            if (favs.includes(ticker)) {
+                favs = favs.filter(t => t !== ticker);
+            } else {
+                favs.push(ticker);
+            }
+            localStorage.setItem('ssabissa_favorites', JSON.stringify(favs));
+            updateFavoriteUI(ticker);
+        }
+
+        function updateFavoriteUI(ticker) {
+            const favs = getFavorites();
+            const isActive = favs.includes(ticker);
+            
+            const mainIcon = document.getElementById('favBtnMain_icon');
+            if (mainIcon) {
+                const pageTicker = window.CURRENT_TICKER || mainIcon.getAttribute('data-ticker');
+                if (pageTicker === ticker) {
+                    if (isActive) mainIcon.classList.add('active');
+                    else mainIcon.classList.remove('active');
+                }
+            }
+            
+            const modalIcon = document.getElementById('favBtnModal_icon');
+            if (modalIcon && modalIcon.dataset.ticker === ticker) {
+                if (isActive) modalIcon.classList.add('active');
+                else modalIcon.classList.remove('active');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const mainIcon = document.getElementById('favBtnMain_icon');
+            if (mainIcon) {
+                const targetTicker = window.CURRENT_TICKER || mainIcon.getAttribute('data-ticker');
+                if(targetTicker) updateFavoriteUI(targetTicker);
+            }
+        });
 
         function openModal(ticker) {
             const modal = document.getElementById('diagnoseModal');
@@ -859,10 +958,22 @@
                         changeHtml = `<span>-</span>`;
                     }
 
+                    const isFav = getFavorites().includes(data.ticker);
+                    const favClass = isFav ? 'active' : '';
+
                     body.innerHTML = `
                         <div class="m-header">
-                            <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
-                            <div class="m-price">${data.current_price}</div>
+                            <div class="m-header-left">
+                                <div class="m-name">${data.name} <span style="font-size:0.8rem; color:#868e96; font-weight:600;">${data.ticker}</span></div>
+                                <div class="m-price">
+                                    ${data.current_price}
+                                    <button class="fav-btn" onclick="toggleFavorite('${data.ticker}')">
+                                        <svg id="favBtnModal_icon" data-ticker="${data.ticker}" class="fav-icon ${favClass}" viewBox="0 0 24 24">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="m-score-circle" style="background-color: ${data.color};">${data.score}</div>
                         <div style="display:flex; justify-content:center; margin-bottom:16px;">

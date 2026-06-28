@@ -48,11 +48,14 @@
             border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.8); 
             box-sizing: border-box; z-index: 1000; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); 
         }
-        .top-nav .nav-logo { 
-            text-decoration: none; color: #64748b; font-weight: 800; font-size: 0.95rem; 
-            display: flex; align-items: center; letter-spacing: -0.5px; 
+        
+        /* 🎨 3D 텍스트 로고 */
+        .nav-logo.ssb-logo {
+            font-size: 26px; font-weight: 900; color: #ffffff; text-decoration: none; 
+            letter-spacing: -1px; text-shadow: 1px 1px 0 #0f172a, 2px 2px 0 #0f172a, 3px 3px 0 #0f172a, 4px 4px 0 #0f172a, 5px 5px 6px rgba(0, 0, 0, 0.3);
+            display: flex; align-items: center; margin-right: 10px;
         }
-        .top-nav .nav-logo:hover { color: #475569; }
+
         .top-nav .nav-links { display: flex; gap: 14px; align-items: center; }
         .top-nav a:not(.nav-logo) { 
             text-decoration: none; color: #64748b; font-size: 0.8rem; font-weight: 600; transition: all 0.3s; 
@@ -80,6 +83,9 @@
         @media (max-width: 768px) {
             .top-nav { display: none !important; }
             body { padding-top: 20px; margin-bottom: 80px; }
+            
+            .nav-logo.ssb-logo { font-size: 20px; text-shadow: 1px 1px 0 #0f172a, 2px 2px 0 #0f172a, 3px 3px 0 #0f172a, 4px 4px 4px rgba(0, 0, 0, 0.3); }
+
             .mobile-sub-nav { 
                 position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
                 background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
@@ -87,7 +93,7 @@
                 justify-content: space-between; align-items: center; width: calc(100% - 32px); max-width: 400px; 
                 box-sizing: border-box; display: flex !important; z-index: 900; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4); 
             }
-            .mobile-sub-nav .nav-logo { text-decoration: none; color: #64748b !important; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.5px; display: flex; align-items: center; }
+            .mobile-sub-nav .nav-logo { text-decoration: none; display: flex; align-items: center; }
             .mobile-sub-nav .nav-links { display: flex; gap: 6px; align-items: center; }
             .mobile-sub-nav a:not(.nav-logo) { text-decoration: none; color: #64748b; font-weight: 600; font-size: 0.75rem; padding: 6px 8px; transition: all 0.3s; background: transparent !important; }
             .mobile-sub-nav a:not(.nav-logo):hover { color: var(--blue); }
@@ -151,15 +157,9 @@
 <body>
 
     <div class="top-nav">
-        <a href="/" class="nav-logo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            홈
-        </a>
+        <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/calendar">캘린더</a>
+            <a href="/favorites">관심종목</a>
             <a href="/ranking">랭킹</a>
             <a href="/strategy">가이드</a>
             <div class="dropdown">
@@ -171,6 +171,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="desktopMenu">
+                    <a href="/calendar">캘린더</a>
                     <a href="/faq" class="current">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
@@ -186,7 +187,6 @@
         </div>
 
         <div class="faq-container">
-            <!-- Q1 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> 싸비싸(SSABISSA)는 어떤 서비스인가요?</span>
@@ -198,7 +198,6 @@
                 </div>
             </div>
 
-            <!-- Q2 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> 종합 가치 점수는 어떻게 계산되나요?</span>
@@ -210,7 +209,6 @@
                 </div>
             </div>
 
-            <!-- Q3 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> 어제 진단했을 때와 오늘 점수가 달라졌어요. 왜 그런가요?</span>
@@ -222,7 +220,6 @@
                 </div>
             </div>
 
-            <!-- Q4 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> 해외 주식도 진단이 가능한가요?</span>
@@ -234,7 +231,6 @@
                 </div>
             </div>
 
-            <!-- Q5 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> ETF나 암호화폐(비트코인)도 검색할 수 있나요?</span>
@@ -246,7 +242,6 @@
                 </div>
             </div>
 
-            <!-- Q6 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> 주주 토론방에 글을 썼는데 보이지 않거나 에러가 떠요.</span>
@@ -258,7 +253,6 @@
                 </div>
             </div>
             
-            <!-- Q7 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> 서비스 이용 요금은 얼마인가요? 회원가입이 필요한가요?</span>
@@ -270,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- Q8 -->
             <div class="faq-item" onclick="toggleFaq(this)">
                 <div class="faq-question">
                     <span><span class="q-mark">Q.</span> 추천 종목이나 진단 점수를 무조건 믿고 투자해도 되나요?</span>
@@ -296,17 +289,10 @@
         </div>
     </div>
 
-    <!-- 모바일 하단 네비게이션 -->
     <div class="mobile-sub-nav" style="display: none;">
-        <a href="/" class="nav-logo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            홈
-        </a>
+        <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/calendar">캘린더</a>
+            <a href="/favorites">관심종목</a>
             <a href="/ranking">랭킹</a>
             
             <div class="dropdown m-dropdown">
@@ -318,6 +304,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="mobileMenu">
+                    <a href="/calendar">캘린더</a>
                     <a href="/strategy">가이드</a>
                     <a href="/faq" class="current">FAQ</a>
                     <a href="/about">소개</a>
@@ -330,15 +317,6 @@
     <script>
         // ✅ 아코디언 토글 로직
         function toggleFaq(element) {
-            // 다른 열려있는 항목 닫기 (선택 사항 - 한 번에 하나만 열리게 하려면 아래 3줄 주석 해제)
-            /*
-            const allItems = document.querySelectorAll('.faq-item');
-            allItems.forEach(item => {
-                if (item !== element) item.classList.remove('active');
-            });
-            */
-            
-            // 현재 클릭한 항목 토글
             element.classList.toggle('active');
         }
 

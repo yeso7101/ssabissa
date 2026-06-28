@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request, Form, Response, HTTPException
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel # [추가됨] 관심종목 리스트 처리를 위함
+from typing import List        # [추가됨] 관심종목 리스트 처리를 위함
 from collections import Counter
 import requests
 import json
@@ -575,6 +577,54 @@ def api_autocomplete(q: str = ""):
         res = requests.get(f"https://query2.finance.yahoo.com/v1/finance/search?q={q}&lang=ko-KR&region=KR", headers={'User-Agent': 'Mozilla/5.0'}, timeout=2).json()
         return [{"ticker": i["symbol"].upper()+".KS" if i["symbol"].isdigit() and len(i["symbol"])==6 else i["symbol"].upper(), "name": i.get("longname") or i.get("shortname") or i["symbol"]} for i in res.get("quotes", []) if i.get("quoteType") in ["EQUITY", "ETF"]][:5]
     except: return []
+
+# ================================================================
+# 🌟 [추가됨] 관심 종목 라우터 및 데이터 반환 API 🌟
+# ================================================================
+@app.get("/favorites", response_class=HTMLResponse)
+def favorites_page(request: Request):
+    # 프론트엔드에서 로컬스토리지 데이터를 기반으로 렌더링하도록 템플릿 반환
+    return templates.TemplateResponse(request=request, name="favorites.html", context={"request": request})
+
+class TickerList(BaseModel):
+    tickers: List[str]
+
+@app.post("/api/favorites/details")
+def get_favorites_details(req: TickerList):
+    # 로컬 스토리지에 저장된 여러 티커를 한 번에 조회하여 프론트에 넘겨주는 API
+    results = []
+    for t in req.tickers:
+        ticker_upper = resolve_ticker_by_name(t)
+        
+        # 1. 1차적으로 서버 캐시 데이터 확인 (빠른 렌더링)
+        cache = TICKER_CACHE.get(ticker_upper)
+        if cache and cache.get("score") != 50:
+            results.append({
+                "ticker": ticker_upper,
+                "name": cache.get("name", ticker_upper),
+                "score": cache.get("score", 50),
+                "color": cache.get("color", "#64748b")
+            })
+            continue
+            
+        # 2. 캐시에 없으면 yfinance로 새로 계산해서 반환
+        try:
+            info = yf.Ticker(ticker_upper).info
+            score, color, _, _ = calculate_ssabissa_score(info, ticker_upper)
+            name = info.get("longName") or info.get("shortName") or ticker_upper
+            results.append({
+                "ticker": ticker_upper,
+                "name": name,
+                "score": score,
+                "color": color
+            })
+            # 조회한 데이터 캐싱
+            TICKER_CACHE[ticker_upper] = {"name": name, "score": score, "color": color}
+        except Exception:
+            pass
+            
+    return {"data": results}
+# ================================================================
 
 @app.get("/strategy", response_class=HTMLResponse)
 def strategy_page(request: Request): return templates.TemplateResponse(request=request, name="strategy.html", context={"request": request})
