@@ -119,7 +119,7 @@
             cursor: pointer; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); transition: all 0.2s;
         }
         .nav-btn:hover { background: #f1f5f9; transform: scale(1.05); }
-        .current-date { font-size: 1.2rem; font-weight: 900; color: var(--text-main); }
+        .current-date { font-size: 1.2rem; font-weight: 900; color: var(--text-main); min-width: 130px; text-align: center; }
 
         .calendar-card { 
             background: white; border-radius: 16px; padding: 0; 
@@ -199,11 +199,11 @@
         </div>
 
         <div class="date-navigator">
-            <button class="nav-btn" aria-label="이전 주" onclick="alert('이전 주 일정은 준비 중입니다.')">
+            <button class="nav-btn" aria-label="이전 주" onclick="changeWeek(-1)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
             </button>
-            <div class="current-date">이번 주 일정</div>
-            <button class="nav-btn" aria-label="다음 주" onclick="alert('다음 주 일정은 준비 중입니다.')">
+            <div class="current-date" id="weekDisplay">이번 주 일정</div>
+            <button class="nav-btn" aria-label="다음 주" onclick="changeWeek(1)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
         </div>
@@ -273,59 +273,74 @@
             }
         }
 
-        // 백엔드 API에서 실제 캘린더 데이터를 가져와 렌더링하는 핵심 함수
-        async function loadCalendarData() {
+        // ✅ 캘린더 전역 상태 관리 변수
+        let globalEvents = {};
+        let currentWeekOffset = 0; // 0: 이번주, -1: 저번주, 1: 다음주
+
+        // 해당 날짜가 속한 주의 월요일과 일요일을 구하는 함수
+        function getWeekRange(offset) {
+            const now = new Date();
+            const day = now.getDay();
+            // 일요일(0)이면 -6일, 그 외는 현재 요일만큼 빼고 1(월요일)을 더해 이번주 월요일 기준일 찾기
+            const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1); 
+            
+            const startOfWeek = new Date(now.setDate(diffToMonday + (offset * 7)));
+            const endOfWeek = new Date(startOfWeek.getTime());
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            return { start: startOfWeek, end: endOfWeek };
+        }
+
+        // YY.MM.DD 형식을 Date 객체로 변환 (날짜 비교용)
+        function parseDateString(dateStr) {
+            const [y, m, d] = dateStr.split('.');
+            // 2000년대 연도 처리
+            return new Date(`20${y}-${m}-${d}`);
+        }
+
+        // 🔘 주차 변경 버튼 클릭 이벤트
+        function changeWeek(direction) {
+            currentWeekOffset += direction;
+            renderCalendar();
+        }
+
+        // 현재 선택된 주차에 맞춰 필터링 및 화면 렌더링
+        function renderCalendar() {
             const container = document.getElementById('calendar-container');
-            try {
-                const res = await fetch('/api/calendar/data');
-                const data = await res.json();
+            const weekDisplay = document.getElementById('weekDisplay');
+            const { start, end } = getWeekRange(currentWeekOffset);
+            
+            // UI 네비게이터 텍스트 갱신
+            if (currentWeekOffset === 0) {
+                weekDisplay.innerText = "이번 주 일정";
+            } else if (currentWeekOffset === -1) {
+                weekDisplay.innerText = "지난 주 일정";
+            } else if (currentWeekOffset === 1) {
+                weekDisplay.innerText = "다음 주 일정";
+            } else {
+                weekDisplay.innerText = `${start.getMonth()+1}/${start.getDate()} ~ ${end.getMonth()+1}/${end.getDate()}`;
+            }
+
+            let html = '';
+            let hasEvents = false;
+            
+            // 저장된 전역 이벤트 데이터 필터링
+            const sortedDates = Object.keys(globalEvents).sort();
+            
+            sortedDates.forEach(dateStr => {
+                const eventDate = parseDateString(dateStr);
                 
-                // 데이터를 날짜별로 그룹화
-                const eventsByDate = {};
-                
-                if (data.dividend) {
-                    data.dividend.forEach(item => {
-                        if (!eventsByDate[item.date]) eventsByDate[item.date] = [];
-                        const tickerMatch = item.title.match(/\[(.*?)\]/);
-                        const ticker = tickerMatch ? tickerMatch[1] : '';
-                        eventsByDate[item.date].push({
-                            time: '종일',
-                            title: item.title,
-                            description: '배당락일 (해당일 전까지 매수 필요)',
-                            type: 'dividend',
-                            type_name: '배당락일',
-                            ticker: ticker
-                        });
-                    });
-                }
-                if (data.earning) {
-                    data.earning.forEach(item => {
-                        if (!eventsByDate[item.date]) eventsByDate[item.date] = [];
-                        const tickerMatch = item.title.match(/\[(.*?)\]/);
-                        const ticker = tickerMatch ? tickerMatch[1] : '';
-                        eventsByDate[item.date].push({
-                            time: '발표일',
-                            title: item.title,
-                            description: '기업 실적 발표 (예정)',
-                            type: 'earnings',
-                            type_name: '실적발표',
-                            ticker: ticker
-                        });
-                    });
-                }
-                
-                const sortedDates = Object.keys(eventsByDate).sort();
-                
-                if (sortedDates.length === 0) {
-                    container.innerHTML = '<div class="empty-msg" style="padding: 60px 20px;">예정된 주요 글로벌 증시 일정이 없습니다.</div>';
-                    return;
-                }
-                
-                // HTML 조립 (기존 디자인 및 클래스 완벽 유지)
-                let html = '';
-                sortedDates.forEach(date => {
-                    html += `<div class="event-group"><div class="event-date-header">${date}</div>`;
-                    eventsByDate[date].forEach(ev => {
+                // 시간 정보는 초기화하고 순수 날짜 기준 비교
+                eventDate.setHours(0,0,0,0);
+                const checkStart = new Date(start).setHours(0,0,0,0);
+                const checkEnd = new Date(end).setHours(0,0,0,0);
+
+                // 현재 주차 범위에 속하는 날짜만 추출
+                if (eventDate >= checkStart && eventDate <= checkEnd) {
+                    hasEvents = true;
+                    html += `<div class="event-group"><div class="event-date-header">${dateStr}</div>`;
+                    
+                    globalEvents[dateStr].forEach(ev => {
                         const href = ev.ticker ? `/?ticker=${ev.ticker}` : '#';
                         html += `
                             <a href="${href}" class="event-item">
@@ -339,9 +354,61 @@
                         `;
                     });
                     html += `</div>`;
-                });
+                }
+            });
+
+            // 해당 주차에 일정이 없는 경우 표시
+            if (!hasEvents) {
+                html = `<div class="empty-msg" style="padding: 60px 20px;">해당 주차에는 예정된 주요 글로벌 증시 일정이 없습니다.</div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // 백엔드 API에서 실제 캘린더 데이터를 한 번만 가져오는 초기화 함수
+        async function loadCalendarData() {
+            const container = document.getElementById('calendar-container');
+            try {
+                const res = await fetch('/api/calendar/data');
+                const data = await res.json();
                 
-                container.innerHTML = html;
+                // 초기화 (이전 캐시 클리어)
+                globalEvents = {};
+                
+                if (data.dividend) {
+                    data.dividend.forEach(item => {
+                        if (!globalEvents[item.date]) globalEvents[item.date] = [];
+                        const tickerMatch = item.title.match(/\[(.*?)\]/);
+                        const ticker = tickerMatch ? tickerMatch[1] : '';
+                        globalEvents[item.date].push({
+                            time: '종일',
+                            title: item.title,
+                            description: '배당락일 (해당일 전까지 매수 필요)',
+                            type: 'dividend',
+                            type_name: '배당락일',
+                            ticker: ticker
+                        });
+                    });
+                }
+                if (data.earning) {
+                    data.earning.forEach(item => {
+                        if (!globalEvents[item.date]) globalEvents[item.date] = [];
+                        const tickerMatch = item.title.match(/\[(.*?)\]/);
+                        const ticker = tickerMatch ? tickerMatch[1] : '';
+                        globalEvents[item.date].push({
+                            time: '발표일',
+                            title: item.title,
+                            description: '기업 실적 발표 (예정)',
+                            type: 'earnings',
+                            type_name: '실적발표',
+                            ticker: ticker
+                        });
+                    });
+                }
+                
+                // 데이터 수집 완료 후 렌더링 호출
+                renderCalendar();
+
             } catch (e) {
                 container.innerHTML = '<div class="empty-msg" style="padding: 60px 20px; color: var(--red);">데이터 통신 오류가 발생했습니다.</div>';
             }

@@ -323,6 +323,8 @@ def update_market_calendar():
     earning_events = []
     kst = timezone(timedelta(hours=9))
     today_date = datetime.now(kst).date()
+    # 수정: 30일 이전 과거 데이터부터 수집하도록 범위 확장
+    past_date_limit = today_date - timedelta(days=30) 
 
     for t in sample_tickers:
         try:
@@ -335,13 +337,13 @@ def update_market_calendar():
             ex_date = info.get("exDividendDate")
             if ex_date:
                 dt = datetime.fromtimestamp(ex_date, tz=kst).date()
-                if dt >= today_date:
+                if dt >= past_date_limit: # 수정된 날짜 제한 적용
                     dividend_events.append({"date": dt.strftime('%y.%m.%d'), "title": f"[{t.replace('.KS','')}] {name}"})
             
             earning_date = info.get("earningsTimestamp") or info.get("earningsTimestampStart")
             if earning_date:
                 edt = datetime.fromtimestamp(earning_date, tz=kst).date()
-                if edt >= today_date:
+                if edt >= past_date_limit: # 수정된 날짜 제한 적용
                     earning_events.append({"date": edt.strftime('%y.%m.%d'), "title": f"[{t.replace('.KS','')}] {name}"})
         except Exception:
             continue
