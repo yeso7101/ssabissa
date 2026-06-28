@@ -2,8 +2,8 @@ from fastapi import FastAPI, Request, Form, Response, HTTPException
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel # [추가됨] 관심종목 리스트 처리를 위함
-from typing import List        # [추가됨] 관심종목 리스트 처리를 위함
+from pydantic import BaseModel
+from typing import List
 from collections import Counter
 import requests
 import json
@@ -336,14 +336,12 @@ def update_market_calendar():
             if ex_date:
                 dt = datetime.fromtimestamp(ex_date, tz=kst).date()
                 if dt >= today_date:
-                    # 💡 날짜 포맷 변경 및 '배당락' 문자열 제거 적용
                     dividend_events.append({"date": dt.strftime('%y.%m.%d'), "title": f"[{t.replace('.KS','')}] {name}"})
             
             earning_date = info.get("earningsTimestamp") or info.get("earningsTimestampStart")
             if earning_date:
                 edt = datetime.fromtimestamp(earning_date, tz=kst).date()
                 if edt >= today_date:
-                    # 💡 날짜 포맷 변경 및 '실적발표' 문자열 제거 적용
                     earning_events.append({"date": edt.strftime('%y.%m.%d'), "title": f"[{t.replace('.KS','')}] {name}"})
         except Exception:
             continue
@@ -497,7 +495,6 @@ async def home(request: Request):
         except Exception: 
             result = {"error": "올바른 종목명이나 티커코드를 확인해 주세요."}
     else:
-        # 검색어가 없을 때 추천 종목 로드
         if RECOMMENDATION_CACHE:
             recommendation = random.choice(RECOMMENDATION_CACHE)
             
@@ -559,7 +556,53 @@ def ranking(request: Request):
 @app.get("/calendar", response_class=HTMLResponse)
 async def calendar_page(request: Request):
     template_file = "calender.html" if os.path.exists("templates/calender.html") else "calendar.html"
-    return templates.TemplateResponse(request=request, name=template_file, context={"request": request})
+    
+    # [수정됨] 캘린더 실제 데이터를 수집하여 템플릿(jinja)로 넘겨줍니다.
+    events = {}
+    if os.path.exists(CALENDAR_FILE):
+        try:
+            with open(CALENDAR_FILE, "r", encoding="utf-8") as f:
+                cal_data = json.load(f)
+                
+                # 배당락일 가공
+                for item in cal_data.get("dividend", []):
+                    date_str = item["date"]
+                    if date_str not in events: events[date_str] = []
+                    
+                    # 괄호 사이의 티커 기호 추출 (ex. "[AAPL] 애플" -> "AAPL")
+                    ticker = item["title"].split("]")[0].replace("[", "").strip() if "[" in item["title"] else ""
+                    
+                    events[date_str].append({
+                        "time": "종일",
+                        "title": item["title"],
+                        "description": "배당락일 (해당일 전까지 매수 필요)",
+                        "type": "dividend",
+                        "type_name": "배당락일",
+                        "ticker": ticker
+                    })
+                    
+                # 실적발표 가공
+                for item in cal_data.get("earning", []):
+                    date_str = item["date"]
+                    if date_str not in events: events[date_str] = []
+                    
+                    ticker = item["title"].split("]")[0].replace("[", "").strip() if "[" in item["title"] else ""
+                    
+                    events[date_str].append({
+                        "time": "발표일",
+                        "title": item["title"],
+                        "description": "기업 실적 발표 (예정)",
+                        "type": "earnings",
+                        "type_name": "실적발표",
+                        "ticker": ticker
+                    })
+                    
+            # 날짜순(오름차순) 정렬
+            events = dict(sorted(events.items()))
+        except Exception as e:
+            print(f"Calendar Fetch Error: {e}")
+            
+    return templates.TemplateResponse(request=request, name=template_file, context={"request": request, "events": events})
 
 @app.get("/api/calendar/data")
 def get_calendar_data():
@@ -578,12 +621,8 @@ def api_autocomplete(q: str = ""):
         return [{"ticker": i["symbol"].upper()+".KS" if i["symbol"].isdigit() and len(i["symbol"])==6 else i["symbol"].upper(), "name": i.get("longname") or i.get("shortname") or i["symbol"]} for i in res.get("quotes", []) if i.get("quoteType") in ["EQUITY", "ETF"]][:5]
     except: return []
 
-# ================================================================
-# 🌟 [추가됨] 관심 종목 라우터 및 데이터 반환 API 🌟
-# ================================================================
 @app.get("/favorites", response_class=HTMLResponse)
 def favorites_page(request: Request):
-    # 프론트엔드에서 로컬스토리지 데이터를 기반으로 렌더링하도록 템플릿 반환
     return templates.TemplateResponse(request=request, name="favorites.html", context={"request": request})
 
 class TickerList(BaseModel):
@@ -591,12 +630,10 @@ class TickerList(BaseModel):
 
 @app.post("/api/favorites/details")
 def get_favorites_details(req: TickerList):
-    # 로컬 스토리지에 저장된 여러 티커를 한 번에 조회하여 프론트에 넘겨주는 API
     results = []
     for t in req.tickers:
         ticker_upper = resolve_ticker_by_name(t)
         
-        # 1. 1차적으로 서버 캐시 데이터 확인 (빠른 렌더링)
         cache = TICKER_CACHE.get(ticker_upper)
         if cache and cache.get("score") != 50:
             results.append({
@@ -607,7 +644,6 @@ def get_favorites_details(req: TickerList):
             })
             continue
             
-        # 2. 캐시에 없으면 yfinance로 새로 계산해서 반환
         try:
             info = yf.Ticker(ticker_upper).info
             score, color, _, _ = calculate_ssabissa_score(info, ticker_upper)
@@ -618,13 +654,11 @@ def get_favorites_details(req: TickerList):
                 "score": score,
                 "color": color
             })
-            # 조회한 데이터 캐싱
             TICKER_CACHE[ticker_upper] = {"name": name, "score": score, "color": color}
         except Exception:
             pass
             
     return {"data": results}
-# ================================================================
 
 @app.get("/strategy", response_class=HTMLResponse)
 def strategy_page(request: Request): return templates.TemplateResponse(request=request, name="strategy.html", context={"request": request})

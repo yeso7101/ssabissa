@@ -28,8 +28,12 @@
             padding-bottom: 80px; 
             box-sizing: border-box; 
             color: var(--text-main); 
+            
+            /* 가독성 최적화 세팅 (줄바꿈 및 정렬) */
             word-break: keep-all; 
-            line-height: 1.6;
+            overflow-wrap: break-word;
+            line-height: 1.65;
+            text-align: justify;
         }
         .container { 
             max-width: 600px; 
@@ -166,10 +170,9 @@
 <body>
 
     <div class="top-nav">
-        <!-- 🎨 3D 로고 적용 -->
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/favorites">관심종목</a>
+            <a href="/favorites">관심</a>
             <a href="/ranking">랭킹</a>
             <div class="dropdown">
                 <button class="dropbtn" onclick="toggleDesktopMenu(event)">
@@ -180,9 +183,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="desktopMenu">
-                    <a href="/calendar" class="current">캘린더</a> <!-- 현재 페이지 활성화 -->
-                    <a href="/strategy">가이드</a> <!-- ✅ 햄버거 메뉴 안으로 이동 -->
-                    <a href="/faq">FAQ</a>
+                    <a href="/calendar" class="current">캘린더</a> <a href="/strategy">가이드</a> <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>
@@ -197,7 +198,6 @@
             <p class="page-desc">주요 기업의 실적 발표일, 배당락일 및<br>핵심 거시경제 지표 발표를 한눈에 확인하세요.</p>
         </div>
 
-        <!-- 📅 날짜 네비게이터 -->
         <div class="date-navigator">
             <button class="nav-btn" aria-label="이전 주" onclick="alert('이전 주 일정은 준비 중입니다.')">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -208,61 +208,10 @@
             </button>
         </div>
 
-        <div class="calendar-card">
-            <!-- 백엔드에서 events 데이터를 넘겨준다고 가정, 데이터가 없으면 예시 데이터 출력 -->
-            {% if events and events|length > 0 %}
-                {% for date, daily_events in events.items() %}
-                <div class="event-group">
-                    <div class="event-date-header">{{ date }}</div>
-                    {% for event in daily_events %}
-                    <!-- 클릭 시 해당 티커 검색(또는 관련 페이지)으로 이동 -->
-                    <a href="{% if event.ticker %}/?ticker={{ event.ticker }}{% else %}#{% endif %}" class="event-item">
-                        <div class="event-time">{{ event.time }}</div>
-                        <div class="event-info">
-                            <h3 class="event-title">{{ event.title }}</h3>
-                            <div class="event-desc">{{ event.description }}</div>
-                        </div>
-                        <div class="event-badge badge-{{ event.type }}">{{ event.type_name }}</div>
-                    </a>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            {% else %}
-                <!-- 데이터가 없을 때 기본으로 보여줄 예시 템플릿(UI 유지용) -->
-                <div class="event-group">
-                    <div class="event-date-header">오늘 (예시 데이터)</div>
-                    
-                    <a href="/?ticker=AAPL" class="event-item">
-                        <div class="event-time">개장 전</div>
-                        <div class="event-info">
-                            <h3 class="event-title">애플 (AAPL)</h3>
-                            <div class="event-desc">2분기 실적 발표 예상 (EPS 예측치: $1.20)</div>
-                        </div>
-                        <div class="event-badge badge-earnings">실적발표</div>
-                    </a>
-                    
-                    <a href="#" class="event-item">
-                        <div class="event-time">21:30</div>
-                        <div class="event-info">
-                            <h3 class="event-title">미국 소비자물가지수 (CPI)</h3>
-                            <div class="event-desc">전년 대비 변동률 (예측치: 3.1%)</div>
-                        </div>
-                        <div class="event-badge badge-macro">경제지표</div>
-                    </a>
-                </div>
-                
-                <div class="event-group">
-                    <div class="event-date-header">내일 (예시 데이터)</div>
-                    <a href="/?ticker=KO" class="event-item">
-                        <div class="event-time">종일</div>
-                        <div class="event-info">
-                            <h3 class="event-title">코카콜라 (KO)</h3>
-                            <div class="event-desc">배당락일 (주당 $0.48)</div>
-                        </div>
-                        <div class="event-badge badge-dividend">배당락일</div>
-                    </a>
-                </div>
-            {% endif %}
+        <div class="calendar-card" id="calendar-container">
+            <div class="empty-msg" style="padding: 60px 20px;">
+                서버에서 일정을 실시간으로 불러오는 중입니다... ⏳
+            </div>
         </div>
 
         <div style="background: #eff6ff; padding: 16px; border-radius: 12px; font-size: 0.85rem; color: #1e3a8a; font-weight: 600; text-align: center; border: 1px solid #bfdbfe;">
@@ -276,10 +225,9 @@
     </div>
 
     <div class="mobile-sub-nav" style="display: none;">
-        <!-- ✅ 다른 페이지와 100% 동일한 ssb-logo 클래스를 적용하여 이질감 완벽 해소 -->
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/favorites">관심종목</a>
+            <a href="/favorites">관심</a>
             <a href="/ranking">랭킹</a>
             
             <div class="dropdown m-dropdown">
@@ -291,9 +239,7 @@
                     </svg>
                 </button>
                 <div class="dropdown-content" id="mobileMenu">
-                    <a href="/calendar" class="current">캘린더</a> <!-- 현재 페이지 활성화 -->
-                    <a href="/strategy">가이드</a> <!-- ✅ 햄버거 메뉴 안으로 이동 -->
-                    <a href="/faq">FAQ</a>
+                    <a href="/calendar" class="current">캘린더</a> <a href="/strategy">가이드</a> <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>
@@ -326,6 +272,83 @@
                 }
             }
         }
+
+        // 백엔드 API에서 실제 캘린더 데이터를 가져와 렌더링하는 핵심 함수
+        async function loadCalendarData() {
+            const container = document.getElementById('calendar-container');
+            try {
+                const res = await fetch('/api/calendar/data');
+                const data = await res.json();
+                
+                // 데이터를 날짜별로 그룹화
+                const eventsByDate = {};
+                
+                if (data.dividend) {
+                    data.dividend.forEach(item => {
+                        if (!eventsByDate[item.date]) eventsByDate[item.date] = [];
+                        const tickerMatch = item.title.match(/\[(.*?)\]/);
+                        const ticker = tickerMatch ? tickerMatch[1] : '';
+                        eventsByDate[item.date].push({
+                            time: '종일',
+                            title: item.title,
+                            description: '배당락일 (해당일 전까지 매수 필요)',
+                            type: 'dividend',
+                            type_name: '배당락일',
+                            ticker: ticker
+                        });
+                    });
+                }
+                if (data.earning) {
+                    data.earning.forEach(item => {
+                        if (!eventsByDate[item.date]) eventsByDate[item.date] = [];
+                        const tickerMatch = item.title.match(/\[(.*?)\]/);
+                        const ticker = tickerMatch ? tickerMatch[1] : '';
+                        eventsByDate[item.date].push({
+                            time: '발표일',
+                            title: item.title,
+                            description: '기업 실적 발표 (예정)',
+                            type: 'earnings',
+                            type_name: '실적발표',
+                            ticker: ticker
+                        });
+                    });
+                }
+                
+                const sortedDates = Object.keys(eventsByDate).sort();
+                
+                if (sortedDates.length === 0) {
+                    container.innerHTML = '<div class="empty-msg" style="padding: 60px 20px;">예정된 주요 글로벌 증시 일정이 없습니다.</div>';
+                    return;
+                }
+                
+                // HTML 조립 (기존 디자인 및 클래스 완벽 유지)
+                let html = '';
+                sortedDates.forEach(date => {
+                    html += `<div class="event-group"><div class="event-date-header">${date}</div>`;
+                    eventsByDate[date].forEach(ev => {
+                        const href = ev.ticker ? `/?ticker=${ev.ticker}` : '#';
+                        html += `
+                            <a href="${href}" class="event-item">
+                                <div class="event-time">${ev.time}</div>
+                                <div class="event-info">
+                                    <h3 class="event-title">${ev.title}</h3>
+                                    <div class="event-desc">${ev.description}</div>
+                                </div>
+                                <div class="event-badge badge-${ev.type}">${ev.type_name}</div>
+                            </a>
+                        `;
+                    });
+                    html += `</div>`;
+                });
+                
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<div class="empty-msg" style="padding: 60px 20px; color: var(--red);">데이터 통신 오류가 발생했습니다.</div>';
+            }
+        }
+        
+        // 페이지 로드 시 바로 실제 데이터 패치 스크립트 실행
+        document.addEventListener("DOMContentLoaded", loadCalendarData);
     </script>
 </body>
 </html>

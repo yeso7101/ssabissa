@@ -26,8 +26,12 @@
             padding-bottom: 80px; 
             box-sizing: border-box; 
             color: var(--text-main); 
+            
+            /* 가독성 최적화 세팅 (줄바꿈 및 정렬) */
             word-break: keep-all; 
-            line-height: 1.6;
+            overflow-wrap: break-word;
+            line-height: 1.65;
+            text-align: justify;
         }
         .container { 
             max-width: 600px; 
@@ -189,9 +193,8 @@
     <div class="top-nav">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/favorites">관심종목</a>
+            <a href="/favorites">관심</a>
             <a href="/ranking">랭킹</a>
-            <!-- 기존에 밖에 있던 가이드 메뉴를 제거하고 드롭다운 내부로 이동 -->
             <div class="dropdown">
                 <button class="dropbtn" onclick="toggleDesktopMenu(event)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -202,8 +205,7 @@
                 </button>
                 <div class="dropdown-content" id="desktopMenu">
                     <a href="/calendar">캘린더</a>
-                    <a href="/strategy" class="active">가이드</a> <!-- 여기로 이동 및 활성화 상태 추가 -->
-                    <a href="/faq">FAQ</a>
+                    <a href="/strategy" class="active">가이드</a> <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>
@@ -213,64 +215,59 @@
 
     <div class="container">
         <h2 style="margin-top: 0; font-weight: 900; color: var(--text-main); font-size: 1.5rem; padding-left: 4px; display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
-            📖 싸비싸 가치투자 가이드
+            <span style="font-size: 1.8rem;">🎒</span> 주린이를 위한 싸비싸 가이드
         </h2>
 
         <div class="strategy-intro">
-            싸비싸(SSABISSA)는 단기적인 테마나 감정에 휩쓸리지 않고, 
-            <strong>기업의 본질적인 펀더멘탈과 안전 마진</strong>에 기반한 합리적인 투자를 지향합니다.
+            어려운 경제 뉴스나 복잡한 주식 용어 때문에 막막하셨나요? 싸비싸(SSABISSA)가 일상생활의 쉬운 비유를 통해 가치투자의 핵심을 가장 직관적으로 알려드립니다.
         </div>
 
         <div class="card">
-            <div class="card-title">💯 100점 만점 평가 시스템</div>
-            <p style="font-size: 0.9rem; color: #475569; margin-bottom: 16px; font-weight: 500;">
-                싸비싸의 엔진은 기업의 재무 상태, 성장성, 수익성, 배당 매력도를 종합적으로 분석하여 직관적인 100점 만점의 점수로 환산합니다.
+            <div class="card-title">🤔 가치투자란 무엇인가요?</div>
+            <p style="font-size: 0.95rem; color: #475569; margin-bottom: 16px; font-weight: 500;">
+                쉽게 말해 <strong>"10만 원짜리 지폐를 8만 원에 사는 것"</strong>입니다. 명품 가방이 세일할 때 사면 이득이듯, 주식도 기업의 진짜 가치보다 저렴할 때 사는 것이 가치투자의 핵심입니다.
             </p>
             <div class="highlight-box">
-                <div class="highlight-title">💡 점수 해석 가이드</div>
+                <div class="highlight-title">💡 싸비싸의 역할 (100점 만점 평가)</div>
                 <div class="highlight-text">
-                    • <strong>80점 이상:</strong> 저평가 우량주 (강력 매수 검토)<br>
-                    • <strong>60점 ~ 79점:</strong> 적정 가치 또는 안정적 성장주<br>
-                    • <strong>40점 ~ 59점:</strong> 관망 및 추가 분석 필요<br>
-                    • <strong>40점 미만:</strong> 고평가 또는 재무 리스크 주의
+                    싸비싸는 방대하고 복잡한 재무제표를 1초 만에 분석하여, 지금 이 회사의 주식이 원래 가치보다 '싼지, 비싼지'를 100점 만점의 점수로 직관적으로 알려줍니다.
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title">🔍 11대 핵심 지표 분석</div>
+            <div class="card-title">🔍 꼭 알아야 할 주식 용어 (초보자 편)</div>
             <ul class="indicator-list">
                 <li class="indicator-item">
-                    <div class="ind-title">1. PER (주가수익비율)</div>
-                    <div class="ind-desc">순이익 대비 주가의 수준을 평가합니다. 동종 업계 대비 낮을수록 저평가 매력이 높습니다.</div>
+                    <div class="ind-title">💰 PER (주가수익비율) : "원금 회수 기간"</div>
+                    <div class="ind-desc">
+                        내가 투자한 돈을 몇 년 만에 본전으로 뽑을 수 있는지를 나타냅니다.<br><br>
+                        <strong>☕ 카페 창업 비유:</strong> 1억 원을 주고 인수한 동네 카페가 매년 1천만 원의 이익을 내면, 내 원금 회수에 10년이 걸립니다. 이때 PER은 '10'입니다. 숫자가 낮을수록 회수가 빠릅니다.
+                    </div>
                 </li>
                 <li class="indicator-item">
-                    <div class="ind-title">2. PBR (주가순자산비율)</div>
-                    <div class="ind-desc">장부 가치 대비 주가입니다. 1 미만일 경우 기업의 청산 가치보다 주가가 낮음을 의미합니다.</div>
+                    <div class="ind-title">🏢 PBR (주가순자산비율) : "바닥 다지기"</div>
+                    <div class="ind-desc">
+                        회사가 당장 문을 닫고 재산을 다 팔았을 때, 내 투자금을 건질 수 있는지 확인하는 안전 지표입니다.<br><br>
+                        <strong>🍔 햄버거 가게 비유:</strong> 5천만 원에 인수한 햄버거 가게의 오븐과 기계만 중고로 팔아도 6천만 원이 나온다면? 망해도 무조건 이득을 보는 상태입니다. 보통 PBR이 1 미만이면 아주 안전하다고 봅니다.
+                    </div>
                 </li>
                 <li class="indicator-item">
-                    <div class="ind-title">3. ROE (자기자본이익률)</div>
-                    <div class="ind-desc">자본을 활용해 얼마나 효율적으로 이익을 내는지 보여줍니다. 꾸준히 높은 ROE는 훌륭한 해자를 의미합니다.</div>
-                </li>
-                <li class="indicator-item">
-                    <div class="ind-title">4. EV/EBITDA</div>
-                    <div class="ind-desc">기업 가치를 현금 창출 능력으로 나눈 지표로, M&A 시장에서 실제 투자 회수 기간을 가늠할 때 쓰입니다.</div>
-                </li>
-                <li class="indicator-item">
-                    <div class="ind-title">5. 배당 수익률 (Dividend Yield)</div>
-                    <div class="ind-desc">주가 대비 지급되는 배당금의 비율입니다. 하락장에서 든든한 안전판 역할을 합니다.</div>
+                    <div class="ind-title">💵 배당수익률 : "건물주의 월세"</div>
+                    <div class="ind-desc">
+                        주식을 가지고 있으면 회사가 번 돈의 일부를 주주들에게 현금으로 나눠주는 비율입니다.<br><br>
+                        <strong>🏦 은행 예금 비유:</strong> 은행 예금 이자가 3%인데, 어떤 튼튼한 회사의 배당수익률이 5%라면? 주가가 오르는 시세 차익은 덤이고 매년 꼬박꼬박 들어오는 현금만으로도 더 유리한 투자가 될 수 있습니다.
+                    </div>
                 </li>
             </ul>
-            <div style="text-align: center; margin-top: 16px; font-size: 0.85rem; color: #94a3b8;">
-                * 외 6개의 추가 보조 지표를 종합하여 최종 점수가 산출됩니다.
-            </div>
         </div>
 
         <div class="card" style="background: #f8fafc;">
-            <div class="card-title" style="color: var(--blue);">🤖 AI 큐레이션 및 백테스트</div>
-            <p style="font-size: 0.9rem; color: #475569; font-weight: 500; margin-bottom: 0;">
-                싸비싸는 단순한 수치 제공을 넘어, <strong>AI 기반의 트렌드 분석</strong>과 목표가 괴리율, 그리고 과거 데이터를 바탕으로 한 <strong>가상 누적 수익률(Backtest)</strong> 결과를 요약하여 제공합니다. 이를 통해 투자 결정의 시간을 단축시켜 드립니다.
+            <div class="card-title" style="color: var(--blue);">🚀 직접 진단해 보세요! (AI 큐레이션)</div>
+            <p style="font-size: 0.9rem; color: #475569; font-weight: 500; margin-bottom: 20px;">
+                어려운 지표들을 일일이 계산할 필요 없습니다. 상단의 검색창에 평소 관심 있던 기업의 이름을 입력하시면, 싸비싸가 위와 같은 객관적인 데이터와 AI 과거 패턴을 바탕으로 분석을 대신해 드립니다.
             </p>
+            <a href="/" style="display: block; width: 100%; text-align: center; background: var(--blue); color: white; padding: 14px; border-radius: 12px; text-decoration: none; font-weight: 800; transition: transform 0.2s; box-sizing: border-box; font-size: 0.95rem;">🔍 메인 화면으로 이동하기</a>
         </div>
         
         <div style="text-align: center; margin-top: 30px; font-size: 0.75rem; color: #94a3b8; font-weight: 500;">
@@ -279,13 +276,11 @@
         </div>
     </div>
 
-    <!-- 모바일 하단 네비게이션 -->
     <div class="mobile-sub-nav" style="display: none;">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/favorites">관심종목</a>
+            <a href="/favorites">관심</a>
             <a href="/ranking">랭킹</a>
-            <!-- 기존에 밖에 있던 가이드 메뉴를 제거하고 드롭다운 내부로 이동 -->
             <div class="dropdown m-dropdown">
                 <button class="dropbtn" onclick="toggleMobileMenu(event)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -296,8 +291,7 @@
                 </button>
                 <div class="dropdown-content" id="mobileMenu">
                     <a href="/calendar">캘린더</a>
-                    <a href="/strategy" class="active">가이드</a> <!-- 여기로 이동 및 활성화 상태 추가 -->
-                    <a href="/faq">FAQ</a>
+                    <a href="/strategy" class="active">가이드</a> <a href="/faq">FAQ</a>
                     <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>

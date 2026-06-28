@@ -27,9 +27,12 @@
             padding-bottom: 80px; 
             box-sizing: border-box; 
             color: var(--text-main); 
-            /* ✅ 전역 가독성 개선: 단어 단위 줄바꿈 및 줄 간격 확보 */
+            
+            /* ✅ 전역 가독성 개선: 단어 단위 줄바꿈 및 줄 간격/정렬 확보 */
             word-break: keep-all; 
-            line-height: 1.6;
+            overflow-wrap: break-word;
+            line-height: 1.65;
+            text-align: justify;
         }
         .container { 
             max-width: 600px; 
@@ -158,7 +161,7 @@
     <div class="top-nav">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/favorites">관심종목</a>
+            <a href="/favorites">관심</a>
             <a href="/ranking">랭킹</a>
             <div class="dropdown">
                 <button class="dropbtn" onclick="toggleDesktopMenu(event)">
@@ -171,7 +174,8 @@
                 <div class="dropdown-content" id="desktopMenu">
                     <a href="/calendar">캘린더</a>
                     <a href="/strategy">가이드</a>
-                    <a href="/faq" class="current">FAQ</a> <a href="/about">소개</a>
+                    <a href="/faq" class="current">FAQ</a> 
+                    <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>
             </div>
@@ -272,7 +276,7 @@
                     <p>싸비싸의 진단 점수와 AI 큐레이션은 객관적인 재무 데이터를 바탕으로 한 '보조 지표'일 뿐입니다. 거시 경제 상황, 글로벌 트렌드, 또는 개별 기업의 숨겨진 악재 등 알고리즘이 파악할 수 없는 수많은 변수가 존재합니다. 모든 투자의 최종 결정과 책임은 투자자 본인에게 있으므로 신중하게 판단하시기 바랍니다.</p>
                 </div>
             </div>
-            </div>
+        </div>
 
         <div class="contact-box">
             더 궁금한 점이 있으시거나 제휴/버그 제보 문의는<br>
@@ -290,7 +294,7 @@
     <div class="mobile-sub-nav" style="display: none;">
         <a href="/" class="nav-logo ssb-logo">SSB.</a>
         <div class="nav-links">
-            <a href="/favorites">관심종목</a>
+            <a href="/favorites">관심</a>
             <a href="/ranking">랭킹</a>
             
             <div class="dropdown m-dropdown">
@@ -304,7 +308,8 @@
                 <div class="dropdown-content" id="mobileMenu">
                     <a href="/calendar">캘린더</a>
                     <a href="/strategy">가이드</a>
-                    <a href="/faq" class="current">FAQ</a> <a href="/about">소개</a>
+                    <a href="/faq" class="current">FAQ</a> 
+                    <a href="/about">소개</a>
                     <a href="/privacy">약관</a>
                 </div>
             </div>
